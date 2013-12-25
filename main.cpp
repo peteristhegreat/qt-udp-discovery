@@ -3,6 +3,7 @@
 #include <QTextStream>
 #include <QString>
 #include "server.h"
+#include <QHostInfo>
 #include <QDebug>
 
 int main(int argc, char *argv[])
@@ -12,6 +13,13 @@ int main(int argc, char *argv[])
     QTextStream cout(stdout);
     QTextStream cin(stdin);
 
+    QList<QHostAddress> add = QHostInfo::fromName(QHostInfo::localHostName()).addresses();
+    foreach(QHostAddress a, add)
+    {
+        qDebug() << a.toString();
+    }
+
+    qDebug() << "This machines's IP address is:";
     qDebug() << "Listen (L) or Broadcast (B)?";// << QTextStream::;
 //    QString line = cin.readLine();  // This is how you read the entire line
 
@@ -22,11 +30,12 @@ int main(int argc, char *argv[])
 //    while(getchar())
     if(word.startsWith("l", Qt::CaseInsensitive))
     {
-        s->listenOnPort();
+        s->listenForUdpBroadcast();
     }
     else
     {
-        s->broadcastUdpDatagram();
+        s->startTcpServer();
+        s->broadcastUdp();
     }
 
     return a.exec();

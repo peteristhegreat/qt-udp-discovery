@@ -1,68 +1,157 @@
 #include "server.h"
 #include <QDebug>
+#include <QHostInfo>
 
 Server::Server(QObject *parent) :
     QObject(parent)
 {
+    qDebug() << Q_FUNC_INFO;
+    m_state = IDLE;
 
+    // Starts by broadcasting 3 times and listening?
+
+    // If a connection is heard, it then starts up a TCPSocket to the broadcast address
+    // otherwise it keeps an open socket to be connected to.
 }
 
-void Server::broadcastUdpDatagram()
+void Server::connectToTcpServer()
 {
+    qDebug() << Q_FUNC_INFO;
+    QList<QHostAddress> add = QHostInfo::fromName(QHostInfo::localHostName()).addresses();
+
+    if(add.contains(m_hostAddress))
+    {
+        // We are trying to connect to our local machine!
+        qDebug() << "We are trying to connect on the same machine!";
+
+        // notify the sender?
+    }
+
+    m_tcpSocket = new QTcpSocket;
+    QObject::connect(m_tcpSocket, SIGNAL(readyRead()), this, SLOT(on_tcpReadyRead()));
+    m_tcpSocket->connectToHost(m_hostAddress, MY_PORT + 1);
+
+    m_state = CONNECTED_TCP_SOCKET;
+}
+
+void Server::on_tcpReadyRead()
+{
+    qDebug() << Q_FUNC_INFO;
+    qDebug() << "\t" << qPrintable(m_tcpSocket->readAll());
+}
+
+void Server::on_newTcpConnection()
+{
+    qDebug() << Q_FUNC_INFO;
+    m_tcpSocket = m_tcpServer->nextPendingConnection();
+    connect(m_tcpSocket, SIGNAL(readyRead()),
+            this, SLOT(on_tcpReadyRead  ()));
+//    connect(m_tcpSocket, SIGNAL(error(QAbstractSocket::SocketError)),
+//            this, SLOT(displayError(QAbstractSocket::SocketError)));
+
+//    serverStatusLabel->setText(tr("Accepted connection"));
+    m_tcpServer->close();
+    qDebug() << "Sending: Testing new TCP Connection!";
+    m_tcpSocket->write("Testing new TCP Connection!");
+    m_state = CONNECTED_TCP_SOCKET;
+}
+
+void Server::broadcastUdp()
+{
+    qDebug() << Q_FUNC_INFO;
+
     static int messageNo = 0;
-    udpSocket = new QUdpSocket(this);
+    m_udpSocket = new QUdpSocket(this);
     QByteArray datagram = "Jotto! " + QByteArray::number(messageNo);
-    udpSocket->writeDatagram(datagram.data(), datagram.size(),
+    connect(m_udpSocket, SIGNAL(readyRead()),
+            this, SLOT(readByBroadcaster()));
+    m_udpSocket->writeDatagram(datagram.data(), datagram.size(),
                              QHostAddress::Broadcast, MY_PORT);
     messageNo++;
 }
 
-void Server::listenOnPort()
+void Server::readByBroadcaster()
 {
-    udpSocket = new QUdpSocket(this);
-    udpSocket->bind(MY_PORT, QUdpSocket::ShareAddress);
-
-    connect(udpSocket, SIGNAL(readyRead()),
-            this, SLOT(readPendingDatagrams()));
+    qDebug() << Q_FUNC_INFO;
 }
 
-void Server::initSocket()
+void Server::listenForUdpBroadcast()
 {
-    udpSocket = new QUdpSocket(this);
-    udpSocket->bind(QHostAddress::LocalHost, MY_PORT);
+    qDebug() << Q_FUNC_INFO;
 
-    connect(udpSocket, SIGNAL(readyRead()),
+    m_udpSocket = new QUdpSocket(this);
+    m_udpSocket->bind(MY_PORT, QUdpSocket::ShareAddress);
+//    m_udpSocket->bind(QHostAddress::LocalHost, MY_PORT);
+
+    connect(m_udpSocket, SIGNAL(readyRead()),
             this, SLOT(readPendingDatagrams()));
+
+    m_state = Server::LISTENING_UDP;
 }
 
 void Server::readPendingDatagrams()
 {
+    qDebug() << Q_FUNC_INFO;
+
+    // m_state = LISTENING_UDP;
+
     // listener for datagrams heard...
-    while (udpSocket->hasPendingDatagrams()) {
+    while (m_udpSocket->hasPendingDatagrams()) {
         QByteArray datagram;
-        datagram.resize(udpSocket->pendingDatagramSize());
+        datagram.resize(m_udpSocket->pendingDatagramSize());
         QHostAddress sender;
         quint16 senderPort;
 
 
-        udpSocket->readDatagram(datagram.data(), datagram.size(),
+        m_udpSocket->readDatagram(datagram.data(), datagram.size(),
                                 &sender, &senderPort);
         qDebug() << "Server Found!";
         qDebug() << sender.toString() << senderPort;
 
+        m_hostAddress = sender;
+        m_port = senderPort;
+
+        m_udpSocket->disconnectFromHost();
+
+
+        QByteArray datagram2 = "Received Message!  L -> B";
+        m_udpSocket->writeDatagram(datagram2.data(), datagram2.size(),
+                                 sender, m_port);
+
         processTheDatagram(datagram);
 
-//        qDebug() << "Switching to TCP/IP...";
+        // Transition from LISTENING_UDP, to connecting to the
+        // TCP SERVER
+        connectToTcpServer();
 
+//        m_state = CONNECTED_AS_TCP_CLIENT;
     }
 }
 
-void Server::init_TCPIP()
+void Server::startTcpServer()
 {
+    qDebug() << Q_FUNC_INFO;
 
+    m_tcpServer = new QTcpServer;
+    m_tcpServer->listen(QHostAddress::Any, MY_PORT + 1);
+    QObject::connect(m_tcpServer, SIGNAL(newConnection()),
+                     this, SLOT(on_newTcpConnection()));
 }
 
 void Server::processTheDatagram(QByteArray & ba)
 {
+    qDebug() << Q_FUNC_INFO;
     qDebug() << ba.size() << " --- " << qPrintable(QString(ba));
+}
+
+void Server::dumpMachineAddresses()
+{
+    qDebug() << Q_FUNC_INFO;
+    QList<QHostAddress> add = QHostInfo::fromName(QHostInfo::localHostName()).addresses();
+    foreach(QHostAddress a, add)
+    {
+        qDebug() << a.toString();
+    }
+
+    qDebug() << "This machines's IP/MAC addresses are:";
 }
