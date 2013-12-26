@@ -4,19 +4,28 @@
 #
 #-------------------------------------------------
 
-QT       += core network
+QT       += core gui svg network
 
-QT       -= gui
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+
+#QT       -= gui
 
 TARGET = PeerToPeerChat
-CONFIG   += console
-CONFIG   -= app_bundle
+#CONFIG   += console
+#CONFIG   -= app_bundle
 
 TEMPLATE = app
 
 
 SOURCES += main.cpp \
-    server.cpp
+    server.cpp \
+    mainstack.cpp \
+    dictionary.cpp
 
 HEADERS += \
-    server.h
+    server.h \
+    mainstack.h \
+    dictionary.h
+
+RESOURCES += \
+    qresources.qrc

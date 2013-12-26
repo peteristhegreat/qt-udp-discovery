@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file>jotto-logo.svg</file>
+    </qresource>
+</RCC>

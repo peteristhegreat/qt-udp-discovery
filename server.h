@@ -5,6 +5,7 @@
 #include <QUdpSocket>
 #include <QTcpServer>
 #include <QTcpSocket>
+#include <QString>
 //#include <QTimerEvent>
 
 #define MY_PORT 45234
@@ -31,14 +32,19 @@ public:
     void connectToTcpServer();
     void dumpMachineAddresses();
 signals:
-
+    void msg(QString);
+    void data(QString);
+    void connected();
 public slots:
+    void on_tcpSocketError();
+    void writeData(QString);
     void on_tcpReadyRead();
     void readByBroadcaster();
     void on_newTcpConnection();
     void readPendingDatagrams();
 
 private:
+    void linkTcpSocket();
     QHostAddress m_hostAddress;
     quint16 m_port;
     QTcpServer * m_tcpServer;

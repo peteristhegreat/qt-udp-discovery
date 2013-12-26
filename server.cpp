@@ -31,13 +31,27 @@ void Server::connectToTcpServer()
     QObject::connect(m_tcpSocket, SIGNAL(readyRead()), this, SLOT(on_tcpReadyRead()));
     m_tcpSocket->connectToHost(m_hostAddress, MY_PORT + 1);
 
+    linkTcpSocket();
+}
+
+void Server::linkTcpSocket()
+{
+//    m_state = CONNECTED_TCP_SOCKET;
+//    QObject::connect(m_tcpSocket, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(on_tcpSocketError()));
+//    emit msg("connected!");
+//    emit connected();
     m_state = CONNECTED_TCP_SOCKET;
+    QObject::connect(m_tcpSocket, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(on_tcpSocketError()));
+    emit msg("connected!");
+    emit connected();
 }
 
 void Server::on_tcpReadyRead()
 {
+    QString str = m_tcpSocket->readAll();
     qDebug() << Q_FUNC_INFO;
-    qDebug() << "\t" << qPrintable(m_tcpSocket->readAll());
+    qDebug() << "\t" << qPrintable(str);
+    emit data(str);
 }
 
 void Server::on_newTcpConnection()
@@ -51,9 +65,15 @@ void Server::on_newTcpConnection()
 
 //    serverStatusLabel->setText(tr("Accepted connection"));
     m_tcpServer->close();
-    qDebug() << "Sending: Testing new TCP Connection!";
-    m_tcpSocket->write("Testing new TCP Connection!");
-    m_state = CONNECTED_TCP_SOCKET;
+//    qDebug() << "Sending: Testing new TCP Connection!";
+//    m_tcpSocket->write("Testing new TCP Connection!");
+
+    linkTcpSocket();
+}
+
+void Server::on_tcpSocketError()
+{
+    emit msg(m_tcpSocket->errorString());
 }
 
 void Server::broadcastUdp()
@@ -77,6 +97,7 @@ void Server::readByBroadcaster()
 
 void Server::listenForUdpBroadcast()
 {
+    emit msg("waiting for 2nd player...");
     qDebug() << Q_FUNC_INFO;
 
     m_udpSocket = new QUdpSocket(this);
@@ -154,4 +175,9 @@ void Server::dumpMachineAddresses()
     }
 
     qDebug() << "This machines's IP/MAC addresses are:";
+}
+
+void Server::writeData(QString s)
+{
+    m_tcpSocket->write(qPrintable(s));
 }
