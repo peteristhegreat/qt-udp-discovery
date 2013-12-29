@@ -7,7 +7,9 @@ Server::Server(QObject *parent) :
 {
     qDebug() << Q_FUNC_INFO;
     m_state = IDLE;
-
+    m_tcpSocket = 0;
+    m_udpSocket = 0;
+    m_tcpServer = 0;
     // Starts by broadcasting 3 times and listening?
 
     // If a connection is heard, it then starts up a TCPSocket to the broadcast address
@@ -179,5 +181,6 @@ void Server::dumpMachineAddresses()
 
 void Server::writeData(QString s)
 {
-    m_tcpSocket->write(qPrintable(s));
+    if(m_tcpSocket)
+        m_tcpSocket->write(qPrintable(s));
 }

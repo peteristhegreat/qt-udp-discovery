@@ -3,3 +3,6 @@
 Makefile*
 debug/
 *.pdb
+demog.num
+frequency-old.txt
+iconpng.png

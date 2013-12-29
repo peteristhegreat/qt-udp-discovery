@@ -6,6 +6,8 @@
 
 QT       += core gui svg network
 
+RC_FILE = myapp.rc
+
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 #QT       -= gui
@@ -20,12 +22,20 @@ TEMPLATE = app
 SOURCES += main.cpp \
     server.cpp \
     mainstack.cpp \
-    dictionary.cpp
+    dictionary.cpp \
+    letterbutton.cpp \
+    flowlayout.cpp
 
 HEADERS += \
     server.h \
     mainstack.h \
-    dictionary.h
+    dictionary.h \
+    letterbutton.h \
+    flowlayout.h \
+    version.h
 
 RESOURCES += \
     qresources.qrc
+
+OTHER_FILES += \
+    myapp.rc

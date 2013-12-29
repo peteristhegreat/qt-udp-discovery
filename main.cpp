@@ -12,7 +12,8 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-
+    a.setFont(QFont("Arial", 14));
+    a.setApplicationName("Jotto");
     bool retVal = QResource::registerResource("qresources.qrc");
 //    qDebug() << "resources?" << retVal;
 //    QTextStream cout(stdout);
