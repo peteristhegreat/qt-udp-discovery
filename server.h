@@ -34,6 +34,7 @@ public:
 signals:
     void msg(QString);
     void data(QString);
+    void secretWord(QString);
     void connected();
 public slots:
     void on_tcpSocketError();

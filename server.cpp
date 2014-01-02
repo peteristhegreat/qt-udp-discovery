@@ -53,6 +53,7 @@ void Server::on_tcpReadyRead()
     QString str = m_tcpSocket->readAll();
     qDebug() << Q_FUNC_INFO;
     qDebug() << "\t" << qPrintable(str);
+
     emit data(str);
 }
 

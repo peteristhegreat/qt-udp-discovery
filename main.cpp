@@ -8,12 +8,15 @@
 #include "mainstack.h"
 #include <QApplication>
 #include <QResource>
+#include <QSettings>
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
     a.setFont(QFont("Arial", 14));
     a.setApplicationName("Jotto");
+    a.setOrganizationName("Post Meridian");
+    QSettings::setDefaultFormat(QSettings::IniFormat);
     bool retVal = QResource::registerResource("qresources.qrc");
 //    qDebug() << "resources?" << retVal;
 //    QTextStream cout(stdout);

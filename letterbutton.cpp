@@ -6,12 +6,15 @@
 LetterButton::LetterButton(QChar c, QWidget *parent) :
     QLabel(parent)
 {
+    m_down = false;
     this->setText(c);
     this->setAlignment(Qt::AlignCenter);
-    this->setFixedSize(30, 30);
+    this->setFixedSize(60, 60);
     QObject::connect(this, SIGNAL(clicked()), this, SLOT(on_clicked()));
     this->setTheme(Qt::black, Qt::white, 0);
     this->setTheme(Qt::white, Qt::black, 2);
+    this->setTheme(Qt::black, Qt::lightGray, 4);
+    this->setTheme(Qt::white, Qt::green, 6);
     this->on_reset();
     this->setFrameStyle(QFrame::Box);
     this->setAutoFillBackground(true);

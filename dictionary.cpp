@@ -10,6 +10,11 @@
 Dictionary::Dictionary(QObject *parent) :
     QObject(parent)
 {
+    m_allowedWordLengths << 3 << 4 << 5 << 6 << 7 << 8;
+
+    foreach(int i, m_allowedWordLengths)
+        m_map[i] = new QHash < QString, int>;
+
     // start a delayed init
     QTimer * t = new QTimer;
     t->setSingleShot(true);
@@ -20,19 +25,15 @@ Dictionary::Dictionary(QObject *parent) :
 
 bool Dictionary::contains(QString s)
 {
-    if(m_wordLength == 5)
-    {
-        return five_letter_words.contains(s);
-    }
-    else
-    {
-        return six_letter_words.contains(s);
-    }
+    return m_map[m_wordLength]->contains(s);
 }
 
 void Dictionary::setWordLength(int l)
 {
-    m_wordLength = l;
+    if(m_allowedWordLengths.contains(l))
+        m_wordLength = l;
+    else
+        m_wordLength = 5;
 }
 
 void Dictionary::loadFrequencyList()
@@ -45,24 +46,18 @@ void Dictionary::loadFrequencyList()
     int count = 0;
     while(!freq.atEnd())
     {
-
         line =  freq.readLine();
         word = line.split(' ').at(1);
-        if(word.length() == m_wordLength)
+        if(m_map.contains(word.length()))
         {
-            if(five_letter_words.contains(word))
-                five_letter_words[word] = line.split(' ').at(0).toInt();
+            if(m_map[word.length()]->contains(word))
+            {
+                (*m_map[word.length()])[word] = line.split(' ').at(0).toInt();
+//                if(line.split(' ').at(2) == "np0")
+//                    qDebug() << word << (*m_map[word.length()])[word];
+            }
         }
-//        if(word.length() == 5)
-//        {
-//            five_letter_words[word] = 1;
-////            if(word.startsWith('z'))
-////                qDebug() << qPrintable(word);
-//        }
-//        else if(word.length() == 6)
-//        {
-//            six_letter_words[word] = 1;
-//        }
+
         count++;
         if(count == 1000)
             qApp->processEvents();
@@ -73,38 +68,25 @@ void Dictionary::loadFrequencyList()
 
 QString Dictionary::getNewSecretWord(int difficulty)
 {
-    // TODO, factor in difficulty
+    // factor in difficulty
     qsrand(QDateTime::currentMSecsSinceEpoch());
 
-//    loadFrequencyList();
-
-//    QTime t;
-//    t.start();
-    if(m_wordLength == 5)
+    QHash<QString, int>::const_iterator iter;
+    do
     {
-        QHash<QString, int>::const_iterator iter;// = five_letter_words.constBegin();
-        do
-        {
-            int i = qrand() % five_letter_words.size();
-            //        five_letter_words.iterator
-            iter = five_letter_words.constBegin();
-            iter += i;
-            qDebug() << "SecretWord?" << iter.key() << iter.value() ;//<< t.elapsed() << five_letter_words.size();
-            qApp->processEvents();
-        }while(iter.value() < difficulty);
+        int i = qrand() % m_map[m_wordLength]->size();
+        iter = m_map[m_wordLength]->constBegin();
+        iter += i;
+        qDebug() << "SecretWord?" << iter.key() << iter.value() ;
+        qApp->processEvents();
+    }while(iter.value() < difficulty);
 
-        return iter.key();
-    }
-    else
-    {
-//        int i = qrand() % six_letter_words.size();
-        return QString();//six_letter_words.contains(s);
-    }
-
+    return iter.key();
 }
 
 void Dictionary::init()
 {
+    // TODO: Cache the word lists for faster loading later
     // if files don't exist
     QTime time;
     time.start();
@@ -115,15 +97,10 @@ void Dictionary::init()
     while(!dict.atEnd())
     {
         word = dict.readLine().trimmed();
-        if(word.length() == 5)
+
+        if(m_map.contains(word.length()))
         {
-            five_letter_words[word] = 1;
-//            if(word.startsWith('z'))
-//                qDebug() << qPrintable(word);
-        }
-        else if(word.length() == 6)
-        {
-            six_letter_words[word] = 1;
+            (*m_map[word.length()])[word] = 1;
         }
         count++;
         if(count == 1000)
@@ -132,10 +109,5 @@ void Dictionary::init()
     dict.close();
     qDebug() << "time?" << time.elapsed();
 
-    // load dictionary.txt, and generate x-letter-words lists
-
-    // load 6-letter-words.txt
-    // load 5-letter-words.txt
-    // load 4-letter-words.txt
     loadFrequencyList();
 }

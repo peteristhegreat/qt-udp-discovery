@@ -15,14 +15,23 @@ public:
 signals:
     void clicked();
 public slots:
-    void mousePressEvent(QMouseEvent * ){}
-    void mouseReleaseEvent(QMouseEvent * ){ emit clicked();}
+    void mousePressEvent(QMouseEvent * )
+    {
+        m_down = true;
+    }
+    void mouseReleaseEvent(QMouseEvent * )
+    {
+        if(m_down)
+        emit clicked();
+        m_down = false;
+    }
     void updateColors();
     void setTheme(QColor, QColor, int);
 //    void setFont(QFont);
     void on_clicked();
     void on_reset();
 private:
+    bool m_down;
     int m_state;
     QList <QColor> m_colors;
 };
