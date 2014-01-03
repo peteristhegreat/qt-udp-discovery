@@ -30,6 +30,7 @@ MainStack::MainStack(QWidget *parent) :
     m_dict = new Dictionary(this);
 
     init_gui();
+    resize(650, 800);
     readSettings();
 
 }
@@ -61,6 +62,9 @@ void MainStack::on_data(QString str)
     if (str.startsWith("*"))
     {
         m_theirSecretWord = str.mid(1);
+        m_dict->setWordLength(m_theirSecretWord.length());
+
+        emit appendToTheirs("Received secret word: " + QString(m_theirSecretWord.length(), '*'));
     }
     else
     {
@@ -94,12 +98,12 @@ void MainStack::sendData()
     {
         // validation of input
         if(m_correctLength->isChecked()
-                && word.length() < m_dict->wordLength())
+                && word.length() < m_theirSecretWord.length())
         {
             bar->showMessage("\"" + word + "\" is too short.", timeout);
         }
         else if(m_correctLength->isChecked()
-                && word.length() > m_dict->wordLength())
+                && word.length() > m_theirSecretWord.length())
         {
             bar->showMessage("\"" + word + "\" is too long.", timeout);
         }
@@ -137,7 +141,7 @@ void MainStack::sendData()
         if(word == m_theirSecretWord)
         {
             // Game Over, you win!
-            emit appendToYours("Correct: 5 " + word);
+            emit appendToYours("Correct: " + word);
             m_server->writeData("The other player guessed your word!");
         }
     }
@@ -146,12 +150,24 @@ void MainStack::sendData()
 
 void MainStack::on_connectToGame()
 {
+    if(m_server->isConnected())
+    {
+        on_connected();
+        return;
+    }
+
     m_server->startTcpServer();
     m_server->broadcastUdp();
 }
 
 void MainStack::on_createGame()
 {
+    if(m_server->isConnected())
+    {
+        on_connected();
+        return;
+    }
+
     m_server->listenForUdpBroadcast();
 }
 
@@ -160,13 +176,29 @@ void MainStack::on_connected()
     // Jump into two player mode!
 
     QString input;
+    bool ok;
     do
     {
         input = QInputDialog::getText(this,
-                                      "Jotto - Set Secret Word",
-                                      "Please enter a 5 letter word.");
-    } while(input.length() != 5 || !m_dict->contains(input));
+              "Jotto - Set Secret Word",
+              "Please enter a "
+              + QString::number(m_dict->wordLength())
+              + " letter word.", QLineEdit::Normal, QString(), &ok).toLower();
+    } while(ok && m_server->isConnected() && (input.length() != m_dict->wordLength() || !m_dict->contains(input)));
 
+
+//    QStatusBar * bar = this->currentWidget()->findChild<QStatusBar *>();
+//    QString currentMessage = bar->currentMessage();
+    if(!ok || !m_server->isConnected())
+    {
+        this->setCurrentWidget(m_mainMenu);
+//        if(!m_server->isConnected())
+//        {
+//            QStatusBar * bar = this->currentWidget()->findChild<QStatusBar *>();
+////            m_bar->
+//        }
+        return;
+    }
     qDebug() << "Secret Word:" << input;
     m_server->writeData("*" + input);
 

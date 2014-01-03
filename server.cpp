@@ -10,6 +10,7 @@ Server::Server(QObject *parent) :
     m_tcpSocket = 0;
     m_udpSocket = 0;
     m_tcpServer = 0;
+    m_connected = false;
     // Starts by broadcasting 3 times and listening?
 
     // If a connection is heard, it then starts up a TCPSocket to the broadcast address
@@ -46,6 +47,7 @@ void Server::linkTcpSocket()
     QObject::connect(m_tcpSocket, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(on_tcpSocketError()));
     emit msg("connected!");
     emit connected();
+    m_connected = true;
 }
 
 void Server::on_tcpReadyRead()
@@ -77,6 +79,7 @@ void Server::on_newTcpConnection()
 void Server::on_tcpSocketError()
 {
     emit msg(m_tcpSocket->errorString());
+    m_connected = false;
 }
 
 void Server::broadcastUdp()

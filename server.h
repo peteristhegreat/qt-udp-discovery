@@ -31,11 +31,13 @@ public:
     void processTheDatagram(QByteArray &ba);
     void connectToTcpServer();
     void dumpMachineAddresses();
+    bool isConnected() {return m_connected;}
 signals:
     void msg(QString);
     void data(QString);
     void secretWord(QString);
     void connected();
+    void disconnected();
 public slots:
     void on_tcpSocketError();
     void writeData(QString);
@@ -45,6 +47,7 @@ public slots:
     void readPendingDatagrams();
 
 private:
+    bool m_connected;
     void linkTcpSocket();
     QHostAddress m_hostAddress;
     quint16 m_port;

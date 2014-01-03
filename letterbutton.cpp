@@ -14,6 +14,7 @@ LetterButton::LetterButton(QChar c, QWidget *parent) :
 //    this->on_reset();
     this->setFrameStyle(QFrame::Box);
     this->setAutoFillBackground(true);
+    m_state = -1;
 //    this->setFlat(true);
 //    this->setBackgroundRole(QPalette::Window);
 //    this->setForegroundRole(QPalette::WindowText);

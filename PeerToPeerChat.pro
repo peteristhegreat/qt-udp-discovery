@@ -12,7 +12,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 #QT       -= gui
 
-TARGET = PeerToPeerChat
+TARGET = Jotto
 #CONFIG   += console
 #CONFIG   -= app_bundle
 
