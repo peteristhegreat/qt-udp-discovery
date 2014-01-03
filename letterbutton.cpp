@@ -11,11 +11,7 @@ LetterButton::LetterButton(QChar c, QWidget *parent) :
     this->setAlignment(Qt::AlignCenter);
     this->setFixedSize(60, 60);
     QObject::connect(this, SIGNAL(clicked()), this, SLOT(on_clicked()));
-    this->setTheme(Qt::black, Qt::white, 0);
-    this->setTheme(Qt::white, Qt::black, 2);
-    this->setTheme(Qt::black, Qt::lightGray, 4);
-    this->setTheme(Qt::white, Qt::green, 6);
-    this->on_reset();
+//    this->on_reset();
     this->setFrameStyle(QFrame::Box);
     this->setAutoFillBackground(true);
 //    this->setFlat(true);
@@ -29,8 +25,6 @@ void LetterButton::setTheme(QColor fg, QColor bg, int i)
         m_colors.append(QColor(Qt::black));
     m_colors[i] = fg;
     m_colors[i+1] = bg;
-    if(m_state == i)
-        updateColors();
 }
 
 void LetterButton::on_clicked()
@@ -65,6 +59,8 @@ void LetterButton::updateColors()
 //    p.setColor(QPalette::WindowText, m_colors.at((m_state+1) % m_colors.size()));
     this->setPalette(p);
     this->update();
+
+    emit stateChanged(this->text().at(0), m_state);
 }
 
 void LetterButton::on_reset()

@@ -12,6 +12,7 @@
 #include <QCheckBox>
 #include <QComboBox>
 #include <QSettings>
+#include "highlighter.h"
 
 MainStack::MainStack(QWidget *parent) :
     QStackedWidget(parent)
@@ -358,6 +359,8 @@ void MainStack::init_board(bool is_two_player)
     QStatusBar * bar;
     Utils::FlowLayout * flow;
 
+    Highlighter * highlighter;
+
     int row = 0;
     w = new QWidget;
     grid = new QGridLayout;
@@ -376,6 +379,7 @@ void MainStack::init_board(bool is_two_player)
     }
 
     txt = new QTextEdit;
+    highlighter = new Highlighter(txt->document());
 //    txt->setReadOnly(true);
 
 //    txt->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
@@ -409,8 +413,16 @@ void MainStack::init_board(bool is_two_player)
         LetterButton * lb = new LetterButton('A' + i);
         QObject::connect(this, SIGNAL(setTheme(QColor, QColor, int)), lb, SLOT(setTheme(QColor, QColor, int)));
         QObject::connect(this, SIGNAL(resetLetters()), lb, SLOT(on_reset()));
+        highlighter->connectToLetterButton(lb);
         flow->addWidget(lb);
     }
+    QObject::connect(this, SIGNAL(setTheme(QColor, QColor, int)), highlighter, SLOT(setTheme(QColor, QColor, int)));
+
+    emit setTheme(Qt::black, Qt::white, 0);
+    emit setTheme(Qt::white, Qt::black, 2);
+    emit setTheme(Qt::black, Qt::lightGray, 4);
+    emit setTheme(Qt::white, Qt::green, 6);
+    emit resetLetters();
 
     grid->addLayout(flow,row++,0,1,2, Qt::AlignCenter);
 

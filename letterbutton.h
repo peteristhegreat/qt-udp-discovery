@@ -14,6 +14,7 @@ public:
     LetterButton(QChar c, QWidget *parent = 0);
 signals:
     void clicked();
+    void stateChanged(QChar, int);
 public slots:
     void mousePressEvent(QMouseEvent * )
     {

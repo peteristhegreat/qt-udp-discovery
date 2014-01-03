@@ -24,7 +24,8 @@ SOURCES += main.cpp \
     mainstack.cpp \
     dictionary.cpp \
     letterbutton.cpp \
-    flowlayout.cpp
+    flowlayout.cpp \
+    highlighter.cpp
 
 HEADERS += \
     server.h \
@@ -32,7 +33,8 @@ HEADERS += \
     dictionary.h \
     letterbutton.h \
     flowlayout.h \
-    version.h
+    version.h \
+    highlighter.h
 
 RESOURCES += \
     qresources.qrc
