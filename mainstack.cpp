@@ -13,6 +13,8 @@
 #include <QComboBox>
 #include <QSettings>
 #include "highlighter.h"
+#include <QMessageBox>
+#include "shuffle.h"
 
 MainStack::MainStack(QWidget *parent) :
     QStackedWidget(parent)
@@ -144,6 +146,9 @@ void MainStack::sendData()
             emit appendToYours("Correct: " + word);
             m_server->writeData("The other player guessed your word!");
         }
+
+        QLabel * label = this->currentWidget()->findChild<QLabel *> ("Guess Count");
+        label->setText(QString::number(label->text().toInt() + 1));
     }
     lineEdit->clear();
 }
@@ -379,6 +384,47 @@ void MainStack::on_helpButton()
    this->setCurrentWidget(m_helpPage);
 }
 
+void MainStack::on_giveUpButton()
+{
+    QMessageBox msgBox;
+//    msgBox.setParent(this);
+    msgBox.setText("You are so close.");
+    msgBox.setInformativeText("Do you really want to give up?");
+    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    msgBox.setDefaultButton(QMessageBox::No);
+    int ret = msgBox.exec();
+    if(ret == QMessageBox::Yes)
+    {
+        QMessageBox::information(this,"The Secret Word",
+                                 "The secret word was:\n\n      "
+                                 + m_theirSecretWord
+                                 + "\n\nBetter luck next time.");
+        foreach(QTextEdit * t,
+                this->currentWidget()->findChildren<QTextEdit *>())
+        {
+            t->clear();
+        }
+
+        this->setCurrentWidget(m_mainMenu);
+    }
+
+}
+
+void MainStack::on_shuffle()
+{
+    QString str;
+    // get all the letters highlighted gray or green
+    foreach(LetterButton * lb, this->currentWidget()->findChildren<LetterButton*>())
+    {
+        if(lb->getState() > 4)
+            str += lb->getLetter();
+    }
+
+    // scramble the letters
+    QString shuffled = shuffle(str).toLower();
+    this->currentWidget()->findChild<QStatusBar *> ()->showMessage(shuffled);
+}
+
 void MainStack::init_board(bool is_two_player)
 {
 //    QSvgWidget * svg;
@@ -397,6 +443,23 @@ void MainStack::init_board(bool is_two_player)
     w = new QWidget;
     grid = new QGridLayout;
 
+    QHBoxLayout * hbox;
+    hbox = new QHBoxLayout;
+    QPushButton * button;
+    button = new QPushButton("Give Up");
+    QObject::connect(button, SIGNAL(clicked()), this, SLOT(on_giveUpButton()));
+    hbox->addWidget(button);
+    hbox->addStretch();
+    button = new QPushButton("Refresh");
+    QObject::connect(button, SIGNAL(clicked()), this, SIGNAL(resetLetters()));
+    hbox->addWidget(button);
+    hbox->addSpacing(10);
+    button = new QPushButton("Shuffle");
+    QObject::connect(button, SIGNAL(clicked()), this, SLOT(on_shuffle()));
+    hbox->addWidget(button);
+
+
+    grid->addLayout(hbox, row++, 0,1,2);
     if(is_two_player)
         w->setObjectName("Two Player");
     else
@@ -412,7 +475,7 @@ void MainStack::init_board(bool is_two_player)
 
     txt = new QTextEdit;
     highlighter = new Highlighter(txt->document());
-//    txt->setReadOnly(true);
+    txt->setReadOnly(true);
 
 //    txt->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
     if(is_two_player)
@@ -431,7 +494,7 @@ void MainStack::init_board(bool is_two_player)
     if(is_two_player)
     {
         txt = new QTextEdit;
-//        txt->setReadOnly(true);
+        txt->setReadOnly(true);
         txt->setMaximumWidth(120);
         grid->addWidget(txt,row++,1, Qt::AlignLeft);
         QObject::connect(m_server, SIGNAL(data(QString)), this, SLOT(on_data(QString)));
@@ -462,17 +525,27 @@ void MainStack::init_board(bool is_two_player)
     grid->addWidget(bar,row++,0,1,2);
     QObject::connect(m_server, SIGNAL(msg(QString)),bar, SLOT(showMessage(QString)));
 
-    flow = new Utils::FlowLayout;
+//    flow = new Utils::FlowLayout;
+//    QHBoxLayout * hbox;
+    hbox = new QHBoxLayout;
+    hbox->addStretch();
 
-    label = new QLabel("Your Guess");
-    flow->addWidget(label);
+    label = new QLabel("Guess");
+    hbox->addWidget(label);
+    label->setMargin(0);
+
+    label = new QLabel("1");
+    hbox->addWidget(label);
+    label->setObjectName("Guess Count");
+    label->setMargin(0);
 
     QLineEdit * lineEdit = new QLineEdit;
     QObject::connect(lineEdit, SIGNAL(returnPressed()), this, SLOT(sendData()));
-    flow->addWidget(lineEdit);
+    hbox->addWidget(lineEdit);
 
-    grid->addLayout(flow,row++,0,1,2, Qt::AlignCenter);
+    hbox->addStretch();
 
+    grid->addLayout(hbox,row++,0,1,2, Qt::AlignCenter);
 
     w->setLayout(grid);
     this->addWidget(w);

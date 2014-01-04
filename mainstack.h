@@ -9,6 +9,7 @@
 #include <QCheckBox>
 #include <QCloseEvent>
 #include <QComboBox>
+#include <QLabel>
 
 class MainStack : public QStackedWidget
 {
@@ -28,6 +29,8 @@ public slots:
     void on_connected();
     void on_onePlayer();
     void on_settingsButton();
+    void on_giveUpButton();
+    void on_shuffle();
     // line edit with enter pressed
     void sendData();
     void on_helpButton();

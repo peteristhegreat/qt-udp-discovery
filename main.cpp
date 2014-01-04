@@ -9,10 +9,14 @@
 #include <QApplication>
 #include <QResource>
 #include <QSettings>
+#include <QSysInfo>
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+#ifdef Q_OS_OSX
+    a.setWindowIcon(QIcon("://jotto.png"));
+#endif
     a.setFont(QFont("Arial", 14));
     a.setApplicationName("Jotto");
     a.setOrganizationName("Post Meridian");

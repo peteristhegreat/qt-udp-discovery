@@ -12,6 +12,8 @@ class LetterButton : public QLabel
     Q_OBJECT
 public:
     LetterButton(QChar c, QWidget *parent = 0);
+    int getState(){ return m_state;}
+    QChar getLetter(){ return this->text().at(0);}
 signals:
     void clicked();
     void stateChanged(QChar, int);

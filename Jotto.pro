@@ -12,12 +12,16 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 #QT       -= gui
 
+ICON = jotto.icns
+
 TARGET = Jotto
 #CONFIG   += console
 #CONFIG   -= app_bundle
 
 TEMPLATE = app
 
+QMAKE_CXXFLAGS += -std=c++11
+CONFIG+=c++11
 
 SOURCES += main.cpp \
     server.cpp \
@@ -25,7 +29,8 @@ SOURCES += main.cpp \
     dictionary.cpp \
     letterbutton.cpp \
     flowlayout.cpp \
-    highlighter.cpp
+    highlighter.cpp \
+    shuffle.cpp
 
 HEADERS += \
     server.h \
@@ -34,7 +39,8 @@ HEADERS += \
     letterbutton.h \
     flowlayout.h \
     version.h \
-    highlighter.h
+    highlighter.h \
+    shuffle.h
 
 RESOURCES += \
     qresources.qrc

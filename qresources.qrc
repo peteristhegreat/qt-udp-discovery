@@ -3,5 +3,6 @@
         <file>jotto-logo.svg</file>
         <file>dictionary.txt</file>
         <file>frequency.txt</file>
+        <file>jotto.png</file>
     </qresource>
 </RCC>
