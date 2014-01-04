@@ -45,9 +45,9 @@ void Server::linkTcpSocket()
 //    emit connected();
     m_state = CONNECTED_TCP_SOCKET;
     QObject::connect(m_tcpSocket, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(on_tcpSocketError()));
+    m_connected = true;
     emit msg("connected!");
     emit connected();
-    m_connected = true;
 }
 
 void Server::on_tcpReadyRead()

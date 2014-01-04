@@ -1,7 +1,8 @@
 #ifndef SHUFFLE_H
 #define SHUFFLE_H
 
-#include <random>
+//#include <random>
+#include <vector>
 #include <algorithm>
 #include <iterator>
 #include <iostream>

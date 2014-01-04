@@ -20,8 +20,8 @@ TARGET = Jotto
 
 TEMPLATE = app
 
-QMAKE_CXXFLAGS += -std=c++11
-CONFIG+=c++11
+#QMAKE_CXXFLAGS += -std=c++0x
+#CONFIG+=c++0x
 
 SOURCES += main.cpp \
     server.cpp \

@@ -419,10 +419,18 @@ void MainStack::on_shuffle()
         if(lb->getState() > 4)
             str += lb->getLetter();
     }
+    QStatusBar * bar = this->currentWidget()->findChild<QStatusBar *> ();
 
-    // scramble the letters
-    QString shuffled = shuffle(str).toLower();
-    this->currentWidget()->findChild<QStatusBar *> ()->showMessage(shuffled);
+    if(str.length() < 2)
+    {
+        bar->showMessage("Need 2+ letters green to shuffle.");
+    }
+    else
+    {
+        // scramble the letters
+        QString shuffled = shuffle(str).toLower();
+        bar->showMessage(shuffled);
+    }
 }
 
 void MainStack::init_board(bool is_two_player)
