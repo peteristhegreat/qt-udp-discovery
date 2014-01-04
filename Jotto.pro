@@ -23,6 +23,8 @@ TEMPLATE = app
 #QMAKE_CXXFLAGS += -std=c++0x
 #CONFIG+=c++0x
 
+QMAKE_CXXFLAGS += /MT
+
 SOURCES += main.cpp \
     server.cpp \
     mainstack.cpp \

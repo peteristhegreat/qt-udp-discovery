@@ -16,6 +16,7 @@ class MainStack : public QStackedWidget
     Q_OBJECT
 public:
     explicit MainStack(QWidget *parent = 0);
+    void updateGuessCount(bool reset = false);
 signals:
     void setTheme(QColor, QColor, int);
     void resetLetters();

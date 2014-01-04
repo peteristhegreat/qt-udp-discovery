@@ -146,11 +146,25 @@ void MainStack::sendData()
             emit appendToYours("Correct: " + word);
             m_server->writeData("The other player guessed your word!");
         }
-
-        QLabel * label = this->currentWidget()->findChild<QLabel *> ("Guess Count");
-        label->setText(QString::number(label->text().toInt() + 1));
+        updateGuessCount();
     }
     lineEdit->clear();
+}
+
+void MainStack::updateGuessCount(bool reset)
+{
+
+    QLabel * label = this->currentWidget()->findChild<QLabel *> ("Guess Count");
+    if(reset)
+    {
+        // reset the guess count down to 1
+        label->setText(QString::number(1));
+    }
+    else
+    {
+        // increment the guess count
+        label->setText(QString::number(label->text().toInt() + 1));
+    }
 }
 
 void MainStack::on_connectToGame()
@@ -404,6 +418,10 @@ void MainStack::on_giveUpButton()
         {
             t->clear();
         }
+
+        emit resetLetters();
+
+        updateGuessCount(true);
 
         this->setCurrentWidget(m_mainMenu);
     }
