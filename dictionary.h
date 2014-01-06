@@ -13,9 +13,27 @@ public:
     explicit Dictionary(QObject *parent = 0);
     bool contains(QString);
     int wordLength(){ return m_wordLength;}
-    QString getNewSecretWord(int difficulty);
+    QString getNewSecretWord(int difficulty, bool allowDoubleLetters);
     void loadFrequencyList();
     QList <int> getWordLengths(){ return m_allowedWordLengths;}
+
+    static bool hasDoubleLetters(QString word)
+    {
+        bool hasDoubleLetters = false;
+
+        for(int i = 0; i < word.length(); i++)
+        {
+            for(int j = i+1; j < word.length(); j++)
+            {
+                if(word.at(j) == word.at(i))
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
 signals:
 
 public slots:

@@ -49,7 +49,8 @@ private:
 
     QCheckBox * m_inDictionary;
     QCheckBox * m_correctLength;
-
+    QCheckBox * m_ephHouseRules;
+    QCheckBox * m_allowDoubleLetters;
     QComboBox * m_numLettersCombo;
 
     QStatusBar * m_bar;

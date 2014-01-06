@@ -66,7 +66,7 @@ void Dictionary::loadFrequencyList()
     qDebug() << "time?" << time.elapsed();
 }
 
-QString Dictionary::getNewSecretWord(int difficulty)
+QString Dictionary::getNewSecretWord(int difficulty, bool allowDoubleLetters)
 {
     // factor in difficulty
     qsrand(QDateTime::currentMSecsSinceEpoch());
@@ -79,7 +79,8 @@ QString Dictionary::getNewSecretWord(int difficulty)
         iter += i;
         qDebug() << "SecretWord?" << iter.key() << iter.value() ;
         qApp->processEvents();
-    }while(iter.value() < difficulty);
+    }while(iter.value() < difficulty
+           || (!allowDoubleLetters && Dictionary::hasDoubleLetters(iter.key())));
 
     return iter.key();
 }

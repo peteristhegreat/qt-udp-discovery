@@ -48,6 +48,8 @@ void MainStack::readSettings()
     this->restoreGeometry(s.value("geometry").toByteArray());
     m_dict->setWordLength(s.value("num_letters", 5).toInt());
     m_numLettersCombo->setCurrentIndex(m_numLettersCombo->findText(QString::number(m_dict->wordLength())));
+    m_ephHouseRules->setChecked(s.value("eph_house_rules", false).toBool());
+    m_allowDoubleLetters->setChecked(s.value("allow_double_letters",true).toBool());
 }
 
 void MainStack::writeSettings()
@@ -55,6 +57,8 @@ void MainStack::writeSettings()
     QSettings s;
     s.setValue("geometry", this->saveGeometry());
     s.setValue("num_letters", m_dict->wordLength());
+    s.setValue("eph_house_rules", m_ephHouseRules->isChecked());
+    s.setValue("allow_double_letters", m_allowDoubleLetters->isChecked());
 }
 
 void MainStack::on_data(QString str)
@@ -109,6 +113,10 @@ void MainStack::sendData()
         {
             bar->showMessage("\"" + word + "\" is too long.", timeout);
         }
+        else if(!m_allowDoubleLetters->isChecked() && Dictionary::hasDoubleLetters(word))
+        {
+            bar->showMessage("\"" + word + "\" has double letters.", timeout);
+        }
         else if(m_inDictionary->isChecked()
                 && !m_dict->contains(word))
         {
@@ -124,13 +132,42 @@ void MainStack::sendData()
     {
         QString tempGuessedWord = word;
         int count = 0;
-        for(int i = 0; i < m_theirSecretWord.length(); i++)
+        if(m_ephHouseRules->isChecked())
         {
-            int letterIndex = tempGuessedWord.indexOf(m_theirSecretWord.at(i));
-            if(letterIndex != -1)
+            // this is much less intuitive reporting, but it should be consistent
+            tempGuessedWord = "";
+            for(int i = 0; i < word.length(); i++)
             {
-                tempGuessedWord.remove(letterIndex, 1);
-                count++;
+                if(!tempGuessedWord.contains(word.at(i)))
+                {
+                    tempGuessedWord += word.at(i);
+                }
+            }
+            // now tempGuessedWord includes only unique letters
+
+            for(int i = 0; i < tempGuessedWord.length(); i++)
+            {
+                int index = 0;
+                // for every instance of any of the guess letters in the word, add to the tally
+                for(int j = 0; j < m_theirSecretWord.length(); j++)
+                {
+                    if(m_theirSecretWord.at(j) == tempGuessedWord.at(i))
+                    {
+                        count++;
+                    }
+                }
+            }
+        }
+        else
+        {
+            for(int i = 0; i < m_theirSecretWord.length(); i++)
+            {
+                int letterIndex = tempGuessedWord.indexOf(m_theirSecretWord.at(i));
+                if(letterIndex != -1)
+                {
+                    tempGuessedWord.remove(letterIndex, 1);
+                    count++;
+                }
             }
         }
 
@@ -203,7 +240,13 @@ void MainStack::on_connected()
               "Please enter a "
               + QString::number(m_dict->wordLength())
               + " letter word.", QLineEdit::Normal, QString(), &ok).toLower();
-    } while(ok && m_server->isConnected() && (input.length() != m_dict->wordLength() || !m_dict->contains(input)));
+
+
+    } while(ok && m_server->isConnected()
+            && (input.length() != m_dict->wordLength()
+                || !m_dict->contains(input)
+                || (!m_allowDoubleLetters->isChecked() && Dictionary::hasDoubleLetters(input))
+                ));
 
 
 //    QStatusBar * bar = this->currentWidget()->findChild<QStatusBar *>();
@@ -229,7 +272,7 @@ void MainStack::on_connected()
 void MainStack::on_onePlayer()
 {
     // Pick a random word from the dictionary based on difficulty
-    m_theirSecretWord = m_dict->getNewSecretWord(16);
+    m_theirSecretWord = m_dict->getNewSecretWord(16, m_allowDoubleLetters->isChecked());
 
     this->setCurrentWidget(m_onePlayerBoard);// one player board
 
@@ -342,6 +385,15 @@ void MainStack::init_settings()
 
     QObject::connect(m_numLettersCombo, SIGNAL(currentIndexChanged(QString)),
                      m_dict, SLOT(setWordLength(QString)));
+
+    m_ephHouseRules = new QCheckBox("EPH House Rules for double/triple letter reporting");
+    grid->addWidget(m_ephHouseRules);
+    m_ephHouseRules->setChecked(false);
+
+    m_allowDoubleLetters = new QCheckBox("Allow double letters");
+    grid->addWidget(m_allowDoubleLetters);
+    m_allowDoubleLetters->setChecked(true);
+
     if(false)
     {
         QVBoxLayout * vbox = new QVBoxLayout;
