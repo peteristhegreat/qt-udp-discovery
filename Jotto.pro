@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui svg network
+QT       += core gui svg network multimedia
 
 RC_FILE = myapp.rc
 
@@ -23,8 +23,6 @@ TEMPLATE = app
 #QMAKE_CXXFLAGS += -std=c++0x
 #CONFIG+=c++0x
 
-QMAKE_CXXFLAGS += /MT
-
 SOURCES += main.cpp \
     server.cpp \
     mainstack.cpp \
@@ -32,7 +30,8 @@ SOURCES += main.cpp \
     letterbutton.cpp \
     flowlayout.cpp \
     highlighter.cpp \
-    shuffle.cpp
+    shuffle.cpp \
+    overlay.cpp
 
 HEADERS += \
     server.h \
@@ -42,7 +41,8 @@ HEADERS += \
     flowlayout.h \
     version.h \
     highlighter.h \
-    shuffle.h
+    shuffle.h \
+    overlay.h
 
 RESOURCES += \
     qresources.qrc

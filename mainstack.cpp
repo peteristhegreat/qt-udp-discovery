@@ -32,9 +32,23 @@ MainStack::MainStack(QWidget *parent) :
     m_dict = new Dictionary(this);
 
     init_gui();
+
+    m_overlay = new Overlay(this);
+    m_overlay->hide();
+    QObject::connect(m_overlay, SIGNAL(finished()), this, SLOT(on_endOfVictoryDance()));
+
     resize(650, 800);
     readSettings();
 
+}
+
+void MainStack::on_endOfVictoryDance()
+{
+    QPushButton * btn = this->currentWidget()->findChild<QPushButton *>("Give Up");
+    btn->setEnabled(true);
+    QStatusBar * bar = this->currentWidget()->findChild<QStatusBar *>();
+    bar->showMessage("You are super awesome!  Go team!");
+    btn->setFocus();
 }
 
 void MainStack::closeEvent(QCloseEvent *)
@@ -50,6 +64,8 @@ void MainStack::readSettings()
     m_numLettersCombo->setCurrentIndex(m_numLettersCombo->findText(QString::number(m_dict->wordLength())));
     m_ephHouseRules->setChecked(s.value("eph_house_rules", false).toBool());
     m_allowDoubleLetters->setChecked(s.value("allow_double_letters",true).toBool());
+//    m_musicEnabled->setValue(s.value("music_volume", 10).toBool());
+//    m_soundsEnabled->setValue(s.value("sounds_volume", 40).toBool());
 }
 
 void MainStack::writeSettings()
@@ -59,6 +75,11 @@ void MainStack::writeSettings()
     s.setValue("num_letters", m_dict->wordLength());
     s.setValue("eph_house_rules", m_ephHouseRules->isChecked());
     s.setValue("allow_double_letters", m_allowDoubleLetters->isChecked());
+}
+
+void MainStack::resizeEvent(QResizeEvent *event) {
+    m_overlay->resize(event->size());
+    event->accept();
 }
 
 void MainStack::on_data(QString str)
@@ -182,6 +203,17 @@ void MainStack::sendData()
             // Game Over, you win!
             emit appendToYours("Correct: " + word);
             m_server->writeData("The other player guessed your word!");
+
+
+            m_overlay->startAnimation();
+            m_overlay->show();
+            m_overlay->raise();
+
+
+            QPushButton * btn = this->currentWidget()->findChild<QPushButton *>("Give Up");
+            btn->setText("Done");
+            btn->setDisabled(true);
+            lineEdit->setDisabled(true);
         }
         updateGuessCount();
     }
@@ -267,6 +299,9 @@ void MainStack::on_connected()
     // TODO: send the secret word over to the other player's program
 
     this->setCurrentWidget(m_twoPlayerBoard);// two player board
+
+    this->currentWidget()->findChild<QLineEdit*>()->setEnabled(true);
+    this->currentWidget()->findChild<QLineEdit*>()->setFocus();
 }
 
 void MainStack::on_onePlayer()
@@ -277,6 +312,9 @@ void MainStack::on_onePlayer()
     this->setCurrentWidget(m_onePlayerBoard);// one player board
 
     emit appendToYours("Random secret word picked.");
+
+    this->currentWidget()->findChild<QLineEdit*>()->setEnabled(true);
+    this->currentWidget()->findChild<QLineEdit*>()->setFocus();
 }
 
 void MainStack::init_gui()
@@ -452,19 +490,34 @@ void MainStack::on_helpButton()
 
 void MainStack::on_giveUpButton()
 {
-    QMessageBox msgBox;
-//    msgBox.setParent(this);
-    msgBox.setText("You are so close.");
-    msgBox.setInformativeText("Do you really want to give up?");
-    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-    msgBox.setDefaultButton(QMessageBox::No);
-    int ret = msgBox.exec();
+    QPushButton * btn = this->currentWidget()->findChild<QPushButton *>("Give Up");
+
+    int ret = QMessageBox::Yes;
+
+    if(btn->text() == "Give Up")
+    {
+        QMessageBox msgBox;
+        //    msgBox.setParent(this);
+        msgBox.setText("You are so close.");
+        msgBox.setInformativeText("Do you really want to give up?");
+        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        msgBox.setDefaultButton(QMessageBox::No);
+        ret = msgBox.exec();
+    }
+    else
+    {
+        // they answered with a correct word
+    }
+
     if(ret == QMessageBox::Yes)
     {
-        QMessageBox::information(this,"The Secret Word",
-                                 "The secret word was:\n\n      "
-                                 + m_theirSecretWord
-                                 + "\n\nBetter luck next time.");
+        if(btn->text() == "Give Up")
+        {
+            QMessageBox::information(this,"The Secret Word",
+                                     "The secret word was:\n\n      "
+                                     + m_theirSecretWord
+                                     + "\n\nBetter luck next time.");
+        }
         foreach(QTextEdit * t,
                 this->currentWidget()->findChildren<QTextEdit *>())
         {
@@ -474,6 +527,11 @@ void MainStack::on_giveUpButton()
         emit resetLetters();
 
         updateGuessCount(true);
+
+        m_overlay->hide();
+        btn->setText("Give Up");
+        QStatusBar * bar = this->currentWidget()->findChild<QStatusBar * >();
+        bar->clearMessage();
 
         this->setCurrentWidget(m_mainMenu);
     }
@@ -525,6 +583,7 @@ void MainStack::init_board(bool is_two_player)
     hbox = new QHBoxLayout;
     QPushButton * button;
     button = new QPushButton("Give Up");
+    button->setObjectName("Give Up");
     QObject::connect(button, SIGNAL(clicked()), this, SLOT(on_giveUpButton()));
     hbox->addWidget(button);
     hbox->addStretch();

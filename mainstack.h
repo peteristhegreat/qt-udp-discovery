@@ -5,10 +5,12 @@
 #include "server.h"
 #include <QLineEdit>
 #include "dictionary.h"
+#include "overlay.h"
 #include <QStatusBar>
 #include <QCheckBox>
 #include <QCloseEvent>
 #include <QComboBox>
+#include <QResizeEvent>
 #include <QLabel>
 
 class MainStack : public QStackedWidget
@@ -23,6 +25,8 @@ signals:
     void appendToYours(QString);
     void appendToTheirs(QString);
 public slots:
+    void on_endOfVictoryDance();
+    void resizeEvent(QResizeEvent*);
     // data is received from the server
     void on_data(QString);
     void on_createGame();
@@ -40,6 +44,7 @@ public slots:
     void writeSettings();
     void closeEvent(QCloseEvent *);
 private:
+    Overlay * m_overlay;
     QWidget * m_helpPage;
     QWidget * m_onePlayerBoard;
     QWidget * m_twoPlayerBoard;
