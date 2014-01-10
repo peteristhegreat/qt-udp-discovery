@@ -15,6 +15,7 @@
 #include "highlighter.h"
 #include <QMessageBox>
 #include "shuffle.h"
+#include <QDir>
 
 MainStack::MainStack(QWidget *parent) :
     QStackedWidget(parent)
@@ -39,7 +40,7 @@ MainStack::MainStack(QWidget *parent) :
 
     resize(650, 800);
     readSettings();
-
+    //this->currentWidget()->findChild<QStatusBar*>()->showMessage(QDir::currentPath());
 }
 
 void MainStack::on_endOfVictoryDance()
@@ -306,6 +307,13 @@ void MainStack::on_connected()
 
 void MainStack::on_onePlayer()
 {
+    if(false)
+    {
+        m_overlay->startAnimation();
+        m_overlay->show();
+        m_overlay->raise();
+    }
+
     // Pick a random word from the dictionary based on difficulty
     m_theirSecretWord = m_dict->getNewSecretWord(16, m_allowDoubleLetters->isChecked());
 

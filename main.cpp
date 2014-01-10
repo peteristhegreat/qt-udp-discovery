@@ -10,12 +10,15 @@
 #include <QResource>
 #include <QSettings>
 #include <QSysInfo>
+#include <QDir>
+#include <QMediaPlayer>
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 #ifdef Q_OS_OSX
     a.setWindowIcon(QIcon("://jotto.png"));
+    QDir::setCurrent(QApplication::applicationDirPath());
 #endif
     a.setFont(QFont("Arial", 14));
     a.setApplicationName("Jotto");

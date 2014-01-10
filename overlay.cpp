@@ -2,6 +2,8 @@
 #include <QPainter>
 #include <QPropertyAnimation>
 #include <QDebug>
+#include <QDir>
+#include <QFile>
 
 
 Overlay::Overlay(QWidget *parent) :QWidget(parent)
@@ -119,10 +121,17 @@ void Overlay::paintEvent(QPaintEvent *event)
 void Overlay::startAnimation()
 {
 #ifdef USE_PLAYER
-    m_player->setMedia(QUrl::fromLocalFile("sounds/finished.wav"));
+    m_player->setMedia(QUrl::fromLocalFile("./sounds/finished.wav"));
+    qDebug() << QDir::current().absolutePath();
     m_player->play();
+//    qDebug() << m_player->errorString();
 #else
     finishedSoundEffect.play();
 #endif
+//    QFile f("temp.txt");
+//    f.open(QFile::WriteOnly);
+//    f.write(qPrintable(QDir::current().absolutePath()));
+//    f.close();
     m_seqAnimation->start();
+    setTextPos(QPoint(-200,-200));
 }

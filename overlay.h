@@ -10,7 +10,9 @@
 #include <QAudioProbe>
 #include <QMediaPlayer>
 
+#ifndef Q_OS_MAC
 #define USE_PLAYER
+#endif
 
 
 class Overlay : public QWidget
