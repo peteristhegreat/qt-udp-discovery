@@ -31,7 +31,7 @@ bool Dictionary::contains(QString s, bool correct_length)
     }
     else
     {
-        return m_map[s.length()]->contains(s);
+        return m_map.contains(s.length()) && m_map[s.length()]->contains(s);
     }
 }
 
