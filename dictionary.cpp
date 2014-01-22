@@ -23,9 +23,16 @@ Dictionary::Dictionary(QObject *parent) :
     this->setWordLength(5);
 }
 
-bool Dictionary::contains(QString s)
+bool Dictionary::contains(QString s, bool correct_length)
 {
-    return m_map[m_wordLength]->contains(s);
+    if(correct_length)
+    {
+        return m_map[m_wordLength]->contains(s);
+    }
+    else
+    {
+        return m_map[s.length()]->contains(s);
+    }
 }
 
 void Dictionary::setWordLength(int l)

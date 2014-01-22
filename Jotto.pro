@@ -31,7 +31,8 @@ SOURCES += main.cpp \
     flowlayout.cpp \
     highlighter.cpp \
     shuffle.cpp \
-    overlay.cpp
+    overlay.cpp \
+    slidingstackedwidget.cpp
 
 HEADERS += \
     server.h \
@@ -42,10 +43,12 @@ HEADERS += \
     version.h \
     highlighter.h \
     shuffle.h \
-    overlay.h
+    overlay.h \
+    slidingstackedwidget.h
 
 RESOURCES += \
     qresources.qrc
 
 OTHER_FILES += \
-    myapp.rc
+    myapp.rc \
+    style.qss

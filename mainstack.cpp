@@ -16,9 +16,13 @@
 #include <QMessageBox>
 #include "shuffle.h"
 #include <QDir>
+#include <QApplication>
+#include <QShortcut>
+#include <QKeySequence>
+#include <QGroupBox>
 
 MainStack::MainStack(QWidget *parent) :
-    QStackedWidget(parent)
+    SlidingStackedWidget(parent)
 {
     m_server = new Server;
     QObject::connect(m_server, SIGNAL(connected()), this, SLOT(on_connected()));
@@ -41,6 +45,28 @@ MainStack::MainStack(QWidget *parent) :
     resize(650, 800);
     readSettings();
     //this->currentWidget()->findChild<QStatusBar*>()->showMessage(QDir::currentPath());
+
+    QShortcut * shortcut;
+    shortcut = new QShortcut(QKeySequence("F5"),this,SLOT(on_refreshStyleSheet()));
+    on_refreshStyleSheet();
+}
+
+void MainStack::on_refreshStyleSheet()
+{
+//    QApplication app( argc, argv );
+
+    // Load an application style
+    QFile styleFile( "style.qss" );
+    if(styleFile.exists())
+    {
+        styleFile.open( QFile::ReadOnly );
+
+        // Apply the loaded stylesheet
+        QString style( styleFile.readAll() );
+        qApp->setStyleSheet( style );
+
+        this->ensurePolished();
+    }
 }
 
 void MainStack::on_endOfVictoryDance()
@@ -140,7 +166,7 @@ void MainStack::sendData()
             bar->showMessage("\"" + word + "\" has double letters.", timeout);
         }
         else if(m_inDictionary->isChecked()
-                && !m_dict->contains(word))
+                && !m_dict->contains(word, m_correctLength->isChecked()))
         {
             bar->showMessage("\"" + word + "\" was not found in the dictionary.", timeout);
         }
@@ -330,42 +356,69 @@ void MainStack::init_gui()
     QSvgWidget * svg;
     QWidget * w;
     QGridLayout * grid;
+    QVBoxLayout * vbox;
+    QVBoxLayout * group_vbox;
     QPushButton * btn;
+    QGroupBox * group;
 //    QTextEdit * txt;
 //    QLineEdit * lineEdit;
 //    QLabel * label;
     QStatusBar * bar;
 //    Utils::FlowLayout * flow;
+    QHBoxLayout * hbox;
 
     w = new QWidget;
+    vbox = new QVBoxLayout;
+
     grid = new QGridLayout;
 
     svg = new QSvgWidget("://jotto-logo.svg");
     grid->addWidget(svg);
 
+    vbox->addStretch();
+
+    group = new QGroupBox("Two Player");
+
+    group_vbox = new QVBoxLayout;
+
     btn = new QPushButton("Create Game");
     QObject::connect(btn, SIGNAL(clicked()), this, SLOT(on_createGame()));
-    grid->addWidget(btn);
+    group_vbox->addWidget(btn);
 
     btn = new QPushButton("Join Game");
     QObject::connect(btn, SIGNAL(clicked()), this, SLOT(on_connectToGame()));
-    grid->addWidget(btn);
+    group_vbox->addWidget(btn);
+
+    group->setLayout(group_vbox);
+
+    vbox->addWidget(group);
 
     btn = new QPushButton("Quick Game");
     QObject::connect(btn, SIGNAL(clicked()), this, SLOT(on_onePlayer()));
-    grid->addWidget(btn);
+    vbox->addWidget(btn);
 
     btn = new QPushButton("Help");
     QObject::connect(btn, SIGNAL(clicked()), this, SLOT(on_helpButton()));
-    grid->addWidget(btn);
+    vbox->addWidget(btn);
 
     btn = new QPushButton("Settings");
     QObject::connect(btn, SIGNAL(clicked()), this, SLOT(on_settingsButton()));
-    grid->addWidget(btn);
+    vbox->addWidget(btn);
+
+    vbox->addStretch();
+
+    hbox = new QHBoxLayout;
+    hbox->addStretch();
+    hbox->addLayout(vbox);
+    hbox->addStretch();
+
+    grid->addLayout(hbox,grid->rowCount(), 0);
 
     bar = new QStatusBar;
     grid->addWidget(bar);
+    bar->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Minimum);
     QObject::connect(m_server, SIGNAL(msg(QString)),bar, SLOT(showMessage(QString)));
+
 
     w->setLayout(grid);
     this->addWidget(w);// 0
@@ -398,7 +451,9 @@ void MainStack::init_settings()
     QPushButton * btn;
     btn = new QPushButton("Back");
     QObject::connect(btn, SIGNAL(clicked()), this, SLOT(on_backButton()));
-    grid->addWidget(btn);
+    grid->addWidget(btn,0,0,
+                    Qt::AlignLeft);
+//                    Qt::AlignHCenter);
 
 //    QCheckBox * checkbox;
     grid->addWidget(new QLabel("Jotto Settings"));
@@ -472,7 +527,9 @@ void MainStack::init_helpPage()
     QPushButton * btn;
     btn = new QPushButton("Back");
     QObject::connect(btn, SIGNAL(clicked()), this, SLOT(on_backButton()));
-    grid->addWidget(btn);
+    grid->addWidget(btn,0,0,
+                    Qt::AlignLeft);
+//                    Qt::AlignHCenter);
 
     QString helpText =
             "Welcome to Jotto!\n\n"
@@ -482,8 +539,9 @@ void MainStack::init_helpPage()
             "only five letter words can be guessed.";
     QLabel * label = new QLabel(helpText);
     label->setWordWrap(true);
-    label->setFixedWidth(250);
-    grid->addWidget(label);
+    label->setFixedWidth(300);
+    grid->addWidget(label, grid->rowCount(), 0, Qt::AlignHCenter);
+//    grid->add
 
     w->setLayout(grid);
     this->addWidget(w);
@@ -699,4 +757,15 @@ void MainStack::init_board(bool is_two_player)
     else
         m_onePlayerBoard = w;
 
+}
+
+void MainStack::setCurrentWidget(QWidget * w)
+{
+    this->slideInIdx(this->indexOf(w));
+    m_currWidget = w;
+}
+
+QWidget * MainStack::currentWidget()
+{
+    return m_currWidget;
 }

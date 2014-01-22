@@ -12,19 +12,24 @@
 #include <QComboBox>
 #include <QResizeEvent>
 #include <QLabel>
+#include "slidingstackedwidget.h"
 
-class MainStack : public QStackedWidget
+class MainStack : public SlidingStackedWidget
 {
     Q_OBJECT
 public:
     explicit MainStack(QWidget *parent = 0);
+    ~MainStack(){}
     void updateGuessCount(bool reset = false);
+    QWidget * currentWidget();
 signals:
     void setTheme(QColor, QColor, int);
     void resetLetters();
     void appendToYours(QString);
     void appendToTheirs(QString);
 public slots:
+    void setCurrentWidget(QWidget * w);
+    void on_refreshStyleSheet();
     void on_endOfVictoryDance();
     void resizeEvent(QResizeEvent*);
     // data is received from the server
@@ -44,6 +49,7 @@ public slots:
     void writeSettings();
     void closeEvent(QCloseEvent *);
 private:
+    QWidget * m_currWidget;
     Overlay * m_overlay;
     QWidget * m_helpPage;
     QWidget * m_onePlayerBoard;

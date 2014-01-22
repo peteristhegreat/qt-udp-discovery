@@ -11,7 +11,7 @@ class Dictionary : public QObject
     Q_OBJECT
 public:
     explicit Dictionary(QObject *parent = 0);
-    bool contains(QString);
+    bool contains(QString, bool correct_length = true);
     int wordLength(){ return m_wordLength;}
     QString getNewSecretWord(int difficulty, bool allowDoubleLetters);
     void loadFrequencyList();
