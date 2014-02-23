@@ -6,6 +6,8 @@
 
 QT       += core gui svg network multimedia
 
+QTPLUGIN += qavfmediaplayer qtaudio_coreaudio qtmedia_audioengine qavfcamera
+
 RC_FILE = myapp.rc
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
@@ -32,7 +34,10 @@ SOURCES += main.cpp \
     highlighter.cpp \
     shuffle.cpp \
     overlay.cpp \
-    slidingstackedwidget.cpp
+    slidingstackedwidget.cpp \
+    aspectratiosvgwidget.cpp \
+    globals.cpp \
+    mainstack_2.cpp
 
 HEADERS += \
     server.h \
@@ -44,11 +49,16 @@ HEADERS += \
     highlighter.h \
     shuffle.h \
     overlay.h \
-    slidingstackedwidget.h
+    slidingstackedwidget.h \
+    aspectratiosvgwidget.h \
+    globals.h
 
 RESOURCES += \
     qresources.qrc
 
 OTHER_FILES += \
     myapp.rc \
-    style.qss
+    style.qss \
+    android/AndroidManifest.xml
+
+ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android

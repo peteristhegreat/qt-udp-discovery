@@ -5,7 +5,7 @@
 #include <QTextEdit>
 #include <QLineEdit>
 #include <QLabel>
-#include <QSvgWidget>
+#include "aspectratiosvgwidget.h"
 #include <QInputDialog>
 #include "flowlayout.h"
 #include "letterbutton.h"
@@ -20,10 +20,16 @@
 #include <QShortcut>
 #include <QKeySequence>
 #include <QGroupBox>
+#include <QSlider>
+#include <QScroller>
+#include "globals.h"
+#include <QProgressDialog>
+
 
 MainStack::MainStack(QWidget *parent) :
     SlidingStackedWidget(parent)
 {
+
     m_server = new Server;
     QObject::connect(m_server, SIGNAL(connected()), this, SLOT(on_connected()));
 
@@ -42,13 +48,162 @@ MainStack::MainStack(QWidget *parent) :
     m_overlay->hide();
     QObject::connect(m_overlay, SIGNAL(finished()), this, SLOT(on_endOfVictoryDance()));
 
-    resize(650, 800);
+    m_additionalStyleSheet = "";
+#ifdef Q_OS_IOS
+        m_additionalStyleSheet =
+                "QDialog {"
+                "background: qlineargradient( x1:0.2 y1:0.4, x2:1 y2:0.5, stop:0 deepskyblue, stop:1 darkslateblue);"
+
+//                "background: white;"
+                "}"
+                "QDialog QLabel {"
+                ""// top right bottom left
+                "padding: 100px 20px 20px 20px;"
+                "font-size: 36px;"
+                "}"
+
+                "QDialog QPushButton {"
+                ""
+                "font-size: 24px;"
+                "}"
+
+
+                "QMessageBox QLabel {"
+                ""// top right bottom left
+                "padding: 100px 20px 20px 20px;"
+                "font-size: 36px;"
+                "}"
+
+                "QMessageBox QPushButton {"
+                ""
+                "font-size: 24px;"
+                "}"
+                ;
+#else
+#ifdef Q_OS_ANDROID
+    m_additionalStyleSheet =
+            "QDialog {"
+            "background: qlineargradient( x1:0.2 y1:0.4, x2:1 y2:0.5, stop:0 deepskyblue, stop:1 darkslateblue);"
+
+//                "background: white;"
+            "}"
+            "QDialog QLabel {"
+            ""// top right bottom left
+            "padding: 100px 20px 20px 20px;"
+            "font-size: 36px;"
+            "}"
+
+            "QDialog QPushButton {"
+            ""
+            "font-size: 24px;"
+            "}"
+
+
+            "QMessageBox QLabel {"
+            ""// top right bottom left
+            "padding: 100px 20px 20px 20px;"
+            "font-size: 36px;"
+            "}"
+
+            "QMessageBox QPushButton {"
+            ""
+            "font-size: 24px;"
+            "}"
+            ;
+
+#else
+        resize(650, 800);
+#endif
+#endif
+
     readSettings();
     //this->currentWidget()->findChild<QStatusBar*>()->showMessage(QDir::currentPath());
 
     QShortcut * shortcut;
     shortcut = new QShortcut(QKeySequence("F5"),this,SLOT(on_refreshStyleSheet()));
     on_refreshStyleSheet();
+    
+    // start a delayed init
+    QTimer * t = new QTimer;
+    t->setSingleShot(true);
+    QObject::connect(t, SIGNAL(timeout()), m_dict, SLOT(init()));
+    t->start(500);
+    
+//    QProgressDialog * prog = new QProgressDialog();
+//    prog->setValue(20);
+//    this->addWidget(prog);
+//    this->setCurrentWidget(prog);
+    
+    QObject::connect(m_dict, SIGNAL(ready()), this, SLOT(on_finishedLoading()));
+    
+    m_currWidget = m_mainMenu;
+    
+    QStatusBar * bar = this->currentWidget()->findChild<QStatusBar*>();
+    bar->setFixedHeight(30);
+    bar->setMinimumWidth(200);
+    bar->setStyleSheet("background:white;");
+    bar->showMessage("Loading Dictionary");
+    foreach(QPushButton * btn, this->currentWidget()->findChildren<QPushButton*>())
+    {
+        btn->setDisabled(true);
+    }
+}
+
+void MainStack::on_finishedLoading()
+{
+    qDebug() << this->geometry();
+    QStatusBar * bar = this->currentWidget()->findChild<QStatusBar*>();
+    bar->showMessage("Ready to go!");
+    foreach(QPushButton * btn, this->currentWidget()->findChildren<QPushButton*>())
+    {
+        btn->setDisabled(false);
+    }
+
+#if defined(Q_OS_IOS) || defined(Q_OS_ANDROID)
+#ifdef Q_OS_IOS
+if(this->width() == 320 || this->height() == 320)
+#else
+if(this->width() < 500 || this->height() < 500)
+#endif
+#else
+    if(false)
+#endif
+    {
+        // we are an iphone!
+
+        this->setStyleSheet(this->styleSheet() +
+                    "QFrame {padding: 3px;}"
+                            "QPushButton {"
+                            "    padding: 8;"
+                            "    margin: 2;"
+                            "    /* font-family: \"Times\"; */"
+                            "    font-size: 12px;"
+                            "    border-radius: 4px;"
+                            "    border-style: inset;"
+                            "    border-width: 2px;"
+                            "    /*  min-width: 10em; */"
+                            "    background: white;"
+                            "}"
+
+
+                    );
+
+    }
+    else
+    {
+        this->setStyleSheet(this->styleSheet() +
+                            "QFrame {padding: 10px;}"
+                    );
+    }
+    this->ensurePolished();
+    //    QProgressDialog * prog = qobject_cast <QProgressDialog*> (this->currentWidget());
+//    prog->setValue(90);
+//    this->setCurrentWidget(0);
+//    m_overlay->startAnimation();
+//    qDebug() << Q_FUNC_INFO;
+//    m_overlay->startAnimation();
+//    m_overlay->show();
+//    m_overlay->raise();
 }
 
 void MainStack::on_refreshStyleSheet()
@@ -56,13 +211,27 @@ void MainStack::on_refreshStyleSheet()
 //    QApplication app( argc, argv );
 
     // Load an application style
+
     QFile styleFile( "style.qss" );
+    QFile styleFile2( "://style.qss" );
+
+
     if(styleFile.exists())
     {
         styleFile.open( QFile::ReadOnly );
 
         // Apply the loaded stylesheet
-        QString style( styleFile.readAll() );
+        QString style( styleFile.readAll() + m_additionalStyleSheet);
+        qApp->setStyleSheet( style );
+
+        this->ensurePolished();
+    }
+    else
+    {
+        styleFile2.open( QFile::ReadOnly );
+
+        // Apply the loaded stylesheet
+        QString style( styleFile2.readAll() + m_additionalStyleSheet);
         qApp->setStyleSheet( style );
 
         this->ensurePolished();
@@ -72,10 +241,13 @@ void MainStack::on_refreshStyleSheet()
 void MainStack::on_endOfVictoryDance()
 {
     QPushButton * btn = this->currentWidget()->findChild<QPushButton *>("Give Up");
-    btn->setEnabled(true);
+    if(btn)
+        btn->setEnabled(true);
     QStatusBar * bar = this->currentWidget()->findChild<QStatusBar *>();
-    bar->showMessage("You are super awesome!  Go team!");
-    btn->setFocus();
+    if(bar)
+        bar->showMessage("You are super awesome!  Go team!");
+    if(btn)
+        btn->setFocus();
 }
 
 void MainStack::closeEvent(QCloseEvent *)
@@ -91,6 +263,7 @@ void MainStack::readSettings()
     m_numLettersCombo->setCurrentIndex(m_numLettersCombo->findText(QString::number(m_dict->wordLength())));
     m_ephHouseRules->setChecked(s.value("eph_house_rules", false).toBool());
     m_allowDoubleLetters->setChecked(s.value("allow_double_letters",true).toBool());
+    m_autoMarkZeroLetterGuesses->setChecked(s.value("auto_mark_zero_letter_guesses", true).toBool());
 //    m_musicEnabled->setValue(s.value("music_volume", 10).toBool());
 //    m_soundsEnabled->setValue(s.value("sounds_volume", 40).toBool());
 }
@@ -102,9 +275,11 @@ void MainStack::writeSettings()
     s.setValue("num_letters", m_dict->wordLength());
     s.setValue("eph_house_rules", m_ephHouseRules->isChecked());
     s.setValue("allow_double_letters", m_allowDoubleLetters->isChecked());
+    s.setValue("auto_mark_zero_letter_guesses", m_autoMarkZeroLetterGuesses->isChecked());
 }
 
-void MainStack::resizeEvent(QResizeEvent *event) {
+void MainStack::resizeEvent(QResizeEvent *event)
+{
     m_overlay->resize(event->size());
     event->accept();
 }
@@ -195,7 +370,7 @@ void MainStack::sendData()
 
             for(int i = 0; i < tempGuessedWord.length(); i++)
             {
-                int index = 0;
+//                int index = 0;
                 // for every instance of any of the guess letters in the word, add to the tally
                 for(int j = 0; j < m_theirSecretWord.length(); j++)
                 {
@@ -241,6 +416,21 @@ void MainStack::sendData()
             btn->setText("Done");
             btn->setDisabled(true);
             lineEdit->setDisabled(true);
+        }
+        else if(count == 0 && m_autoMarkZeroLetterGuesses->isChecked())
+        {
+            QList<LetterButton *> letterButtons = this->currentWidget()->findChildren<LetterButton *>();
+            qDebug() << "automark"<< letterButtons.size() << word;
+            foreach(LetterButton * lb, letterButtons)
+            {
+                if(word.contains(lb->getLetter().toLower()))
+                {
+                    while(lb->getState() != 2)
+                    {
+                        lb->on_clicked();
+                    }
+                }
+            }
         }
         updateGuessCount();
     }
@@ -351,90 +541,6 @@ void MainStack::on_onePlayer()
     this->currentWidget()->findChild<QLineEdit*>()->setFocus();
 }
 
-void MainStack::init_gui()
-{
-    QSvgWidget * svg;
-    QWidget * w;
-    QGridLayout * grid;
-    QVBoxLayout * vbox;
-    QVBoxLayout * group_vbox;
-    QPushButton * btn;
-    QGroupBox * group;
-//    QTextEdit * txt;
-//    QLineEdit * lineEdit;
-//    QLabel * label;
-    QStatusBar * bar;
-//    Utils::FlowLayout * flow;
-    QHBoxLayout * hbox;
-
-    w = new QWidget;
-    vbox = new QVBoxLayout;
-
-    grid = new QGridLayout;
-
-    svg = new QSvgWidget("://jotto-logo.svg");
-    grid->addWidget(svg);
-
-    vbox->addStretch();
-
-    group = new QGroupBox("Two Player");
-
-    group_vbox = new QVBoxLayout;
-
-    btn = new QPushButton("Create Game");
-    QObject::connect(btn, SIGNAL(clicked()), this, SLOT(on_createGame()));
-    group_vbox->addWidget(btn);
-
-    btn = new QPushButton("Join Game");
-    QObject::connect(btn, SIGNAL(clicked()), this, SLOT(on_connectToGame()));
-    group_vbox->addWidget(btn);
-
-    group->setLayout(group_vbox);
-
-    vbox->addWidget(group);
-
-    btn = new QPushButton("Quick Game");
-    QObject::connect(btn, SIGNAL(clicked()), this, SLOT(on_onePlayer()));
-    vbox->addWidget(btn);
-
-    btn = new QPushButton("Help");
-    QObject::connect(btn, SIGNAL(clicked()), this, SLOT(on_helpButton()));
-    vbox->addWidget(btn);
-
-    btn = new QPushButton("Settings");
-    QObject::connect(btn, SIGNAL(clicked()), this, SLOT(on_settingsButton()));
-    vbox->addWidget(btn);
-
-    vbox->addStretch();
-
-    hbox = new QHBoxLayout;
-    hbox->addStretch();
-    hbox->addLayout(vbox);
-    hbox->addStretch();
-
-    grid->addLayout(hbox,grid->rowCount(), 0);
-
-    bar = new QStatusBar;
-    grid->addWidget(bar);
-    bar->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Minimum);
-    QObject::connect(m_server, SIGNAL(msg(QString)),bar, SLOT(showMessage(QString)));
-
-
-    w->setLayout(grid);
-    this->addWidget(w);// 0
-    m_mainMenu = w;
-
-    // add widget for one player
-    init_board(false);// 1
-    // add widget for two player
-    init_board(true);// 2
-
-    // add widget for help
-    init_helpPage(); // 3
-
-    init_settings();
-}
-
 void MainStack::on_settingsButton()
 {
     this->setCurrentWidget(m_settingsPage);
@@ -495,6 +601,11 @@ void MainStack::init_settings()
     grid->addWidget(m_allowDoubleLetters);
     m_allowDoubleLetters->setChecked(true);
 
+
+    m_autoMarkZeroLetterGuesses = new QCheckBox("Automark Zero Letter Guesses");
+    grid->addWidget(m_autoMarkZeroLetterGuesses);
+    m_autoMarkZeroLetterGuesses->setChecked(false);
+
     if(false)
     {
         QVBoxLayout * vbox = new QVBoxLayout;
@@ -535,7 +646,7 @@ void MainStack::init_helpPage()
             "Welcome to Jotto!\n\n"
             "You play by trying to guess the secret word. "
             "If you are playing a five letter word game, "
-            "the secret word is 5 letters long and only "
+            "the secret word is 5 letters long and "
             "only five letter words can be guessed.";
     QLabel * label = new QLabel(helpText);
     label->setWordWrap(true);
@@ -564,8 +675,9 @@ void MainStack::on_giveUpButton()
     {
         QMessageBox msgBox;
         //    msgBox.setParent(this);
-        msgBox.setText("You are so close.");
-        msgBox.setInformativeText("Do you really want to give up?");
+        msgBox.setText("You are so close."
+                       "\n\n"
+                       "Do you really want to give up?");
         msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
         msgBox.setDefaultButton(QMessageBox::No);
         ret = msgBox.exec();
@@ -661,8 +773,19 @@ void MainStack::init_board(bool is_two_player)
     QObject::connect(button, SIGNAL(clicked()), this, SLOT(on_shuffle()));
     hbox->addWidget(button);
 
+    button = new QPushButton("Random");
+    QObject::connect(button, SIGNAL(clicked()), this, SLOT(on_randomGuess()));
+    hbox->addWidget(button);
 
     grid->addLayout(hbox, row++, 0,1,2);
+
+    bar = new QStatusBar;
+    grid->addWidget(bar,row++,0,1,2);
+    grid->setRowStretch(row,0);
+
+//    bar->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Minimum);
+    QObject::connect(m_server, SIGNAL(msg(QString)),bar, SLOT(showMessage(QString)));
+
     if(is_two_player)
         w->setObjectName("Two Player");
     else
@@ -676,19 +799,39 @@ void MainStack::init_board(bool is_two_player)
         grid->addWidget(label,row++,1, Qt::AlignLeft);
     }
 
+//    int col = 0;
+
+    hbox = new QHBoxLayout;
+
     txt = new QTextEdit;
+    addKineticScrolling(txt);
+
     highlighter = new Highlighter(txt->document());
     txt->setReadOnly(true);
+
+    QSlider * slider;
+    slider = new QSlider(Qt::Vertical);
+    slider->setRange(100, 360);
+    slider->setValue(140);
+    slider->setFixedWidth(30);
+//    grid->addWidget(slider,row,col++,Qt::AlignLeft);
+    hbox->addWidget(slider);
+    hbox->addStretch();
+
+    QObject::connect(slider, SIGNAL(valueChanged(int)), this, SLOT(on_sliderChanged(int)));
+
 
 //    txt->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
     if(is_two_player)
     {
         txt->setMaximumWidth(120);
-        grid->addWidget(txt,row,0,Qt::AlignRight);
+//        grid->addWidget(txt,row,col++,Qt::AlignRight);
+        hbox->addWidget(txt);
     }
     else
     {
-        grid->addWidget(txt,row++,0,1,2, Qt::AlignHCenter);
+        hbox->addWidget(txt);
+//        grid->addWidget(txt,row++,col++,1,2, Qt::AlignHCenter);
     }
     grid->setRowStretch(grid->rowCount() - 1, 4);
 //    QObject::connect(this, SIGNAL(data(QString)), this, SLOT(on_data(QString)));
@@ -697,12 +840,18 @@ void MainStack::init_board(bool is_two_player)
     if(is_two_player)
     {
         txt = new QTextEdit;
+        addKineticScrolling(txt);
         txt->setReadOnly(true);
         txt->setMaximumWidth(120);
-        grid->addWidget(txt,row++,1, Qt::AlignLeft);
+//        grid->addWidget(txt,row++,col++, Qt::AlignLeft);
+        hbox->addWidget(txt);
         QObject::connect(m_server, SIGNAL(data(QString)), this, SLOT(on_data(QString)));
         QObject::connect(this, SIGNAL(appendToTheirs(QString)), txt, SLOT(append(QString)));
     }
+
+    hbox->addStretch();
+    grid->addLayout(hbox,row++,0,1,grid->columnCount());
+    grid->setRowStretch(row -1, 5);
 
     // Draw the alphabet
     flow = new Utils::FlowLayout;
@@ -724,9 +873,6 @@ void MainStack::init_board(bool is_two_player)
 
     grid->addLayout(flow,row++,0,1,2, Qt::AlignCenter);
 
-    bar = new QStatusBar;
-    grid->addWidget(bar,row++,0,1,2);
-    QObject::connect(m_server, SIGNAL(msg(QString)),bar, SLOT(showMessage(QString)));
 
 //    flow = new Utils::FlowLayout;
 //    QHBoxLayout * hbox;
@@ -746,8 +892,13 @@ void MainStack::init_board(bool is_two_player)
     QObject::connect(lineEdit, SIGNAL(returnPressed()), this, SLOT(sendData()));
     hbox->addWidget(lineEdit);
 
+    button = new QPushButton("Go");
+    QObject::connect(button, SIGNAL(clicked()), this, SLOT(sendData()));
+    hbox->addWidget(button);
     hbox->addStretch();
 
+    
+    
     grid->addLayout(hbox,row++,0,1,2, Qt::AlignCenter);
 
     w->setLayout(grid);
@@ -757,6 +908,40 @@ void MainStack::init_board(bool is_two_player)
     else
         m_onePlayerBoard = w;
 
+}
+
+
+void MainStack::addKineticScrolling(QWidget * w)
+{
+#ifdef Q_OS_IOS
+        //qDebug() << "is iOS!!!";
+        QScroller::grabGesture(w, QScroller::TouchGesture);
+#else
+        QScroller::grabGesture(w, QScroller::LeftMouseButtonGesture);
+#endif
+}
+
+void MainStack::on_randomGuess()
+{
+    QLineEdit * lineEdit = this->currentWidget()->findChild<QLineEdit*>();
+    QString guess = m_dict->getNewSecretWord(5, m_allowDoubleLetters->isChecked());
+    lineEdit->setText(guess);
+    sendData();
+}
+
+void MainStack::on_sliderChanged(int size)
+{
+    Highlighter * h = this->currentWidget()->findChild<Highlighter *>();
+    QList <QTextEdit*> txts = this->currentWidget()->findChildren<QTextEdit*>();
+//    qDebug() << Q_FUNC_INFO << txts.size() << size;
+    for(int i = 0; i< txts.size(); i++)
+    {
+        txts[i]->setFontPointSize((qreal)size/10.0);
+    }
+    if(h)
+    {
+        h->setFontSize((qreal)size/10.0);
+    }
 }
 
 void MainStack::setCurrentWidget(QWidget * w)

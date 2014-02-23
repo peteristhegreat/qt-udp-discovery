@@ -10,8 +10,12 @@
 #include <QAudioProbe>
 #include <QMediaPlayer>
 
-#ifndef Q_OS_MAC
+#ifdef Q_OS_WIN
 #define USE_PLAYER
+#endif
+
+#ifdef Q_OS_IOS
+//#define USE_PLAYER
 #endif
 
 

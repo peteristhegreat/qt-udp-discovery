@@ -1,8 +1,10 @@
 <RCC>
     <qresource prefix="/">
-        <file>jotto-logo.svg</file>
         <file>dictionary.txt</file>
         <file>frequency.txt</file>
         <file>jotto.png</file>
+        <file>sounds/finished.wav</file>
+        <file>style.qss</file>
+        <file>jotto-logo.svg</file>
     </qresource>
 </RCC>

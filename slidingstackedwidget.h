@@ -3,8 +3,11 @@
 
 #include <QStackedWidget>
 
-#include <QtGui>
+//#include <QtGui>
 #include <QWidget>
+#include <QTimer>
+#include <QPropertyAnimation>
+#include <QParallelAnimationGroup>
 #include <QDebug>
 #include <QEasingCurve>
 

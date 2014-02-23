@@ -18,6 +18,7 @@ public:
 public slots:
     void setTheme(QColor fg, QColor bg, int state);
     void on_stateChanged(QChar c, int state);
+    void setFontSize(qreal);
 protected:
     void highlightBlock(const QString &text);
 private:
@@ -25,6 +26,7 @@ private:
     QChar m_char;
     QMap <QChar, QTextCharFormat *> m_formatMap;
     QMap <int, QTextCharFormat *> m_stateToFormat;
+    QTextCharFormat m_default;
 };
 
 #endif // HIGHLIGHTER_H

@@ -67,7 +67,11 @@ Overlay::Overlay(QWidget *parent) :QWidget(parent)
 
     m_probe->setSource(m_player);
 #else
-    finishedSoundEffect.setSource(QUrl::fromLocalFile("sounds/finished.wav"));
+    //finishedSoundEffect.setSource(QUrl::fromLocalFile("://sounds/finished.wav"));
+    finishedSoundEffect.setSource(QUrl("://sounds/finished.wav"));
+
+    QFile f("://sounds/finished.wav");
+    qDebug() << "sound file exists?" << f.exists();
 #endif
 }
 
@@ -83,7 +87,7 @@ void Overlay::processBuffer(QAudioBuffer buffer)
     }
 }
 
-void Overlay::paintEvent(QPaintEvent *event)
+void Overlay::paintEvent(QPaintEvent *)
 {
     static const QPointF star[5] = {
         QPointF(15.0, 100.0),
@@ -121,7 +125,7 @@ void Overlay::paintEvent(QPaintEvent *event)
 void Overlay::startAnimation()
 {
 #ifdef USE_PLAYER
-    m_player->setMedia(QUrl::fromLocalFile("./sounds/finished.wav"));
+    m_player->setMedia(QUrl::fromLocalFile("://sounds/finished.wav"));
     qDebug() << QDir::current().absolutePath();
     m_player->play();
 //    qDebug() << m_player->errorString();

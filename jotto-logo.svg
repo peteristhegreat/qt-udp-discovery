@@ -12,9 +12,10 @@
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    width="271.63663"
    height="154.11252"
+   preserveAspectRatio="xMidYMid meet"
    id="svg2"
    version="1.1"
-   inkscape:version="0.48.4 r9939"
+   inkscape:version="0.48.2 r9819"
    sodipodi:docname="jotto-logo.svg">
   <defs
      id="defs4">
@@ -218,10 +219,10 @@
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
-     inkscape:window-width="1536"
-     inkscape:window-height="803"
-     inkscape:window-x="-8"
-     inkscape:window-y="-8"
+     inkscape:window-width="1680"
+     inkscape:window-height="1002"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
      inkscape:window-maximized="1"
      fit-margin-top="0"
      fit-margin-left="0"

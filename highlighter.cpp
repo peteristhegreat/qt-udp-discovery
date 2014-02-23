@@ -10,7 +10,8 @@
 Highlighter::Highlighter(QTextDocument *parent) :
     QSyntaxHighlighter(parent)
 {
-
+    // the default format
+    m_default.setFontFamily("Arial");
 }
 
 void Highlighter::connectToLetterButton(LetterButton *lb)
@@ -31,6 +32,16 @@ void Highlighter::setTheme(QColor fg, QColor bg, int state)
     m_stateToFormat[state]->setForeground(QBrush(fg));
 }
 
+void Highlighter::setFontSize(qreal size)
+{
+    foreach(int state, m_stateToFormat.keys())
+    {
+            m_stateToFormat[state]->setFontPointSize(size);
+    }
+    m_default.setFontPointSize(size);
+    rehighlight();
+}
+
 void Highlighter::on_stateChanged(QChar c, int state)
 {
 //    qDebug() << c << state;
@@ -42,12 +53,18 @@ void Highlighter::highlightBlock(const QString &text)
 {
 //    qDebug() << text;
     if(text.length() > 0  && text.at(0).isLetter())
-        return;
+    {
+        setFormat(0, text.length(), m_default);
+    }
     for(int i = 0; i < text.size(); i++)
     {
         if(text.at(i).isLetter() && m_formatMap.contains(text.at(i).toLower()))
         {
             setFormat(i, 1, *(m_formatMap[text.at(i).toLower()]));
+        }
+        else
+        {
+            setFormat(0, text.length(), m_default);
         }
     }
 }

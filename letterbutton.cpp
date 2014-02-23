@@ -9,7 +9,7 @@ LetterButton::LetterButton(QChar c, QWidget *parent) :
     m_down = false;
     this->setText(c);
     this->setAlignment(Qt::AlignCenter);
-    this->setFixedSize(60, 60);
+//    this->setFixedSize(60, 60);
     QObject::connect(this, SIGNAL(clicked()), this, SLOT(on_clicked()));
 //    this->on_reset();
     this->setFrameStyle(QFrame::Box);
@@ -30,6 +30,7 @@ void LetterButton::setTheme(QColor fg, QColor bg, int i)
 
 void LetterButton::on_clicked()
 {
+    qDebug() << this->getLetter() << m_state;
     m_state += 2;
     if(m_state >= m_colors.size())
         m_state = 0;

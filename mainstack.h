@@ -28,6 +28,9 @@ signals:
     void appendToYours(QString);
     void appendToTheirs(QString);
 public slots:
+    void on_finishedLoading();
+    void on_randomGuess();
+    void on_sliderChanged(int);
     void setCurrentWidget(QWidget * w);
     void on_refreshStyleSheet();
     void on_endOfVictoryDance();
@@ -49,6 +52,9 @@ public slots:
     void writeSettings();
     void closeEvent(QCloseEvent *);
 private:
+    QString m_additionalStyleSheet;
+
+    void addKineticScrolling(QWidget * w);
     QWidget * m_currWidget;
     Overlay * m_overlay;
     QWidget * m_helpPage;
@@ -63,6 +69,7 @@ private:
     QCheckBox * m_ephHouseRules;
     QCheckBox * m_allowDoubleLetters;
     QComboBox * m_numLettersCombo;
+    QCheckBox * m_autoMarkZeroLetterGuesses;
 
     QStatusBar * m_bar;
     Dictionary * m_dict;

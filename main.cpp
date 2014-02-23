@@ -25,7 +25,8 @@ int main(int argc, char *argv[])
     a.setOrganizationName("Post Meridian");
     QSettings::setDefaultFormat(QSettings::IniFormat);
     bool retVal = QResource::registerResource("qresources.qrc");
-//    qDebug() << "resources?" << retVal;
+    if(!retVal)
+        qDebug() << "resources?" << retVal;
 //    QTextStream cout(stdout);
 //    QTextStream cin(stdin);
 
@@ -45,6 +46,12 @@ int main(int argc, char *argv[])
 
     MainStack m;
     m.show();
+
+//    iphone5c = QRect(0,20 320x548);
+
+
+
+
 //    Server * s = new Server;
 //    while(getchar())
 //    if(word.startsWith("l", Qt::CaseInsensitive))

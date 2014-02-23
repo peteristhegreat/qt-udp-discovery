@@ -19,7 +19,7 @@ public:
 
     static bool hasDoubleLetters(QString word)
     {
-        bool hasDoubleLetters = false;
+//        bool hasDoubleLetters = false;
 
         for(int i = 0; i < word.length(); i++)
         {
@@ -35,7 +35,7 @@ public:
     }
 
 signals:
-
+    void ready();	
 public slots:
     void init();
     void setWordLength(int);

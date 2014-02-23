@@ -15,11 +15,6 @@ Dictionary::Dictionary(QObject *parent) :
     foreach(int i, m_allowedWordLengths)
         m_map[i] = new QHash < QString, int>;
 
-    // start a delayed init
-    QTimer * t = new QTimer;
-    t->setSingleShot(true);
-    QObject::connect(t, SIGNAL(timeout()), this, SLOT(init()));
-    t->start(500);
     this->setWordLength(5);
 }
 
@@ -118,4 +113,6 @@ void Dictionary::init()
     qDebug() << "time?" << time.elapsed();
 
     loadFrequencyList();
+    
+    emit ready();
 }

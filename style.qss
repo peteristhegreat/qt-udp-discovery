@@ -1,17 +1,20 @@
 QPushButton {
+    padding: 20;
+    margin: 10;
+    /* font-family: "Times"; */
+    font-size: 16px;
+    border-radius: 20px;
+    border-style: inset;
+    border-width: 2px;
+    /*  min-width: 10em; */
+    background: white;
+}
 
-padding: 20;
-
-margin: 10;
-
-font-family: "Times";
-border-radius: 20px;
-
-border-style: inset;
-border-width: 2px;
-/*  min-width: 10em; */
- 
- background: white;
+QSlider::handle:vertical {
+    height: 20px;
+    padding: 10px;
+    background: white;
+    margin: 0 -20px; /* expand outside the groove */
 }
 
  QPushButton:pressed {
