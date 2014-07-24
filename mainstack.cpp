@@ -24,6 +24,8 @@
 #include <QScroller>
 #include "globals.h"
 #include <QProgressDialog>
+#include "overlaydialogbox.h"
+#include <QScrollBar>
 
 
 MainStack::MainStack(QWidget *parent) :
@@ -51,33 +53,7 @@ MainStack::MainStack(QWidget *parent) :
     m_additionalStyleSheet = "";
 #ifdef Q_OS_IOS
         m_additionalStyleSheet =
-                "QDialog {"
-                "background: qlineargradient( x1:0.2 y1:0.4, x2:1 y2:0.5, stop:0 deepskyblue, stop:1 darkslateblue);"
-
-//                "background: white;"
-                "}"
-                "QDialog QLabel {"
-                ""// top right bottom left
-                "padding: 100px 20px 20px 20px;"
-                "font-size: 36px;"
-                "}"
-
-                "QDialog QPushButton {"
                 ""
-                "font-size: 24px;"
-                "}"
-
-
-                "QMessageBox QLabel {"
-                ""// top right bottom left
-                "padding: 100px 20px 20px 20px;"
-                "font-size: 36px;"
-                "}"
-
-                "QMessageBox QPushButton {"
-                ""
-                "font-size: 24px;"
-                "}"
                 ;
 #else
 #ifdef Q_OS_ANDROID
@@ -123,11 +99,11 @@ MainStack::MainStack(QWidget *parent) :
     shortcut = new QShortcut(QKeySequence("F5"),this,SLOT(on_refreshStyleSheet()));
     on_refreshStyleSheet();
     
-    // start a delayed init
-    QTimer * t = new QTimer;
-    t->setSingleShot(true);
-    QObject::connect(t, SIGNAL(timeout()), m_dict, SLOT(init()));
-    t->start(500);
+
+//    QTimer * t2 = new QTimer;
+//    t2->setSingleShot(true);
+//    QObject::connect(t2, SIGNAL(timeout()), this, SLOT(myAdjustSize()));
+//    t2->start(400);
     
 //    QProgressDialog * prog = new QProgressDialog();
 //    prog->setValue(20);
@@ -142,22 +118,30 @@ MainStack::MainStack(QWidget *parent) :
     bar->setFixedHeight(30);
     bar->setMinimumWidth(200);
     bar->setStyleSheet("background:white;");
-    bar->showMessage("Loading Dictionary");
+    bar->showMessage("Loading dictionary");
     foreach(QPushButton * btn, this->currentWidget()->findChildren<QPushButton*>())
     {
-        btn->setDisabled(true);
+        if(btn->text() != "Help" && btn->text() != "Settings")
+            btn->setDisabled(true);
     }
+    // start a delayed init
+    QTimer * t = new QTimer;
+    t->setSingleShot(true);
+    QObject::connect(t, SIGNAL(timeout()), m_dict, SLOT(init()));
+    t->start(500);
 }
 
-void MainStack::on_finishedLoading()
+
+void MainStack::showEvent(QShowEvent *)
 {
-    qDebug() << this->geometry();
-    QStatusBar * bar = this->currentWidget()->findChild<QStatusBar*>();
-    bar->showMessage("Ready to go!");
-    foreach(QPushButton * btn, this->currentWidget()->findChildren<QPushButton*>())
-    {
-        btn->setDisabled(false);
-    }
+    static bool firstRun = true;
+    if(!firstRun)
+        return;
+    myAdjustSize();
+}
+
+void MainStack::myAdjustSize()
+{
 
 #if defined(Q_OS_IOS) || defined(Q_OS_ANDROID)
 #ifdef Q_OS_IOS
@@ -172,7 +156,13 @@ if(this->width() < 500 || this->height() < 500)
         // we are an iphone!
 
         this->setStyleSheet(this->styleSheet() +
-                    "QFrame {padding: 3px;}"
+                    "QFrame {padding: 5px;}"
+                    "LetterButton {"
+                            "padding: 8px 4px;"
+                            "margin: 4px 0px;"
+//                            "border-radius: 3px;"
+                            "}"
+                            "QLineEdit {padding: 15px;}"
                             "QPushButton {"
                             "    padding: 8;"
                             "    margin: 2;"
@@ -184,7 +174,7 @@ if(this->width() < 500 || this->height() < 500)
                             "    /*  min-width: 10em; */"
                             "    background: white;"
                             "}"
-
+                            "QTextEdit {padding: 0px;}"
 
                     );
 
@@ -193,6 +183,7 @@ if(this->width() < 500 || this->height() < 500)
     {
         this->setStyleSheet(this->styleSheet() +
                             "QFrame {padding: 10px;}"
+                            "QTextEdit {padding: 0px;}"
                     );
     }
     this->ensurePolished();
@@ -204,6 +195,19 @@ if(this->width() < 500 || this->height() < 500)
 //    m_overlay->startAnimation();
 //    m_overlay->show();
 //    m_overlay->raise();
+
+    this->currentWidget()->adjustSize();
+}
+
+void MainStack::on_finishedLoading()
+{
+    qDebug() << this->geometry();
+    QStatusBar * bar = this->currentWidget()->findChild<QStatusBar*>();
+    bar->showMessage("Ready to go!");
+    foreach(QPushButton * btn, this->currentWidget()->findChildren<QPushButton*>())
+    {
+        btn->setDisabled(false);
+    }
 }
 
 void MainStack::on_refreshStyleSheet()
@@ -240,12 +244,46 @@ void MainStack::on_refreshStyleSheet()
 
 void MainStack::on_endOfVictoryDance()
 {
+    QSettings s;
+    int victory_count = s.value("victory_count", 0).toInt();
+
+    QStringList victoryMessages;
+    victoryMessages
+            << "You are super awesome!"
+            << "Excellent.  Most excellent."
+            << "Good job. That is all I have to say."
+            << "Fantastic work!"
+            << "You cracked that code so fast."
+            << "Jotto master."
+            << "You did that faster than GladOs expected."
+            << "Amazing job!!!"
+            << "I heard you say in your head, \"Eureka!\""
+            << "Jotto pro!"
+            << "You are super awesome!  Go team!"
+            << "If this was pod racing, you are Anakin."
+            << "Congrats. Live long and prosper."
+            << "oooo O_-_O oooo ... I can see your smile."
+            << "Well, that was easy."
+            << "Shoot. There's no foolin\' you."
+            << "You hacked in faster than Tony Stark!"
+            << "Knock, knock. Who's there? A Jotto Winner!"
+            << "A jotto master, you are."
+            << "Are you going to try more letters this time?"
+               ;
+
+
+
+
     QPushButton * btn = this->currentWidget()->findChild<QPushButton *>("Give Up");
     if(btn)
         btn->setEnabled(true);
     QStatusBar * bar = this->currentWidget()->findChild<QStatusBar *>();
     if(bar)
-        bar->showMessage("You are super awesome!  Go team!");
+    {
+        bar->showMessage(victoryMessages.at(victory_count % victoryMessages.size()));
+        victory_count++;
+        s.setValue("victory_count", victory_count);
+    }
     if(btn)
         btn->setFocus();
 }
@@ -264,6 +302,24 @@ void MainStack::readSettings()
     m_ephHouseRules->setChecked(s.value("eph_house_rules", false).toBool());
     m_allowDoubleLetters->setChecked(s.value("allow_double_letters",true).toBool());
     m_autoMarkZeroLetterGuesses->setChecked(s.value("auto_mark_zero_letter_guesses", true).toBool());
+
+    int fontSize = s.value("text_edit_font_size", 260).toInt();
+    foreach(QTextEdit * txt, this->findChildren<QTextEdit*>())
+    {
+        txt->setFontPointSize(fontSize/10);
+    }
+
+    foreach(QSlider* slider, this->findChildren<QSlider*>("font_size_slider"))
+    {
+        slider->setValue(fontSize);
+    }
+    foreach(QLineEdit * lineEdit, this->findChildren<QLineEdit*>())
+    {
+        QFont f = lineEdit->font();
+        f.setPointSize(fontSize/10);
+        lineEdit->setFont(f);
+    }
+
 //    m_musicEnabled->setValue(s.value("music_volume", 10).toBool());
 //    m_soundsEnabled->setValue(s.value("sounds_volume", 40).toBool());
 }
@@ -276,6 +332,9 @@ void MainStack::writeSettings()
     s.setValue("eph_house_rules", m_ephHouseRules->isChecked());
     s.setValue("allow_double_letters", m_allowDoubleLetters->isChecked());
     s.setValue("auto_mark_zero_letter_guesses", m_autoMarkZeroLetterGuesses->isChecked());
+    s.setValue("text_edit_font_size", this->findChild<QTextEdit*>()->fontPointSize()*10);
+//    qDebug() << this->findChild<QTextEdit*>()->fontPointSize()*10;
+
 }
 
 void MainStack::resizeEvent(QResizeEvent *event)
@@ -404,7 +463,7 @@ void MainStack::sendData()
         {
             // Game Over, you win!
             emit appendToYours("Correct: " + word);
-            m_server->writeData("The other player guessed your word!");
+            m_server->writeData("\nThe other player guessed your word!");
 
 
             m_overlay->startAnimation();
@@ -482,14 +541,34 @@ void MainStack::on_connected()
 
     QString input;
     bool ok;
+    QString errorText;
+    int ret;
     do
     {
-        input = QInputDialog::getText(this,
-              "Jotto - Set Secret Word",
-              "Please enter a "
-              + QString::number(m_dict->wordLength())
-              + " letter word.", QLineEdit::Normal, QString(), &ok).toLower();
+        QInputDialog * getTextDialog = new QInputDialog();
+        getTextDialog->setInputMode(QInputDialog::TextInput);
+        getTextDialog->setWindowTitle("Jotto - Set Secret Word");
+        getTextDialog->setLabelText(
+                    "Please enter a "
+                    + QString::number(m_dict->wordLength())
+                    + " letter word." + errorText);
 
+
+#if defined(Q_OS_MAC) || defined(Q_OS_IOS) || defined(Q_OS_ANDROID)
+        OverlayDialogBox dialog(this, getTextDialog);
+        ret = dialog.exec();
+        input = dialog.inputDialog()->textValue();
+#else
+        ret = getTextDialog->exec();
+        input = getTextDialog->textValue();
+        delete getTextDialog;
+#endif
+//        input = QInputDialog::getText(this,
+//              "Jotto - Set Secret Word",
+//              "Please enter a "
+//              + QString::number(m_dict->wordLength())
+//              + " letter word.", QLineEdit::Normal, QString(), &ok).toLower();
+        ok = (ret == QDialog::Accepted);
 
     } while(ok && m_server->isConnected()
             && (input.length() != m_dict->wordLength()
@@ -525,9 +604,29 @@ void MainStack::on_onePlayer()
 {
     if(false)
     {
-        m_overlay->startAnimation();
-        m_overlay->show();
-        m_overlay->raise();
+        QString input, errorText;
+        int ret;
+        QInputDialog * getTextDialog = new QInputDialog();
+        getTextDialog->setInputMode(QInputDialog::TextInput);
+        getTextDialog->setWindowTitle("Jotto - Set Secret Word");
+        getTextDialog->setLabelText(
+                    "Please enter a "
+                    + QString::number(m_dict->wordLength())
+                    + " letter word." + errorText);
+
+
+#if defined(Q_OS_MAC) || defined(Q_OS_IOS) || defined(Q_OS_ANDROID)
+        OverlayDialogBox dialog(this, getTextDialog);
+        ret = dialog.exec();
+        input = dialog.inputDialog()->textValue();
+#else
+        ret = getTextDialog->exec();
+        input = getTextDialog->textValue();
+        delete getTextDialog;
+#endif
+        //        m_overlay->startAnimation();
+//        m_overlay->show();
+//        m_overlay->raise();
     }
 
     // Pick a random word from the dictionary based on difficulty
@@ -673,14 +772,19 @@ void MainStack::on_giveUpButton()
 
     if(btn->text() == "Give Up")
     {
-        QMessageBox msgBox;
-        //    msgBox.setParent(this);
-        msgBox.setText("You are so close."
+        QMessageBox * msgBox = new QMessageBox;
+        msgBox->setText("You are so close."
                        "\n\n"
                        "Do you really want to give up?");
-        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-        msgBox.setDefaultButton(QMessageBox::No);
-        ret = msgBox.exec();
+        msgBox->setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        msgBox->setDefaultButton(QMessageBox::No);
+#if defined(Q_OS_MAC) || defined(Q_OS_IOS) || defined(Q_OS_ANDROID)
+        OverlayDialogBox dialog(this, msgBox);
+        ret = dialog.exec();
+#else
+        ret = msgBox->exec();
+        delete msgBox;
+#endif
     }
     else
     {
@@ -691,13 +795,23 @@ void MainStack::on_giveUpButton()
     {
         if(btn->text() == "Give Up")
         {
-            QMessageBox::information(this,"The Secret Word",
-                                     "The secret word was:\n\n      "
-                                     + m_theirSecretWord
-                                     + "\n\nBetter luck next time.");
+            QMessageBox * msgBox = new QMessageBox();
+            msgBox->setText("The secret word was:\n\n      "
+                            + m_theirSecretWord
+                            + "\n\nBetter luck next time.");
+            msgBox->setStandardButtons(QMessageBox::Ok);
+
+#if defined(Q_OS_MAC) || defined(Q_OS_IOS) || defined(Q_OS_ANDROID)
+            OverlayDialogBox dialog(this, msgBox);
+            ret = dialog.exec();
+#else
+            ret = msgBox->exec();
+            delete msgBox;
+#endif
         }
+
         foreach(QTextEdit * t,
-                this->currentWidget()->findChildren<QTextEdit *>())
+                this->findChildren<QTextEdit *>())
         {
             t->clear();
         }
@@ -793,11 +907,13 @@ void MainStack::init_board(bool is_two_player)
 
     if(is_two_player)
     {
+        grid->setRowStretch(row, 0);
         label = new QLabel("Yours");
         grid->addWidget(label,row,0, Qt::AlignRight);
         label = new QLabel("Theirs");
         grid->addWidget(label,row++,1, Qt::AlignLeft);
     }
+    grid->setRowStretch(row, 1);
 
 //    int col = 0;
 
@@ -805,21 +921,30 @@ void MainStack::init_board(bool is_two_player)
 
     txt = new QTextEdit;
     addKineticScrolling(txt);
+#ifdef Q_OS_IOS
+    txt->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+#endif
 
     highlighter = new Highlighter(txt->document());
     txt->setReadOnly(true);
 
     QSlider * slider;
     slider = new QSlider(Qt::Vertical);
+    slider->setObjectName("font_size_slider");
     slider->setRange(100, 360);
-    slider->setValue(140);
+    slider->setValue(260);
     slider->setFixedWidth(30);
 //    grid->addWidget(slider,row,col++,Qt::AlignLeft);
-    hbox->addWidget(slider);
+    QVBoxLayout * vboxSlider = new QVBoxLayout;
+    vboxSlider->addWidget(new QLabel("A"));
+    vboxSlider->addWidget(slider);
+    vboxSlider->addWidget(new QLabel("a"));
+
+
+    hbox->addLayout(vboxSlider);
     hbox->addStretch();
 
     QObject::connect(slider, SIGNAL(valueChanged(int)), this, SLOT(on_sliderChanged(int)));
-
 
 //    txt->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
     if(is_two_player)
@@ -836,17 +961,22 @@ void MainStack::init_board(bool is_two_player)
     grid->setRowStretch(grid->rowCount() - 1, 4);
 //    QObject::connect(this, SIGNAL(data(QString)), this, SLOT(on_data(QString)));
     QObject::connect(this, SIGNAL(appendToYours(QString)), txt, SLOT(append(QString)));
+    QObject::connect(this, SIGNAL(appendToYours(QString)), this, SLOT(on_appendToTxtEdit(QString)));
 
     if(is_two_player)
     {
         txt = new QTextEdit;
         addKineticScrolling(txt);
+#ifdef Q_OS_IOS
+        txt->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+#endif
         txt->setReadOnly(true);
         txt->setMaximumWidth(120);
 //        grid->addWidget(txt,row++,col++, Qt::AlignLeft);
         hbox->addWidget(txt);
         QObject::connect(m_server, SIGNAL(data(QString)), this, SLOT(on_data(QString)));
         QObject::connect(this, SIGNAL(appendToTheirs(QString)), txt, SLOT(append(QString)));
+        QObject::connect(this, SIGNAL(appendToTheirs(QString)), this, SLOT(on_appendToTxtEdit(QString)));
     }
 
     hbox->addStretch();
@@ -854,7 +984,8 @@ void MainStack::init_board(bool is_two_player)
     grid->setRowStretch(row -1, 5);
 
     // Draw the alphabet
-    flow = new Utils::FlowLayout;
+    flow = new Utils::FlowLayout(0,0,0);
+//    flow->setContentsMargins(0,0,0,0);
     for(int i = 0; i< 26; i++)
     {
         LetterButton * lb = new LetterButton('A' + i);
@@ -868,7 +999,7 @@ void MainStack::init_board(bool is_two_player)
     emit setTheme(Qt::black, Qt::white, 0);
     emit setTheme(Qt::white, Qt::black, 2);
     emit setTheme(Qt::black, Qt::lightGray, 4);
-    emit setTheme(Qt::white, Qt::green, 6);
+    emit setTheme(Qt::black, Qt::green, 6);
     emit resetLetters();
 
     grid->addLayout(flow,row++,0,1,2, Qt::AlignCenter);
@@ -888,16 +1019,18 @@ void MainStack::init_board(bool is_two_player)
     label->setObjectName("Guess Count");
     label->setMargin(0);
 
-    QLineEdit * lineEdit = new QLineEdit;
+    QLineEdit * lineEdit = new LineEdit;
+    lineEdit->setPlaceholderText("tap here!");
     QObject::connect(lineEdit, SIGNAL(returnPressed()), this, SLOT(sendData()));
     hbox->addWidget(lineEdit);
+//    QObject::connect(lineEdit, SIGNAL(editingFinished()), this, SLOT(on_lineEdit_editingFinished()));
+//    QObject::connect(lineEdit, SIGNAL(returnPressed()), this, SLOT(on_lineEdit_returnPressed()));
 
     button = new QPushButton("Go");
     QObject::connect(button, SIGNAL(clicked()), this, SLOT(sendData()));
+    button->setStyleSheet("padding:15px 5px;");
     hbox->addWidget(button);
     hbox->addStretch();
-
-    
     
     grid->addLayout(hbox,row++,0,1,2, Qt::AlignCenter);
 
@@ -908,6 +1041,29 @@ void MainStack::init_board(bool is_two_player)
     else
         m_onePlayerBoard = w;
 
+}
+
+
+void MainStack::on_appendToTxtEdit(QString)
+{
+    foreach(QTextEdit * txt, this->currentWidget()->findChildren<QTextEdit*>())
+    {
+        txt->verticalScrollBar()->setSliderPosition(
+            txt->verticalScrollBar()->maximum());
+        txt->textCursor().clearSelection();
+    }
+}
+
+
+void MainStack::on_lineEdit_returnPressed()
+{
+    qDebug() << Q_FUNC_INFO;
+}
+
+
+void MainStack::on_lineEdit_editingFinished()
+{
+    qDebug() << Q_FUNC_INFO;
 }
 
 
@@ -931,16 +1087,21 @@ void MainStack::on_randomGuess()
 
 void MainStack::on_sliderChanged(int size)
 {
-    Highlighter * h = this->currentWidget()->findChild<Highlighter *>();
-    QList <QTextEdit*> txts = this->currentWidget()->findChildren<QTextEdit*>();
-//    qDebug() << Q_FUNC_INFO << txts.size() << size;
-    for(int i = 0; i< txts.size(); i++)
+    foreach(QTextEdit* txt, this->findChildren<QTextEdit*>())
     {
-        txts[i]->setFontPointSize((qreal)size/10.0);
+        txt->setFontPointSize((qreal)size/10.0);
+        txt->update();
     }
-    if(h)
+    foreach(Highlighter * h, this->findChildren<Highlighter *>())
     {
         h->setFontSize((qreal)size/10.0);
+    }
+
+    foreach(QLineEdit * lineEdit, this->findChildren<QLineEdit*>())
+    {
+        QFont f = lineEdit->font();
+        f.setPointSize(size/10);
+        lineEdit->setFont(f);
     }
 }
 

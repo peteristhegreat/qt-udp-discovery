@@ -1,0 +1,4 @@
+Yours and Theirs is too tall... fixed
+the "theirs" list doesn't refresh when the text size changes
+the notification bar looks funny
+Add a new line after the correct guess before "The other player..."

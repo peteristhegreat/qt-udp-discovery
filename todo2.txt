@@ -1,0 +1,15 @@
+Score the game:
+	Time, how long you took to win.
+	Number of guesses
+	Number of random button presses?
+	How obscure your guesses were.
+
+
+Draw the stars according to how the score turned out.
+
+Create levels:
+	Difficult words
+	Number of letters in the words
+	Double letters or not
+
+Save games, and make them resume-able

@@ -2,10 +2,14 @@
 #include <QDebug>
 #include <QBrush>
 #include <QPalette>
+#include <QWidget>
+#include <QFrame>
 
 LetterButton::LetterButton(QChar c, QWidget *parent) :
     QLabel(parent)
 {
+
+//    setPalette(Qt::transparent);
     m_down = false;
     this->setText(c);
     this->setAlignment(Qt::AlignCenter);
@@ -14,6 +18,8 @@ LetterButton::LetterButton(QChar c, QWidget *parent) :
 //    this->on_reset();
     this->setFrameStyle(QFrame::Box);
     this->setAutoFillBackground(true);
+    this->setMinimumWidth(30);
+    this->setFrameShadow(QFrame::Plain);
     m_state = -1;
 //    this->setFlat(true);
 //    this->setBackgroundRole(QPalette::Window);
@@ -54,6 +60,7 @@ void LetterButton::updateColors()
 //                );
     p.setColor(this->foregroundRole(), m_colors.at(m_state % m_colors.size()));
     p.setColor(this->backgroundRole(), m_colors.at((m_state+1) % m_colors.size()));
+//    p.setColor(QPalette::Window, Qt::transparent);
 //    p.setColor(QPalette::Light, );
 
 

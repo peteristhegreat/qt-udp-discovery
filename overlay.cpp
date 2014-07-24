@@ -11,28 +11,28 @@ Overlay::Overlay(QWidget *parent) :QWidget(parent)
     setPalette(Qt::transparent);
     setAttribute(Qt::WA_TransparentForMouseEvents);
 
-    this->setFont(QFont("Times",30, QFont::Bold, true));
+    this->setFont(QFont("Times",40, QFont::Bold, true));
 
     m_paraAnimation = new QParallelAnimationGroup;
 
     QPropertyAnimation * a;
     a = new QPropertyAnimation(this, "star1Pos");
     a->setStartValue(QPoint(0,-100));
-    a->setEndValue(QPoint(100, 100));
+    a->setEndValue(QPoint(100, 150));
     a->setDuration(2000);
     a->setEasingCurve(QEasingCurve::InOutBack);
 
     m_paraAnimation->addAnimation(a);
     a = new QPropertyAnimation(this, "star2Pos");
     a->setStartValue(QPoint(0,-100));
-    a->setEndValue(QPoint(225, 100));
+    a->setEndValue(QPoint(225, 150));
     a->setDuration(3000);
     a->setEasingCurve(QEasingCurve::InOutBack);
     m_paraAnimation->addAnimation(a);
 
     a = new QPropertyAnimation(this, "star3Pos");
     a->setStartValue(QPoint(0,-110));
-    a->setEndValue(QPoint(350, 100));
+    a->setEndValue(QPoint(350, 150));
     a->setDuration(4000);
     a->setEasingCurve(QEasingCurve::InOutBack);
     m_paraAnimation->addAnimation(a);
@@ -44,7 +44,7 @@ Overlay::Overlay(QWidget *parent) :QWidget(parent)
 
     a = new QPropertyAnimation(this, "textPos");
     a->setStartValue(QPoint(0, 2000));
-    a->setEndValue(QPoint(200, 300));
+    a->setEndValue(QPoint(200, 350));
     a->setDuration(3000);
     a->setEasingCurve(QEasingCurve::InOutBack);
     m_seqAnimation->addAnimation(a);
@@ -98,6 +98,12 @@ void Overlay::paintEvent(QPaintEvent *)
     };
 
     QPainter painter(this);
+    if(this->width() < 500)
+        painter.scale(((qreal)this->width())/500, ((qreal)this->width())/500);
+    else
+    {
+        painter.translate((this->width() - 500)/2, 0);
+    }
     painter.setRenderHint(QPainter::Antialiasing);
     painter.setPen(QPen(Qt::red));
     painter.setBrush(QBrush(Qt::red));
@@ -124,6 +130,7 @@ void Overlay::paintEvent(QPaintEvent *)
 
 void Overlay::startAnimation()
 {
+    this->resize(qobject_cast<QWidget*>(this->parent())->size());
 #ifdef USE_PLAYER
     m_player->setMedia(QUrl::fromLocalFile("://sounds/finished.wav"));
     qDebug() << QDir::current().absolutePath();

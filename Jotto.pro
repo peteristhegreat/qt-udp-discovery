@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui svg network multimedia
+QT       += core gui svg network multimedia multimediawidgets widgets
 
 QTPLUGIN += qavfmediaplayer qtaudio_coreaudio qtmedia_audioengine qavfcamera
 
@@ -15,6 +15,14 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 #QT       -= gui
 
 ICON = jotto.icns
+
+ios {
+# http://www.appiconsizes.com/
+
+BUNDLE_DATA.files = $$system("find $$PWD/icon/ios/ -name '*.png'")
+QMAKE_BUNDLE_DATA += BUNDLE_DATA
+}
+QMAKE_INFO_PLIST = custom.plist
 
 TARGET = Jotto
 #CONFIG   += console
@@ -37,7 +45,8 @@ SOURCES += main.cpp \
     slidingstackedwidget.cpp \
     aspectratiosvgwidget.cpp \
     globals.cpp \
-    mainstack_2.cpp
+    mainstack_2.cpp \
+    overlaydialogbox.cpp
 
 HEADERS += \
     server.h \
@@ -51,7 +60,8 @@ HEADERS += \
     overlay.h \
     slidingstackedwidget.h \
     aspectratiosvgwidget.h \
-    globals.h
+    globals.h \
+    overlaydialogbox.h
 
 RESOURCES += \
     qresources.qrc

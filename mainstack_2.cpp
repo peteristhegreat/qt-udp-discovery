@@ -169,8 +169,11 @@ void MainStack::init_gui()
     vbox->addWidget(label);
     vbox->addStretch();
 
+    btn = new QPushButton("Quick Game");
+    QObject::connect(btn, SIGNAL(clicked()), this, SLOT(on_onePlayer()));
+    vbox->addWidget(btn);
 
-    group = new QGroupBox("Multiplayer");
+    group = new QGroupBox("WiFi Game");
 
     group_vbox = new QVBoxLayout;
 
@@ -185,10 +188,6 @@ void MainStack::init_gui()
     group->setLayout(group_vbox);
 
     vbox->addWidget(group);
-
-    btn = new QPushButton("Quick Game");
-    QObject::connect(btn, SIGNAL(clicked()), this, SLOT(on_onePlayer()));
-    vbox->addWidget(btn);
 
     btn = new QPushButton("Help");
     QObject::connect(btn, SIGNAL(clicked()), this, SLOT(on_helpButton()));

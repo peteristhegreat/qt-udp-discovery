@@ -9,10 +9,50 @@
 #include <QStatusBar>
 #include <QCheckBox>
 #include <QCloseEvent>
+#include <QShowEvent>
 #include <QComboBox>
 #include <QResizeEvent>
 #include <QLabel>
 #include "slidingstackedwidget.h"
+#include <QKeyEvent>
+#include <QFocusEvent>
+
+class LineEdit : public QLineEdit
+{
+    Q_OBJECT
+public:
+    LineEdit(QWidget * parent = 0): QLineEdit(parent){}
+public slots:
+    void keyPressEvent(QKeyEvent * ke)
+    {
+//        qDebug() << "Press:" << ke->key();
+        QLineEdit::keyPressEvent(ke);
+    }
+    void keyReleaseEvent(QKeyEvent * ke)
+    {
+//        qDebug() << "     :" << ke->key();
+        QLineEdit::keyReleaseEvent(ke);
+    }
+    void focusInEvent(QFocusEvent* fe)
+    {
+//        qDebug() << "in" << fe->reason();
+        QLineEdit::focusInEvent(fe);
+    }
+
+    void focusOutEvent(QFocusEvent * fe)
+    {
+//        qDebug() << "out" << fe->reason();
+        QLineEdit::focusOutEvent(fe);
+#ifdef Q_OS_IOS
+        if(fe->reason() == Qt::OtherFocusReason)
+        {
+            // Done was pressed!
+            emit returnPressed();
+        }
+#endif
+    }
+//    void focusNextChild()
+};
 
 class MainStack : public SlidingStackedWidget
 {
@@ -28,6 +68,11 @@ signals:
     void appendToYours(QString);
     void appendToTheirs(QString);
 public slots:
+    void on_appendToTxtEdit(QString);
+    void showEvent(QShowEvent *);
+    void myAdjustSize();
+    void on_lineEdit_editingFinished();
+    void on_lineEdit_returnPressed();
     void on_finishedLoading();
     void on_randomGuess();
     void on_sliderChanged(int);
