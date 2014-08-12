@@ -16,6 +16,8 @@
 #include "slidingstackedwidget.h"
 #include <QKeyEvent>
 #include <QFocusEvent>
+#include <QTimer>
+#include <QTime>
 
 class LineEdit : public QLineEdit
 {
@@ -68,6 +70,7 @@ signals:
     void appendToYours(QString);
     void appendToTheirs(QString);
 public slots:
+    void updateStats();
     void on_appendToTxtEdit(QString);
     void showEvent(QShowEvent *);
     void myAdjustSize();
@@ -126,6 +129,9 @@ private:
     Server * m_server;
 
     QString m_theirSecretWord;
+
+    QTimer * m_statsTimer;
+    QTime m_stopWatch;
 };
 
 #endif // MAINSTACK_H

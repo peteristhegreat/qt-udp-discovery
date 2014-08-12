@@ -129,6 +129,10 @@ MainStack::MainStack(QWidget *parent) :
     t->setSingleShot(true);
     QObject::connect(t, SIGNAL(timeout()), m_dict, SLOT(init()));
     t->start(500);
+
+    m_statsTimer = new QTimer;
+    m_statsTimer->setInterval(1000);
+    QObject::connect(m_statsTimer, SIGNAL(timeout()), this, SLOT(updateStats()));
 }
 
 
@@ -498,6 +502,11 @@ void MainStack::sendData()
 
 void MainStack::updateGuessCount(bool reset)
 {
+    QPushButton * btn = this->currentWidget()->findChild<QPushButton *>("Give Up");
+    if(btn->text() == "Done")
+    {
+//        label->setText();
+    }
 
     QLabel * label = this->currentWidget()->findChild<QLabel *> ("Guess Count");
     if(reset)
@@ -1004,13 +1013,46 @@ void MainStack::init_board(bool is_two_player)
 
     grid->addLayout(flow,row++,0,1,2, Qt::AlignCenter);
 
+    QWidget * statsWidget = new QWidget;
+    statsWidget->setObjectName("Stats Widget");
 
+    hbox = new QHBoxLayout;
+    statsWidget->setLayout(hbox);
+
+    hbox->addWidget(new QLabel("Time:"));
+    label = new QLabel("0:00");
+    label->setObjectName("Timer");
+    hbox->addWidget(label);
+
+    hbox->addStretch();
+
+    label = new QLabel("0.0");
+    label->setObjectName("Guess Rate");
+    hbox->addWidget(label);
+    hbox->addWidget(new QLabel("sec/guess"));
+
+    hbox->addStretch();
+
+    label = new QLabel("Total Guesses:");
+    hbox->addWidget(label);
+    label = new QLabel("0");
+    label->setObjectName("Total Guesses");
+    hbox->addWidget(label);
+
+    statsWidget->setStyleSheet("QLabel {padding: 0px; margin: 0px; }");
+    foreach(QLabel* l, statsWidget->findChildren<QLabel*>())
+    {
+        l->setMargin(0);
+    }
+
+    grid->addWidget(statsWidget, row++, 0,1,2);
 //    flow = new Utils::FlowLayout;
 //    QHBoxLayout * hbox;
     hbox = new QHBoxLayout;
     hbox->addStretch();
 
     label = new QLabel("Guess");
+    label->setObjectName("Guess Label");
     hbox->addWidget(label);
     label->setMargin(0);
 
@@ -1043,6 +1085,14 @@ void MainStack::init_board(bool is_two_player)
 
 }
 
+void MainStack::updateStats()
+{
+    qDebug() << "Implement updateStats()";
+
+    // get time from m_stopwatch
+
+    // populate all the widgets in the stats widget
+}
 
 void MainStack::on_appendToTxtEdit(QString)
 {
