@@ -6,5 +6,7 @@
         <file>sounds/finished.wav</file>
         <file>style.qss</file>
         <file>jotto-logo.svg</file>
+        <file>checked.png</file>
+        <file>unchecked.png</file>
     </qresource>
 </RCC>

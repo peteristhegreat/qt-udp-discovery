@@ -2,7 +2,7 @@ QPushButton {
     padding: 20;
     margin: 10;
     /* font-family: "Times"; */
-    font-size: 16px;
+    font-size: 16pt;
     border-radius: 20px;
     border-style: inset;
     border-width: 2px;
@@ -44,3 +44,39 @@ color: white;
 color: white;
 }
  */
+
+QCheckBox::indicator
+{
+    width: 120px;
+    height: 42px;
+}
+
+QCheckBox::indicator:checked
+{
+    image: url(:/checked.png);
+}
+QCheckBox::indicator:unchecked
+{
+    image: url(:/unchecked.png);
+}
+/*
+QCheckBox::indicator:checked:hover
+{
+    image: url(../Checkbox_checked_hovered.png);
+}
+QCheckBox::indicator:unchecked:hover
+{
+    image: url(../Checkbox_unchecked_hovered.png);
+}
+QCheckBox::indicator:checked:pressed
+{
+    image: url(../Checkbox_checked_pressed.png);
+}
+QCheckBox::indicator:unchecked:pressed
+{
+    image: url(../Checkbox_unchecked_pressed.png);
+}
+QCheckBox::indicator:checked:disabled
+{
+    image: url(../Checkbox_checked_disabled.png);
+}*/

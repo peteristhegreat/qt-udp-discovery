@@ -13,7 +13,7 @@ OverlayDialogBox::OverlayDialogBox(QWidget *parent, QDialog * dialog) :
     this->setStyleSheet("QDialog {"
                         "background: qlineargradient( x1:0.2 y1:0.4, x2:1 y2:0.5, "
                         "stop:0 deepskyblue, stop:1 darkslateblue);"
-//                        "font-size: 25px;"
+//                        "font-size: 25pt;"
                         "margin: 0px;"
                         "}"
 
@@ -27,24 +27,24 @@ OverlayDialogBox::OverlayDialogBox(QWidget *parent, QDialog * dialog) :
                         "QDialog QLabel {"
                         ""// top right bottom left
                         //"padding: 100px 20px 20px 20px;"
-                        "font-size: 18px;"
+                        "font-size: 18pt;"
                         "}"
 
                         "QDialog QPushButton {"
                         ""
-                        "font-size: 24px;"
+                        "font-size: 24pt;"
                         "}"
 
 
                         "QMessageBox QLabel {"
                         ""// top right bottom left
                         //"padding: 100px 20px 20px 20px;"
-                        "font-size: 18px;"
+                        "font-size: 18pt;"
                         "}"
 
                         "QMessageBox QPushButton {"
                         ""
-                        "font-size: 24px;"
+                        "font-size: 24pt;"
                         "}"
                         );
     // if you have buttons on this overlay you probably don't want this one

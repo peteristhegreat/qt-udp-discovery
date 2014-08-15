@@ -2,6 +2,7 @@
 #define MAINSTACK_H
 
 #include <QtWidgets/QStackedWidget>
+#include "mytime.h"
 #include "server.h"
 #include <QLineEdit>
 #include "dictionary.h"
@@ -118,6 +119,7 @@ private:
     QCheckBox * m_allowDoubleLetters;
     QComboBox * m_numLettersCombo;
     QCheckBox * m_autoMarkZeroLetterGuesses;
+    QCheckBox * m_showStatsDuringGame;
 
     QStatusBar * m_bar;
     Dictionary * m_dict;
@@ -131,7 +133,7 @@ private:
     QString m_theirSecretWord;
 
     QTimer * m_statsTimer;
-    QTime m_stopWatch;
+    MyTime m_stopWatch;
 };
 
 #endif // MAINSTACK_H

@@ -46,7 +46,8 @@ SOURCES += main.cpp \
     aspectratiosvgwidget.cpp \
     globals.cpp \
     mainstack_2.cpp \
-    overlaydialogbox.cpp
+    overlaydialogbox.cpp \
+    mytime.cpp
 
 HEADERS += \
     server.h \
@@ -61,7 +62,8 @@ HEADERS += \
     slidingstackedwidget.h \
     aspectratiosvgwidget.h \
     globals.h \
-    overlaydialogbox.h
+    overlaydialogbox.h \
+    mytime.h
 
 RESOURCES += \
     qresources.qrc

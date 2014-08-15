@@ -142,7 +142,7 @@ void MainStack::init_gui()
     QWidget * w;
     QGridLayout * grid;
     QVBoxLayout * vbox;
-    QVBoxLayout * group_vbox;
+    QBoxLayout * group_vbox;
     QPushButton * btn;
     QGroupBox * group;
 //    QTextEdit * txt;
@@ -175,7 +175,7 @@ void MainStack::init_gui()
 
     group = new QGroupBox("WiFi Game");
 
-    group_vbox = new QVBoxLayout;
+    group_vbox = new QHBoxLayout;
 
     btn = new QPushButton("Create Game");
     QObject::connect(btn, SIGNAL(clicked()), this, SLOT(on_createGame()));
@@ -189,14 +189,17 @@ void MainStack::init_gui()
 
     vbox->addWidget(group);
 
+    hbox = new QHBoxLayout();
+
     btn = new QPushButton("Help");
     QObject::connect(btn, SIGNAL(clicked()), this, SLOT(on_helpButton()));
-    vbox->addWidget(btn);
+    hbox->addWidget(btn);
 
     btn = new QPushButton("Settings");
     QObject::connect(btn, SIGNAL(clicked()), this, SLOT(on_settingsButton()));
-    vbox->addWidget(btn);
+    hbox->addWidget(btn);
 
+    vbox->addLayout(hbox);
     vbox->addStretch();
 
     hbox = new QHBoxLayout;
@@ -208,7 +211,7 @@ void MainStack::init_gui()
 
     bar = new QStatusBar;
     grid->addWidget(bar, grid->rowCount(), 0, 1, grid->columnCount());
-    bar->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Minimum);
+//    bar->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Minimum);
     QObject::connect(m_server, SIGNAL(msg(QString)),bar, SLOT(showMessage(QString)));
 
 
