@@ -33,6 +33,9 @@ public:
         }
         return false;
     }
+    void createShuffledListOfAvailableWords();
+    void loadListOfAvaiableWords();
+    void saveCurrentIndexForList();
 
 signals:
     void ready();	

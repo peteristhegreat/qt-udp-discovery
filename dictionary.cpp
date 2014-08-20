@@ -116,3 +116,20 @@ void Dictionary::init()
     
     emit ready();
 }
+
+void createShuffledListOfAvailableWords()
+{
+    // From the dictionary and the current settings, create a list of all possible words
+
+    // shuffle the list and save it to memory
+}
+
+void loadListOfAvaiableWords()
+{
+    // open the current filename that matches the settings in use
+}
+
+void saveCurrentIndexForList()
+{
+    // save the line number of the current list in use
+}
