@@ -6,6 +6,7 @@
 #include <QDebug>
 #include <QApplication>
 #include <QStringList>
+#include "shuffle.h"
 
 Dictionary::Dictionary(QObject *parent) :
     QObject(parent)
@@ -13,7 +14,10 @@ Dictionary::Dictionary(QObject *parent) :
     m_allowedWordLengths << 3 << 4 << 5 << 6 << 7 << 8;
 
     foreach(int i, m_allowedWordLengths)
+    {
         m_map[i] = new QHash < QString, int>;
+        m_listmap[i] = new QStringList;
+    }
 
     this->setWordLength(5);
 }
@@ -55,6 +59,9 @@ void Dictionary::loadFrequencyList()
             if(m_map[word.length()]->contains(word))
             {
                 (*m_map[word.length()])[word] = line.split(' ').at(0).toInt();
+
+                if(!(*m_listmap[word.length()]).contains(word))
+                    *m_listmap[word.length()] << word;
 //                if(line.split(' ').at(2) == "np0")
 //                    qDebug() << word << (*m_map[word.length()])[word];
             }
@@ -113,14 +120,102 @@ void Dictionary::init()
     qDebug() << "time?" << time.elapsed();
 
     loadFrequencyList();
-    
+
+//    {
+//    QFile dict("://dictionary1.txt");
+//    dict.open(QFile::ReadOnly);
+//    int count = 0;
+//    while(!dict.atEnd())
+//    {
+//        word = dict.readLine().trimmed();
+
+//        if(m_map.contains(word.length()))
+//        {
+//            if(!(*m_listmap[word.length()]).contains(word))
+//                (*m_listmap[word.length()]) << word;
+//        }
+//        count++;
+//        if(count == 1000)
+//            qApp->processEvents();
+//    }
+//    dict.close();
+//    qDebug() << "time?" << time.elapsed();
+//    }
+
     emit ready();
 }
 
-void createShuffledListOfAvailableWords()
+void Dictionary::createShuffledListOfAvailableWords(int wordLength, bool allowDoubleLetters, int low_frequency, int high_frequency)
 {
     // From the dictionary and the current settings, create a list of all possible words
 
+    QStringList list;
+
+    qDebug() << Q_FUNC_INFO << wordLength << allowDoubleLetters << low_frequency << high_frequency;
+
+    QHash<QString, int>::const_iterator iter = m_map[wordLength]->constBegin();
+    while (iter != m_map[wordLength]->constEnd())
+    {
+        if(iter.value() >= low_frequency && iter.value() <= high_frequency)
+        {
+            if(allowDoubleLetters || !Dictionary::hasDoubleLetters(iter.key()))
+                list << iter.key() + QString::number(iter.value());
+        }
+        iter++;
+    }
+
+//    qsrand( QDateTime::currentMSecsSinceEpoch());
+
+//    qDebug() << "ordered" << list;
+    if(list.length() > 0)
+        list = shuffle(list);
+//    qDebug() << list.size();
+
+//    qDebug() << *m_listmap[wordLength] << (*m_listmap[wordLength]).size();
+
+    foreach(int numOfLetters, m_allowedWordLengths)
+    {
+        {
+            // write data
+            QFile fileOut(QString::number(numOfLetters) + "freq.txt");
+            if (fileOut.open(QFile::WriteOnly | QFile::Text)) {
+                QTextStream out(&fileOut);
+                out << (*m_listmap[numOfLetters]).size() << '\n';
+                for (int i = 0; i < (*m_listmap[numOfLetters]).size(); ++i)
+                    out << (*m_listmap[numOfLetters]).at(i) << '\n';
+            } else {
+                std::cerr << "error opening output file\n";
+                //      return EXIT_FAILURE;
+            }
+            fileOut.close();
+        }
+        (*m_listmap[numOfLetters]).sort(Qt::CaseInsensitive);
+
+        QFile fileOut(QString::number(numOfLetters) + "alpha.txt");
+        if (fileOut.open(QFile::WriteOnly | QFile::Text)) {
+            QTextStream out(&fileOut);
+            out << (*m_listmap[numOfLetters]).size() << '\n';
+            for (int i = 0; i < (*m_listmap[numOfLetters]).size(); ++i)
+                out << (*m_listmap[numOfLetters]).at(i) << '\n';
+        } else {
+            std::cerr << "error opening output file\n";
+            //      return EXIT_FAILURE;
+        }
+        fileOut.close();
+
+    }
+
+    // read data
+//    QStringList list;
+//    QFile fileIn(QString::number(numOfLetters) + "freq.txt");
+//    if (fileIn.open(QFile::ReadOnly | QFile::Text)) {
+//        QTextStream in(&fileIn);
+//        while (!in.atEnd())
+//            list += in.readLine();
+//    } else {
+//        std::cerr << "error opening output file\n";
+//        //      return EXIT_FAILURE;
+//    }
     // shuffle the list and save it to memory
 }
 

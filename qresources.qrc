@@ -9,5 +9,30 @@
         <file>checked.png</file>
         <file>unchecked.png</file>
         <file>slider_handle.png</file>
+        <file>dictionary2.txt</file>
+        <file>spoken/3alpha.txt</file>
+        <file>spoken/3freq.txt</file>
+        <file>spoken/4alpha.txt</file>
+        <file>spoken/4freq.txt</file>
+        <file>spoken/5alpha.txt</file>
+        <file>spoken/5freq.txt</file>
+        <file>spoken/6alpha.txt</file>
+        <file>spoken/6freq.txt</file>
+        <file>spoken/7alpha.txt</file>
+        <file>spoken/7freq.txt</file>
+        <file>spoken/8alpha.txt</file>
+        <file>spoken/8freq.txt</file>
+        <file>scabble/3alpha.txt</file>
+        <file>scabble/3freq.txt</file>
+        <file>scabble/4alpha.txt</file>
+        <file>scabble/4freq.txt</file>
+        <file>scabble/5alpha.txt</file>
+        <file>scabble/5freq.txt</file>
+        <file>scabble/6alpha.txt</file>
+        <file>scabble/6freq.txt</file>
+        <file>scabble/7alpha.txt</file>
+        <file>scabble/7freq.txt</file>
+        <file>scabble/8alpha.txt</file>
+        <file>scabble/8freq.txt</file>
     </qresource>
 </RCC>

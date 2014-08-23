@@ -43,3 +43,13 @@ QString shuffle(QString str)
     }
     return str;
 }
+
+QStringList shuffle(QStringList str)
+{
+    for( int i = str.count() - 1 ; i > 0 ; --i )
+    {
+        int random = qrand() % str.count();
+        qSwap(str[i],str[random]);
+    }
+    return str;
+}

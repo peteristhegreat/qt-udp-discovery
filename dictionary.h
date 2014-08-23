@@ -33,7 +33,7 @@ public:
         }
         return false;
     }
-    void createShuffledListOfAvailableWords();
+    void createShuffledListOfAvailableWords(int wordLength = 5, bool allowDoubleLetters = true, int low_frequency = 5, int high_frequency = 167640);
     void loadListOfAvaiableWords();
     void saveCurrentIndexForList();
 
@@ -48,6 +48,7 @@ private:
     QList <int> m_allowedWordLengths;
     int m_wordLength;
     QMap < int, QHash <QString, int> *> m_map;
+    QMap < int, QStringList *> m_listmap;
 //    QHash <QString, int> six_letter_words;
 //    QHash <QString, int> five_letter_words;
 };

@@ -311,20 +311,28 @@ if(this->width() < 500 || this->height() < 500)
         qDebug() << "  Virtual size:" << screen->virtualSize().width() << "x" << screen->virtualSize().height();
 
 
+    int diagonal_squared_mm = screen->physicalSize().width()*screen->physicalSize().width() + screen->physicalSize().height()*screen->physicalSize().height();
+    int dpi = screen->logicalDotsPerInch();
     // Is the diagonal of the screen less than 6 inches?
-    if(screen->physicalSize().width()*screen->physicalSize().width() + screen->physicalSize().height()*screen->physicalSize().height() < 915)
+    if(diagonal_squared_mm < (6*2.54)*(6*2.54))
     {
         // Treat it like an iphone or an LG or Samsung phone
+        qDebug() << "Smaller than 6\" on diagonal";
         m_dpiFactor = 1;
     }
     else
     {
         // Treat it like an iPad or an iPad mini
 
-        // Scale most things up by 2
+        // Scale most things up by 2, so it is easier
+        // to click with a finger instead of a thumb
+        qDebug() << "Larger than 6\" on diagonal";
         m_dpiFactor = 2;
     }
-    emit updateSize(m_dpiFactor*m_dpiFactor);
+    m_dpiFactor *= (qreal)dpi/96;
+    qDebug() << "End dpi factor:" << m_dpiFactor;
+    emit updateSize(m_dpiFactor);
+    this->on_updateSize(m_dpiFactor);
     this->readSettings();
 
     this->currentWidget()->adjustSize();
@@ -339,6 +347,8 @@ void MainStack::on_finishedLoading()
     {
         btn->setDisabled(false);
     }
+
+    m_dict->createShuffledListOfAvailableWords(3,true,0);
 }
 
 void MainStack::on_refreshStyleSheet()
@@ -1385,8 +1395,17 @@ QWidget * MainStack::currentWidget()
 
 void MainStack::on_updateSize(qreal factor)
 {
-    foreach(QTextEdit * textEdit, this->findChildren<QTextEdit *>())
+    static bool firstRun = true;
+    Q_UNUSED(factor);
+//    QScreen *screen = QGuiApplication::screens().first();
+    if(firstRun)
     {
-//        textEdit->setMaximumWidth(qApp->screens().first()->phys*factor);
+        foreach(QTextEdit * textEdit, this->findChildren<QTextEdit *>())
+        {
+            //        qDebug() << "factor" << factor << this->width();
+            //        textEdit->setMinimumWidth(screen->availableSize().width()*2/3);
+            textEdit->setMaximumWidth(textEdit->maximumWidth()*m_dpiFactor);
+        }
+        firstRun = false;
     }
 }
