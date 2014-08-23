@@ -18,7 +18,6 @@ LetterButton::LetterButton(QChar c, QWidget *parent) :
 //    this->on_reset();
     this->setFrameStyle(QFrame::Box);
     this->setAutoFillBackground(true);
-    this->setMinimumWidth(30);
     this->setFrameShadow(QFrame::Plain);
     m_state = -1;
 //    this->setFlat(true);
@@ -80,3 +79,11 @@ void LetterButton::on_reset()
     updateColors();
 }
 
+void LetterButton::updateSize(qreal factor)
+{
+    this->setMinimumWidth(30*factor);
+    this->setMinimumHeight(30*factor);
+    QFont f = this->font();
+    f.setPointSize(12*factor);
+    this->setFont(f);
+}

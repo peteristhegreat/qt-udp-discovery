@@ -19,6 +19,7 @@
 #include <QFocusEvent>
 #include <QTimer>
 #include <QTime>
+#include <QScreen>
 
 class LineEdit : public QLineEdit
 {
@@ -70,7 +71,9 @@ signals:
     void resetLetters();
     void appendToYours(QString);
     void appendToTheirs(QString);
+    void updateSize(qreal factor);
 public slots:
+    void on_updateSize(qreal);
     void updateStats();
     void on_appendToTxtEdit(QString);
     void showEvent(QShowEvent *);
@@ -134,6 +137,8 @@ private:
 
     QTimer * m_statsTimer;
     MyTime m_stopWatch;
+
+    int m_dpiFactor;
 };
 
 #endif // MAINSTACK_H

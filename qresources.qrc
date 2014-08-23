@@ -8,5 +8,6 @@
         <file>jotto-logo.svg</file>
         <file>checked.png</file>
         <file>unchecked.png</file>
+        <file>slider_handle.png</file>
     </qresource>
 </RCC>

@@ -33,6 +33,7 @@ public slots:
 //    void setFont(QFont);
     void on_clicked();
     void on_reset();
+    void updateSize(qreal factor);
 private:
     bool m_down;
     int m_state;

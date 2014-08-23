@@ -12,9 +12,11 @@ QPushButton {
 
 QSlider::handle:vertical {
     height: 50px;
+    width: 50px;
     padding: 25px;
     background: white;
     margin: 0 -25px; /* expand outside the groove */
+    image: url(:/slider_handle.png);
 }
 
  QPushButton:pressed {

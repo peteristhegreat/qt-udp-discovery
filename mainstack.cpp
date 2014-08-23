@@ -32,14 +32,33 @@
 #include <QVBoxLayout>
 #include <QFormLayout>
 #include <QStackedLayout>
+#include <QGuiApplication>
+#include <QScreen>
+#include <QDebug>
 
+// Helper function to return display orientation as a string.
+QString Orientation(Qt::ScreenOrientation orientation)
+{
+    switch (orientation) {
+        case Qt::PrimaryOrientation           : return "Primary";
+        case Qt::LandscapeOrientation         : return "Landscape";
+        case Qt::PortraitOrientation          : return "Portrait";
+        case Qt::InvertedLandscapeOrientation : return "Inverted landscape";
+        case Qt::InvertedPortraitOrientation  : return "Inverted portrait";
+        default                               : return "Unknown";
+    }
+}
 
 MainStack::MainStack(QWidget *parent) :
     SlidingStackedWidget(parent)
 {
+    m_dpiFactor = 1;
     qDebug() << "DPI - Logical:" << this->logicalDpiX() << this->logicalDpiY()
              << "Physical:" << this->physicalDpiX() << this->physicalDpiY()
              << "MM:" << this->widthMM() << this->heightMM();
+
+//    QSettings s;
+//    s.setValue("text_edit_font_size", 26);// 100 to 360
 
     QString computerType;
     switch(this->logicalDpiX())
@@ -187,6 +206,8 @@ MainStack::MainStack(QWidget *parent) :
     m_statsTimer = new QTimer;
     m_statsTimer->setInterval(1000);
     QObject::connect(m_statsTimer, SIGNAL(timeout()), this, SLOT(updateStats()));
+
+
 }
 
 
@@ -210,6 +231,10 @@ if(this->width() < 500 || this->height() < 500)
 #else
     if(false)
 #endif
+//    if(true)
+//#else
+//    if(false)
+//#endif
     {
         // we are an iphone!
 
@@ -242,6 +267,11 @@ if(this->width() < 500 || this->height() < 500)
         this->setStyleSheet(this->styleSheet() +
                             "QFrame {padding: 10px;}"
                             "QTextEdit {padding: 0px;}"
+                            "LetterButton {"
+                                    "padding: 8px 4px;"
+                                    "margin: 4px 0px;"
+        //                            "border-radius: 3px;"
+                                    "}"
                     );
     }
     this->ensurePolished();
@@ -253,6 +283,49 @@ if(this->width() < 500 || this->height() < 500)
 //    m_overlay->startAnimation();
 //    m_overlay->show();
 //    m_overlay->raise();
+
+
+
+// if
+
+    QScreen *screen = QGuiApplication::screens().first();
+        qDebug() << "Information for screen:" << screen->name();
+        qDebug() << "  Available geometry:" << screen->availableGeometry().x() << screen->availableGeometry().y() << screen->availableGeometry().width() << "x" << screen->availableGeometry().height();
+        qDebug() << "  Available size:" << screen->availableSize().width() << "x" << screen->availableSize().height();
+        qDebug() << "  Available virtual geometry:" << screen->availableVirtualGeometry().x() << screen->availableVirtualGeometry().y() << screen->availableVirtualGeometry().width() << "x" << screen->availableVirtualGeometry().height();
+        qDebug() << "  Available virtual size:" << screen->availableVirtualSize().width() << "x" << screen->availableVirtualSize().height();
+        qDebug() << "  Depth:" << screen->depth() << "bits";
+        qDebug() << "  Geometry:" << screen->geometry().x() << screen->geometry().y() << screen->geometry().width() << "x" << screen->geometry().height();
+        qDebug() << "  Logical DPI:" << screen->logicalDotsPerInch();
+        qDebug() << "  Logical DPI X:" << screen->logicalDotsPerInchX();
+        qDebug() << "  Logical DPI Y:" << screen->logicalDotsPerInchY();
+        qDebug() << "  Orientation:" << Orientation(screen->orientation());
+        qDebug() << "  Physical DPI:" << screen->physicalDotsPerInch();
+        qDebug() << "  Physical DPI X:" << screen->physicalDotsPerInchX();
+        qDebug() << "  Physical DPI Y:" << screen->physicalDotsPerInchY();
+        qDebug() << "  Physical size:" << screen->physicalSize().width() << "x" << screen->physicalSize().height() << "mm";
+        qDebug() << "  Primary orientation:" << Orientation(screen->primaryOrientation());
+        qDebug() << "  Refresh rate:" << screen->refreshRate() << "Hz";
+        qDebug() << "  Size:" << screen->size().width() << "x" << screen->size().height();
+        qDebug() << "  Virtual geometry:" << screen->virtualGeometry().x() << screen->virtualGeometry().y() << screen->virtualGeometry().width() << "x" << screen->virtualGeometry().height();
+        qDebug() << "  Virtual size:" << screen->virtualSize().width() << "x" << screen->virtualSize().height();
+
+
+    // Is the diagonal of the screen less than 6 inches?
+    if(screen->physicalSize().width()*screen->physicalSize().width() + screen->physicalSize().height()*screen->physicalSize().height() < 915)
+    {
+        // Treat it like an iphone or an LG or Samsung phone
+        m_dpiFactor = 1;
+    }
+    else
+    {
+        // Treat it like an iPad or an iPad mini
+
+        // Scale most things up by 2
+        m_dpiFactor = 2;
+    }
+    emit updateSize(m_dpiFactor*m_dpiFactor);
+    this->readSettings();
 
     this->currentWidget()->adjustSize();
 }
@@ -351,6 +424,40 @@ void MainStack::closeEvent(QCloseEvent *)
     writeSettings();
 }
 
+
+void MainStack::on_sliderChanged(int size)
+{
+    qDebug() << "Slider" << size;
+    QSettings s;
+    s.setValue("text_edit_font_size", size);
+
+    size *= m_dpiFactor;
+    foreach(QTextEdit* txt, this->findChildren<QTextEdit*>())
+    {
+        txt->setFontPointSize((qreal)size/10.0);
+        txt->update();
+    }
+
+    foreach(Highlighter * h, this->findChildren<Highlighter *>())
+    {
+        h->setFontSize((qreal)size/10.0);
+    }
+
+    foreach(QLineEdit * lineEdit, this->findChildren<QLineEdit*>())
+    {
+        QFont f = lineEdit->font();
+        f.setPointSize(size/10);
+        lineEdit->setFont(f);
+    }
+
+    foreach(QStatusBar * statusBar, this->findChildren<QStatusBar*>())
+    {
+        QFont f = statusBar->font();
+        f.setPointSize(size/10);
+        statusBar->setFont(f);
+    }
+}
+
 void MainStack::readSettings()
 {
     QSettings s;
@@ -363,20 +470,34 @@ void MainStack::readSettings()
     m_showStatsDuringGame->setChecked(s.value("show_stats_during_game", false).toBool());
 
     int fontSize = s.value("text_edit_font_size", 260).toInt();
-    foreach(QTextEdit * txt, this->findChildren<QTextEdit*>())
-    {
-        txt->setFontPointSize(fontSize/10);
-    }
+    if(fontSize < 100) fontSize = 100;
+    else if (fontSize > 360) fontSize = 100;
+    qDebug() << "fontSize" << fontSize;
 
     foreach(QSlider* slider, this->findChildren<QSlider*>("font_size_slider"))
     {
         slider->setValue(fontSize);
     }
+    fontSize *=  m_dpiFactor;
+    foreach(QTextEdit * txt, this->findChildren<QTextEdit*>())
+    {
+        txt->setFontPointSize(fontSize/10);
+    }
+
     foreach(QLineEdit * lineEdit, this->findChildren<QLineEdit*>())
     {
         QFont f = lineEdit->font();
         f.setPointSize(fontSize/10);
         lineEdit->setFont(f);
+    }
+
+    foreach(QStatusBar * statusBar, this->findChildren<QStatusBar*>())
+    {
+        QFont f = statusBar->font();
+        f.setPointSize(fontSize/10);
+        statusBar->setFont(f);
+
+        statusBar->setSizeGripEnabled(false);
     }
 
 //    m_musicEnabled->setValue(s.value("music_volume", 10).toBool());
@@ -391,7 +512,7 @@ void MainStack::writeSettings()
     s.setValue("eph_house_rules", m_ephHouseRules->isChecked());
     s.setValue("allow_double_letters", m_allowDoubleLetters->isChecked());
     s.setValue("auto_mark_zero_letter_guesses", m_autoMarkZeroLetterGuesses->isChecked());
-    s.setValue("text_edit_font_size", this->findChild<QTextEdit*>()->fontPointSize()*10);
+//    s.setValue("text_edit_font_size", this->findChild<QTextEdit*>()->fontPointSize()*10 * 96 / this->physicalDpiX());
     s.setValue("show_stats_during_game",m_showStatsDuringGame->isChecked());
 //    qDebug() << this->findChild<QTextEdit*>()->fontPointSize()*10;
 
@@ -701,6 +822,11 @@ void MainStack::on_onePlayer()
 //        m_overlay->raise();
     }
 
+    foreach(QWidget * w, this->findChildren<QWidget *>("Stats Widget"))
+    {
+        w->setVisible(m_showStatsDuringGame->isChecked());
+    }
+
     // Pick a random word from the dictionary based on difficulty
     m_theirSecretWord = m_dict->getNewSecretWord(16, m_allowDoubleLetters->isChecked());
 
@@ -802,6 +928,16 @@ void MainStack::init_settings()
 
 
     grid->addLayout(form,1,0,1,2, Qt::AlignHCenter);
+
+    QLabel * label = new QLabel();
+    QString labelString;
+    QTextStream out(&labelString);
+    out << "DPI - Logical: " << this->logicalDpiX() << " x " << this->logicalDpiY() << "\n"
+                       << "Physical: " << this->physicalDpiX() << " x " << this->physicalDpiY() << "\n"
+                       << "MM: " << this->widthMM() << " x " << this->heightMM();
+    label->setText(labelString);
+    form->addRow(label);
+//    form->addRow(new QLabel("TEST"));
     w->setLayout(grid);
     this->addWidget(w);
 
@@ -1082,6 +1218,7 @@ void MainStack::init_board(bool is_two_player)
         LetterButton * lb = new LetterButton('A' + i);
         QObject::connect(this, SIGNAL(setTheme(QColor, QColor, int)), lb, SLOT(setTheme(QColor, QColor, int)));
         QObject::connect(this, SIGNAL(resetLetters()), lb, SLOT(on_reset()));
+        QObject::connect(this, SIGNAL(updateSize(qreal)), lb, SLOT(updateSize(qreal)));
         highlighter->connectToLetterButton(lb);
         flow->addWidget(lb);
     }
@@ -1235,36 +1372,6 @@ void MainStack::on_randomGuess()
     sendData();
 }
 
-void MainStack::on_sliderChanged(int size)
-{
-    foreach(QTextEdit* txt, this->findChildren<QTextEdit*>())
-    {
-        txt->setFontPointSize((qreal)size/10.0);
-        txt->update();
-    }
-
-    foreach(Highlighter * h, this->findChildren<Highlighter *>())
-    {
-        h->setFontSize((qreal)size/10.0);
-    }
-
-    foreach(QLineEdit * lineEdit, this->findChildren<QLineEdit*>())
-    {
-        QFont f = lineEdit->font();
-        f.setPointSize(size/10);
-        lineEdit->setFont(f);
-    }
-
-    foreach(QStatusBar * statusBar, this->findChildren<QStatusBar*>())
-    {
-        QFont f = statusBar->font();
-        f.setPointSize(size/10);
-        statusBar->setFont(f);
-
-        statusBar->setSizeGripEnabled(false);
-    }
-}
-
 void MainStack::setCurrentWidget(QWidget * w)
 {
     this->slideInIdx(this->indexOf(w));
@@ -1274,4 +1381,12 @@ void MainStack::setCurrentWidget(QWidget * w)
 QWidget * MainStack::currentWidget()
 {
     return m_currWidget;
+}
+
+void MainStack::on_updateSize(qreal factor)
+{
+    foreach(QTextEdit * textEdit, this->findChildren<QTextEdit *>())
+    {
+//        textEdit->setMaximumWidth(qApp->screens().first()->phys*factor);
+    }
 }
