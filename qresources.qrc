@@ -58,5 +58,7 @@
         <file>spoken/7freq_NDL.txt</file>
         <file>spoken/8alpha_NDL.txt</file>
         <file>spoken/8freq_NDL.txt</file>
+        <file>question.png</file>
+        <file>settings.png</file>
     </qresource>
 </RCC>

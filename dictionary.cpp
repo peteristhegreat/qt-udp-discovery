@@ -92,7 +92,7 @@ void Dictionary::loadFrequencyList(int numOfLetters, bool allowDoubleLetters)
 
 void Dictionary::addToOldSecretWords(QString word)
 {
-    (*m_listmap[m_wordLength]).removeAt(i);
+    (*m_listmap[m_wordLength]).removeOne(word);
 
     // write data
     QFile fileOut(documentsPath + QString::number(word.length()) + "oldSecretWords.txt");

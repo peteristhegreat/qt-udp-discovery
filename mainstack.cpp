@@ -207,7 +207,7 @@ MainStack::MainStack(QWidget *parent) :
     m_statsTimer->setInterval(1000);
     QObject::connect(m_statsTimer, SIGNAL(timeout()), this, SLOT(updateStats()));
 
-
+    m_prevPage = m_mainMenu;
 }
 
 
@@ -842,7 +842,7 @@ void MainStack::on_onePlayer()
 
     // Pick a random word from the dictionary based on difficulty
 //    m_theirSecretWord = m_dict->getNewSecretWord(16, m_allowDoubleLetters->isChecked());
-    m_theirSecretWord = m_dict->getNewSecretWord(0,25, true);
+    m_theirSecretWord = m_dict->getNewSecretWord(0,25);
 
     this->setCurrentWidget(m_onePlayerBoard);// one player board
 
@@ -866,6 +866,14 @@ void MainStack::on_onePlayer()
 
 void MainStack::on_settingsButton()
 {
+    m_prevPage = this->currentWidget();
+
+    foreach(QWidget * w, m_settingsPage->findChildren<QWidget*>())
+    {
+        if(w->objectName() != "Back")
+            w->setEnabled(m_prevPage == m_mainMenu);
+    }
+
     this->setCurrentWidget(m_settingsPage);
 }
 
@@ -881,6 +889,7 @@ void MainStack::init_settings()
 
     QPushButton * btn;
     btn = new QPushButton("Back");
+    btn->setObjectName("Back");
 
     QObject::connect(btn, SIGNAL(clicked()), this, SLOT(on_backButton()));
     grid->addWidget(btn, 0, 0, Qt::AlignLeft);
@@ -964,8 +973,17 @@ void MainStack::init_settings()
 
 void MainStack::on_backButton()
 {
+    bool reloadFreqList = false;
+    if(this->currentWidget() ==  m_settingsPage)
+        reloadFreqList = true;
     qDebug() << Q_FUNC_INFO;
-    this->setCurrentWidget(m_mainMenu);
+    this->setCurrentWidget(m_prevPage);
+
+    if(reloadFreqList)
+    {
+        m_dict->setWordLength(m_numLettersCombo->currentText().toInt());
+        m_dict->loadFrequencyList(m_dict->wordLength(), m_allowDoubleLetters->isChecked());
+    }
 }
 
 void MainStack::init_helpPage()
@@ -977,6 +995,7 @@ void MainStack::init_helpPage()
 
     QPushButton * btn;
     btn = new QPushButton("Back");
+    btn->setObjectName("Back");
     QObject::connect(btn, SIGNAL(clicked()), this, SLOT(on_backButton()));
     grid->addWidget(btn,0,0,
                     Qt::AlignLeft);
@@ -1002,6 +1021,7 @@ void MainStack::init_helpPage()
 void MainStack::on_helpButton()
 {
    qDebug() << Q_FUNC_INFO;
+   m_prevPage = this->currentWidget();
    this->setCurrentWidget(m_helpPage);
 }
 
@@ -1182,6 +1202,18 @@ void MainStack::init_board(bool is_two_player)
     vboxSlider->addWidget(slider);
     vboxSlider->addWidget(new QLabel("a"));
 
+    button = new QPushButton();
+    button->setIcon(QIcon("://settings.png"));
+    button->setStyleSheet("padding: 10px;");
+    QObject::connect(button, SIGNAL(clicked()), this, SLOT(on_settingsButton()));
+    vboxSlider->addWidget(button);
+
+    button = new QPushButton("?");
+//    button->setIcon(QIcon("://question.png"));
+
+    button->setStyleSheet("padding: 10px;");
+    QObject::connect(button, SIGNAL(clicked()), this, SLOT(on_helpButton()));
+    vboxSlider->addWidget(button);
 
     hbox->addLayout(vboxSlider);
     hbox->addStretch();
@@ -1382,7 +1414,7 @@ void MainStack::addKineticScrolling(QWidget * w)
 void MainStack::on_randomGuess()
 {
     QLineEdit * lineEdit = this->currentWidget()->findChild<QLineEdit*>();
-    QString guess = m_dict->getNewSecretWord(0,75, m_allowDoubleLetters->isChecked());
+    QString guess = m_dict->getNewSecretWord(0,75);
     lineEdit->setText(guess);
     sendData();
 }
