@@ -1,0 +1,18 @@
+Spoken Word double letter summary:
+
+"3" had 682 and is now 601  -  11.9 DL fraction of total
+"4" had 1926 and is now 1547  -  19.7 DL fraction of total
+"5" had 3022 and is now 1998  -  33.9 DL fraction of total
+"6" had 3886 and is now 1892  -  51.3 DL fraction of total
+"7" had 4199 and is now 1376  -  67.2 DL fraction of total
+"8" had 3540 and is now 720  -  79.7 DL fraction of total
+
+Scrabble Word double letter summary:
+
+"3" had 970 and is now 870  -  10.3 DL fraction of total
+"4" had 3865 and is now 3080  -  20.3 DL fraction of total
+"5" had 8556 and is now 5626  -  34.2 DL fraction of total
+"6" had 15067 and is now 7187  -  52.3 DL fraction of total
+"7" had 22834 and is now 7558  -  66.9 DL fraction of total
+"8" had 28014 and is now 5754  -  79.5 DL fraction of total
+

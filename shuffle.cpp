@@ -31,7 +31,7 @@ QString shuffle(QString str)
 //    strList << "first" << "second" << "third" << "fourth" << "fifth" << "sixth";
 //    qDebug() << strList;
 
-    qsrand( QDateTime::currentMSecsSinceEpoch());//QTime(0,0,0).secsTo(QTime::currentTime()) );
+//    qsrand( QDateTime::currentMSecsSinceEpoch());//QTime(0,0,0).secsTo(QTime::currentTime()) );
 
     for( int i = str.count() - 1 ; i > 0 ; --i )
     {
@@ -40,6 +40,16 @@ QString shuffle(QString str)
         QChar c = str.at(i);
         str[i] = str.at(random);
         str[random] = c;
+    }
+    return str;
+}
+
+QStringList shuffle(QStringList str)
+{
+    for( int i = str.count() - 1 ; i > 0 ; --i )
+    {
+        int random = qrand() % str.count();
+        qSwap(str[i],str[random]);
     }
     return str;
 }

@@ -207,7 +207,7 @@ MainStack::MainStack(QWidget *parent) :
     m_statsTimer->setInterval(1000);
     QObject::connect(m_statsTimer, SIGNAL(timeout()), this, SLOT(updateStats()));
 
-
+    m_prevPage = m_mainMenu;
 }
 
 
@@ -311,20 +311,28 @@ if(this->width() < 500 || this->height() < 500)
         qDebug() << "  Virtual size:" << screen->virtualSize().width() << "x" << screen->virtualSize().height();
 
 
+    int diagonal_squared_mm = screen->physicalSize().width()*screen->physicalSize().width() + screen->physicalSize().height()*screen->physicalSize().height();
+    int dpi = screen->logicalDotsPerInch();
     // Is the diagonal of the screen less than 6 inches?
-    if(screen->physicalSize().width()*screen->physicalSize().width() + screen->physicalSize().height()*screen->physicalSize().height() < 915)
+    if(diagonal_squared_mm < (6*2.54)*(6*2.54))
     {
         // Treat it like an iphone or an LG or Samsung phone
+        qDebug() << "Smaller than 6\" on diagonal";
         m_dpiFactor = 1;
     }
     else
     {
         // Treat it like an iPad or an iPad mini
 
-        // Scale most things up by 2
+        // Scale most things up by 2, so it is easier
+        // to click with a finger instead of a thumb
+        qDebug() << "Larger than 6\" on diagonal";
         m_dpiFactor = 2;
     }
-    emit updateSize(m_dpiFactor*m_dpiFactor);
+    m_dpiFactor *= (qreal)dpi/96;
+    qDebug() << "End dpi factor:" << m_dpiFactor;
+    emit updateSize(m_dpiFactor);
+    this->on_updateSize(m_dpiFactor);
     this->readSettings();
 
     this->currentWidget()->adjustSize();
@@ -333,12 +341,16 @@ if(this->width() < 500 || this->height() < 500)
 void MainStack::on_finishedLoading()
 {
     qDebug() << this->geometry();
+
+    m_dict->loadFrequencyList(m_dict->wordLength(), m_allowDoubleLetters->isChecked());
     QStatusBar * bar = this->currentWidget()->findChild<QStatusBar*>();
     bar->showMessage("Ready to go!");
     foreach(QPushButton * btn, this->currentWidget()->findChildren<QPushButton*>())
     {
         btn->setDisabled(false);
     }
+
+//    m_dict->createShuffledListOfAvailableWords(3,true,0);
 }
 
 void MainStack::on_refreshStyleSheet()
@@ -642,6 +654,7 @@ void MainStack::sendData()
 
         if(word == m_theirSecretWord)
         {
+            m_dict->addToOldSecretWords(m_theirSecretWord);
             m_stopWatch.pause();
             updateStats();
             // Game Over, you win!
@@ -828,7 +841,8 @@ void MainStack::on_onePlayer()
     }
 
     // Pick a random word from the dictionary based on difficulty
-    m_theirSecretWord = m_dict->getNewSecretWord(16, m_allowDoubleLetters->isChecked());
+//    m_theirSecretWord = m_dict->getNewSecretWord(16, m_allowDoubleLetters->isChecked());
+    m_theirSecretWord = m_dict->getNewSecretWord(0,25);
 
     this->setCurrentWidget(m_onePlayerBoard);// one player board
 
@@ -852,6 +866,14 @@ void MainStack::on_onePlayer()
 
 void MainStack::on_settingsButton()
 {
+    m_prevPage = this->currentWidget();
+
+    foreach(QWidget * w, m_settingsPage->findChildren<QWidget*>())
+    {
+        if(w->objectName() != "Back")
+            w->setEnabled(m_prevPage == m_mainMenu);
+    }
+
     this->setCurrentWidget(m_settingsPage);
 }
 
@@ -867,6 +889,7 @@ void MainStack::init_settings()
 
     QPushButton * btn;
     btn = new QPushButton("Back");
+    btn->setObjectName("Back");
 
     QObject::connect(btn, SIGNAL(clicked()), this, SLOT(on_backButton()));
     grid->addWidget(btn, 0, 0, Qt::AlignLeft);
@@ -950,8 +973,17 @@ void MainStack::init_settings()
 
 void MainStack::on_backButton()
 {
+    bool reloadFreqList = false;
+    if(this->currentWidget() ==  m_settingsPage)
+        reloadFreqList = true;
     qDebug() << Q_FUNC_INFO;
-    this->setCurrentWidget(m_mainMenu);
+    this->setCurrentWidget(m_prevPage);
+
+    if(reloadFreqList)
+    {
+        m_dict->setWordLength(m_numLettersCombo->currentText().toInt());
+        m_dict->loadFrequencyList(m_dict->wordLength(), m_allowDoubleLetters->isChecked());
+    }
 }
 
 void MainStack::init_helpPage()
@@ -963,6 +995,7 @@ void MainStack::init_helpPage()
 
     QPushButton * btn;
     btn = new QPushButton("Back");
+    btn->setObjectName("Back");
     QObject::connect(btn, SIGNAL(clicked()), this, SLOT(on_backButton()));
     grid->addWidget(btn,0,0,
                     Qt::AlignLeft);
@@ -988,6 +1021,7 @@ void MainStack::init_helpPage()
 void MainStack::on_helpButton()
 {
    qDebug() << Q_FUNC_INFO;
+   m_prevPage = this->currentWidget();
    this->setCurrentWidget(m_helpPage);
 }
 
@@ -1022,6 +1056,7 @@ void MainStack::on_giveUpButton()
     {
         if(btn->text() == "Give Up")
         {
+            m_dict->addToOldSecretWords(m_theirSecretWord);
             QMessageBox * msgBox = new QMessageBox();
             msgBox->setText("The secret word was:\n\n      "
                             + m_theirSecretWord
@@ -1167,6 +1202,18 @@ void MainStack::init_board(bool is_two_player)
     vboxSlider->addWidget(slider);
     vboxSlider->addWidget(new QLabel("a"));
 
+    button = new QPushButton();
+    button->setIcon(QIcon("://settings.png"));
+    button->setStyleSheet("padding: 10px;");
+    QObject::connect(button, SIGNAL(clicked()), this, SLOT(on_settingsButton()));
+    vboxSlider->addWidget(button);
+
+    button = new QPushButton("?");
+//    button->setIcon(QIcon("://question.png"));
+
+    button->setStyleSheet("padding: 10px;");
+    QObject::connect(button, SIGNAL(clicked()), this, SLOT(on_helpButton()));
+    vboxSlider->addWidget(button);
 
     hbox->addLayout(vboxSlider);
     hbox->addStretch();
@@ -1367,7 +1414,7 @@ void MainStack::addKineticScrolling(QWidget * w)
 void MainStack::on_randomGuess()
 {
     QLineEdit * lineEdit = this->currentWidget()->findChild<QLineEdit*>();
-    QString guess = m_dict->getNewSecretWord(5, m_allowDoubleLetters->isChecked());
+    QString guess = m_dict->getNewSecretWord(0,75);
     lineEdit->setText(guess);
     sendData();
 }
@@ -1385,8 +1432,17 @@ QWidget * MainStack::currentWidget()
 
 void MainStack::on_updateSize(qreal factor)
 {
-    foreach(QTextEdit * textEdit, this->findChildren<QTextEdit *>())
+    static bool firstRun = true;
+    Q_UNUSED(factor);
+//    QScreen *screen = QGuiApplication::screens().first();
+    if(firstRun)
     {
-//        textEdit->setMaximumWidth(qApp->screens().first()->phys*factor);
+        foreach(QTextEdit * textEdit, this->findChildren<QTextEdit *>())
+        {
+            //        qDebug() << "factor" << factor << this->width();
+            //        textEdit->setMinimumWidth(screen->availableSize().width()*2/3);
+            textEdit->setMaximumWidth(textEdit->maximumWidth()*m_dpiFactor);
+        }
+        firstRun = false;
     }
 }

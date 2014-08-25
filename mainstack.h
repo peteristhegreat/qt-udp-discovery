@@ -104,6 +104,7 @@ public slots:
     void writeSettings();
     void closeEvent(QCloseEvent *);
 private:
+    QWidget * m_prevPage;
     QString m_additionalStyleSheet;
 
     void addKineticScrolling(QWidget * w);
