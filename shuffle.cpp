@@ -31,7 +31,7 @@ QString shuffle(QString str)
 //    strList << "first" << "second" << "third" << "fourth" << "fifth" << "sixth";
 //    qDebug() << strList;
 
-    qsrand( QDateTime::currentMSecsSinceEpoch());//QTime(0,0,0).secsTo(QTime::currentTime()) );
+//    qsrand( QDateTime::currentMSecsSinceEpoch());//QTime(0,0,0).secsTo(QTime::currentTime()) );
 
     for( int i = str.count() - 1 ; i > 0 ; --i )
     {

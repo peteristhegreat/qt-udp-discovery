@@ -341,6 +341,8 @@ if(this->width() < 500 || this->height() < 500)
 void MainStack::on_finishedLoading()
 {
     qDebug() << this->geometry();
+
+    m_dict->loadFrequencyList(m_dict->wordLength(), m_allowDoubleLetters->isChecked());
     QStatusBar * bar = this->currentWidget()->findChild<QStatusBar*>();
     bar->showMessage("Ready to go!");
     foreach(QPushButton * btn, this->currentWidget()->findChildren<QPushButton*>())
@@ -348,7 +350,7 @@ void MainStack::on_finishedLoading()
         btn->setDisabled(false);
     }
 
-    m_dict->createShuffledListOfAvailableWords(3,true,0);
+//    m_dict->createShuffledListOfAvailableWords(3,true,0);
 }
 
 void MainStack::on_refreshStyleSheet()
@@ -652,6 +654,7 @@ void MainStack::sendData()
 
         if(word == m_theirSecretWord)
         {
+            m_dict->addToOldSecretWords(m_theirSecretWord);
             m_stopWatch.pause();
             updateStats();
             // Game Over, you win!
@@ -838,7 +841,8 @@ void MainStack::on_onePlayer()
     }
 
     // Pick a random word from the dictionary based on difficulty
-    m_theirSecretWord = m_dict->getNewSecretWord(16, m_allowDoubleLetters->isChecked());
+//    m_theirSecretWord = m_dict->getNewSecretWord(16, m_allowDoubleLetters->isChecked());
+    m_theirSecretWord = m_dict->getNewSecretWord(0,25, true);
 
     this->setCurrentWidget(m_onePlayerBoard);// one player board
 
@@ -1032,6 +1036,7 @@ void MainStack::on_giveUpButton()
     {
         if(btn->text() == "Give Up")
         {
+            m_dict->addToOldSecretWords(m_theirSecretWord);
             QMessageBox * msgBox = new QMessageBox();
             msgBox->setText("The secret word was:\n\n      "
                             + m_theirSecretWord
@@ -1377,7 +1382,7 @@ void MainStack::addKineticScrolling(QWidget * w)
 void MainStack::on_randomGuess()
 {
     QLineEdit * lineEdit = this->currentWidget()->findChild<QLineEdit*>();
-    QString guess = m_dict->getNewSecretWord(5, m_allowDoubleLetters->isChecked());
+    QString guess = m_dict->getNewSecretWord(0,75, m_allowDoubleLetters->isChecked());
     lineEdit->setText(guess);
     sendData();
 }

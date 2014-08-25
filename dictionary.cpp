@@ -11,6 +11,15 @@
 Dictionary::Dictionary(QObject *parent) :
     QObject(parent)
 {
+    documentsPath = "";
+#ifdef Q_OS_IOS
+    documentsPath = "Documents/";
+#elif Q_OS_MAC
+//    documentsPath = "Contents/Resources/";
+#endif
+
+    qsrand(QDateTime::currentMSecsSinceEpoch());
+
     m_allowedWordLengths << 3 << 4 << 5 << 6 << 7 << 8;
 
     foreach(int i, m_allowedWordLengths)
@@ -42,56 +51,89 @@ void Dictionary::setWordLength(int l)
         m_wordLength = 5;
 }
 
-void Dictionary::loadFrequencyList()
+void Dictionary::loadFrequencyList(int numOfLetters, bool allowDoubleLetters)
 {
-    QTime time;
-    time.start();
-    QString word, line;
-    QFile freq("://frequency.txt");
-    freq.open(QFile::ReadOnly);
-    int count = 0;
-    while(!freq.atEnd())
-    {
-        line =  freq.readLine();
-        word = line.split(' ').at(1);
-        if(m_map.contains(word.length()))
-        {
-            if(m_map[word.length()]->contains(word))
-            {
-                (*m_map[word.length()])[word] = line.split(' ').at(0).toInt();
+    // read data
+    QStringList list;
+    int numOfWords = 0;
+    QFile fileIn("://spoken/"+QString::number(numOfLetters) + "freq" + (allowDoubleLetters?"":"_NDL") + ".txt");
+    if (fileIn.open(QFile::ReadOnly | QFile::Text)) {
+        QTextStream in(&fileIn);
+        numOfWords = in.readLine().toInt();
 
-                if(!(*m_listmap[word.length()]).contains(word))
-                    *m_listmap[word.length()] << word;
-//                if(line.split(' ').at(2) == "np0")
-//                    qDebug() << word << (*m_map[word.length()])[word];
-            }
-        }
-
-        count++;
-        if(count == 1000)
-            qApp->processEvents();
+        while (!in.atEnd())
+            list += in.readLine();
+    } else {
+        qCritical() << "error opening output file\n";
     }
-    freq.close();
-    qDebug() << "time?" << time.elapsed();
+    fileIn.close();
+
+    // remove oldSecretWords
+    int count = 0;
+    QFile fileIn2(documentsPath + QString::number(numOfLetters) + "oldSecretWords.txt");
+    if (fileIn2.open(QFile::ReadOnly | QFile::Text)) {
+        QTextStream in(&fileIn2);
+        while (!in.atEnd())
+        {
+            QString tmp = in.readLine();
+            if(list.removeOne(tmp))
+                count++;
+        }
+    } else {
+        qCritical() << "error opening output file\n";
+    }
+    fileIn2.close();
+    qDebug() << "Removed" << count << "words from list of" << numOfWords << "words.";
+
+    // Store list as current list
+    (*m_listmap[numOfLetters]).clear();
+    (*m_listmap[numOfLetters]) = list;
 }
 
-QString Dictionary::getNewSecretWord(int difficulty, bool allowDoubleLetters)
+void Dictionary::addToOldSecretWords(QString word)
 {
-    // factor in difficulty
-    qsrand(QDateTime::currentMSecsSinceEpoch());
+    (*m_listmap[m_wordLength]).removeAt(i);
 
-    QHash<QString, int>::const_iterator iter;
-    do
-    {
-        int i = qrand() % m_map[m_wordLength]->size();
-        iter = m_map[m_wordLength]->constBegin();
-        iter += i;
-        qDebug() << "SecretWord?" << iter.key() << iter.value() ;
-        qApp->processEvents();
-    }while(iter.value() < difficulty
-           || (!allowDoubleLetters && Dictionary::hasDoubleLetters(iter.key())));
+    // write data
+    QFile fileOut(documentsPath + QString::number(word.length()) + "oldSecretWords.txt");
+    if (fileOut.open(QFile::WriteOnly | QFile::Text | QFile::Append)) {
+        QTextStream out(&fileOut);
+        out << word << '\n';
+    } else {
+        qCritical() << "error opening output file\n";
+    }
+    fileOut.close();
+}
 
-    return iter.key();
+QString Dictionary::getNewSecretWord(int lowPercent, int highPercent)
+{
+//    if(false)
+//    {
+//        // factor in difficulty
+////        qsrand(QDateTime::currentMSecsSinceEpoch());
+
+//        QHash<QString, int>::const_iterator iter;
+//        do
+//        {
+//            int i = qrand() % m_map[m_wordLength]->size();
+//            iter = m_map[m_wordLength]->constBegin();
+//            iter += i;
+//            qDebug() << "SecretWord?" << iter.key() << iter.value() ;
+//            qApp->processEvents();
+//        }while(iter.value() < difficulty
+//               || (!allowDoubleLetters && Dictionary::hasDoubleLetters(iter.key())));
+
+//        return iter.key();
+//    }
+//    else
+//    {
+        // difficulty selects 0-25%, 25-50%, 50-75%,
+    int i = qrand() %
+            ((int)(m_listmap[m_wordLength]->size()
+                   *(qreal)(highPercent - lowPercent)/100));
+    i += m_listmap[m_wordLength]->size()*((qreal) lowPercent)/100;
+    QString word = (*m_listmap[m_wordLength]).at(i);
+    return (*m_listmap[m_wordLength]).at(i);
 }
 
 void Dictionary::init()
@@ -119,7 +161,7 @@ void Dictionary::init()
     dict.close();
     qDebug() << "time?" << time.elapsed();
 
-    loadFrequencyList();
+//    loadFrequencyList();
 
 //    {
 //    QFile dict("://dictionary1.txt");
@@ -184,8 +226,8 @@ void Dictionary::createShuffledListOfAvailableWords(int wordLength, bool allowDo
                 for (int i = 0; i < (*m_listmap[numOfLetters]).size(); ++i)
                     out << (*m_listmap[numOfLetters]).at(i) << '\n';
             } else {
-                std::cerr << "error opening output file\n";
-                //      return EXIT_FAILURE;
+                qCritical() << "error opening output file\n";
+
             }
             fileOut.close();
         }
@@ -198,25 +240,12 @@ void Dictionary::createShuffledListOfAvailableWords(int wordLength, bool allowDo
             for (int i = 0; i < (*m_listmap[numOfLetters]).size(); ++i)
                 out << (*m_listmap[numOfLetters]).at(i) << '\n';
         } else {
-            std::cerr << "error opening output file\n";
-            //      return EXIT_FAILURE;
+            qCritical() << "error opening output file\n";
+
         }
         fileOut.close();
 
     }
-
-    // read data
-//    QStringList list;
-//    QFile fileIn(QString::number(numOfLetters) + "freq.txt");
-//    if (fileIn.open(QFile::ReadOnly | QFile::Text)) {
-//        QTextStream in(&fileIn);
-//        while (!in.atEnd())
-//            list += in.readLine();
-//    } else {
-//        std::cerr << "error opening output file\n";
-//        //      return EXIT_FAILURE;
-//    }
-    // shuffle the list and save it to memory
 }
 
 void loadListOfAvaiableWords()
@@ -227,4 +256,37 @@ void loadListOfAvaiableWords()
 void saveCurrentIndexForList()
 {
     // save the line number of the current list in use
+}
+
+void Dictionary::loadFrequencyList()
+{
+    QTime time;
+    time.start();
+    QString word, line;
+    QFile freq("://frequency.txt");
+    freq.open(QFile::ReadOnly);
+    int count = 0;
+    while(!freq.atEnd())
+    {
+        line =  freq.readLine();
+        word = line.split(' ').at(1);
+        if(m_map.contains(word.length()))
+        {
+            if(m_map[word.length()]->contains(word))
+            {
+                (*m_map[word.length()])[word] = line.split(' ').at(0).toInt();
+
+                if(!(*m_listmap[word.length()]).contains(word))
+                    *m_listmap[word.length()] << word;
+//                if(line.split(' ').at(2) == "np0")
+//                    qDebug() << word << (*m_map[word.length()])[word];
+            }
+        }
+
+        count++;
+        if(count == 1000)
+            qApp->processEvents();
+    }
+    freq.close();
+    qDebug() << "time?" << time.elapsed();
 }
