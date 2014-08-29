@@ -73,6 +73,7 @@ signals:
     void appendToTheirs(QString);
     void updateSize(qreal factor);
 public slots:
+    void dumpCurrentWordLists();
     void on_updateSize(qreal);
     void updateStats();
     void on_appendToTxtEdit(QString);

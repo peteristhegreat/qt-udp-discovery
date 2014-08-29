@@ -5,6 +5,8 @@
 #include <QHash>
 #include <QString>
 #include <QMap>
+#include <QFile>
+#include <QTextStream>
 
 class Dictionary : public QObject
 {
@@ -36,6 +38,39 @@ public:
     void createShuffledListOfAvailableWords(int wordLength = 5, bool allowDoubleLetters = true, int low_frequency = 5, int high_frequency = 167640);
     void loadListOfAvaiableWords();
     void saveCurrentIndexForList();
+    QString getAlphaWordList(bool allowDoubleLetters)
+    {
+        QString fileName = "://spoken/"+QString::number(this->wordLength())
+                + "alpha" + (allowDoubleLetters?"":"_NDL") + ".txt";
+//        QString desc = QString("List of words sorted alphabetically, ")
+//                + (allowDoubleLetters?"with":"without") + " double letters\nCount: ";
+        QString desc = "Count: ";
+        QFile file(fileName);
+        if (!file.open(QFile::ReadOnly | QFile::Text)) {
+            return QString("Cannot read file %1:\n%2.")
+                                 .arg(fileName)
+                                 .arg(file.errorString());
+        }
+        QTextStream in(&file);
+        return desc + in.readAll();
+    }
+
+    QString getFreqWordList(bool allowDoubleLetters)
+    {
+        QString fileName = "://spoken/"+QString::number(this->wordLength())
+                + "freq" + (allowDoubleLetters?"":"_NDL") + ".txt";
+//        QString desc = QString("List of words sorted by frequency (Britian spoken), ")
+//                + (allowDoubleLetters?"with":"without") + " double letters\nCount: ";
+        QString desc = "Count: ";
+        QFile file(fileName);
+        if (!file.open(QFile::ReadOnly | QFile::Text)) {
+            return QString("Cannot read file %1:\n%2.")
+                                 .arg(fileName)
+                                 .arg(file.errorString());
+        }
+        QTextStream in(&file);
+        return desc + in.readAll();
+    }
 
 signals:
     void ready();	

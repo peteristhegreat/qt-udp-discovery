@@ -191,9 +191,9 @@ MainStack::MainStack(QWidget *parent) :
     QObject::connect(t, SIGNAL(timeout()), m_dict, SLOT(init()));
     t->start(500);
 
-    foreach(QTextEdit * textEdit, this->findChildren<QTextEdit*>())
+    foreach(QTextEdit * txt, this->findChildren<QTextEdit*>())
     {
-        textEdit->setTextInteractionFlags(Qt::NoTextInteraction);
+        txt->setTextInteractionFlags(Qt::NoTextInteraction);
     }
 
     foreach(QStatusBar * statusBar, this->findChildren<QStatusBar*>())
@@ -983,6 +983,10 @@ void MainStack::on_backButton()
     {
         m_dict->setWordLength(m_numLettersCombo->currentText().toInt());
         m_dict->loadFrequencyList(m_dict->wordLength(), m_allowDoubleLetters->isChecked());
+        foreach(QTextEdit * txt, m_helpPage->findChildren<QTextEdit *>())
+        {
+            txt->clear();
+        }
     }
 }
 
@@ -1001,6 +1005,8 @@ void MainStack::init_helpPage()
                     Qt::AlignLeft);
 //                    Qt::AlignHCenter);
 
+    QTabWidget * tabs = new QTabWidget;
+    tabs->setTabPosition(QTabWidget::South);
     QString helpText =
             "Welcome to Jotto!\n\n"
             "You play by trying to guess the secret word. "
@@ -1010,9 +1016,28 @@ void MainStack::init_helpPage()
     QLabel * label = new QLabel(helpText);
     label->setWordWrap(true);
     label->setFixedWidth(300);
-    grid->addWidget(label, grid->rowCount(), 0, Qt::AlignHCenter);
-//    grid->add
+//    grid->addWidget(label, grid->rowCount(), 0, Qt::AlignHCenter);
 
+    tabs->addTab(label,"Instructions");
+
+    QTextEdit * txt;
+    txt = new QTextEdit;
+    txt->setReadOnly(true);
+    addKineticScrolling(txt);
+    txt->setObjectName("A-Z Words");
+    tabs->addTab(txt, txt->objectName());
+
+    txt = new QTextEdit;
+    txt->setReadOnly(true);
+    addKineticScrolling(txt);
+    txt->setObjectName("Freq Words");
+    tabs->addTab(txt, txt->objectName());
+
+    label = new QLabel();
+    label->setObjectName("help sub title");
+    grid->addWidget(label, grid->rowCount(), 0);
+
+    grid->addWidget(tabs, grid->rowCount(), 0);//, Qt::AlignCenter);
     w->setLayout(grid);
     this->addWidget(w);
     m_helpPage = w;
@@ -1023,6 +1048,49 @@ void MainStack::on_helpButton()
    qDebug() << Q_FUNC_INFO;
    m_prevPage = this->currentWidget();
    this->setCurrentWidget(m_helpPage);
+
+   QTextEdit * txt = m_helpPage->findChild<QTextEdit *>();
+   if(txt && txt->document()->lineCount() < 2)
+   {
+       QTimer * t = new QTimer;
+       t->setSingleShot(true);
+       QObject::connect(t, SIGNAL(timeout()), this, SLOT(dumpCurrentWordLists()));
+       t->start(200);
+   }
+}
+
+void MainStack::dumpCurrentWordLists()
+{
+    QLabel * label;
+    label = m_helpPage->findChild<QLabel *>("help sub title");
+    label->setText(m_numLettersCombo->currentText() + " letter words, " +
+                   (m_allowDoubleLetters->isChecked()? "with": "without")
+                   + " double letters");
+
+    QTextEdit * txt;
+    txt = m_helpPage->findChild<QTextEdit *>("A-Z Words");
+    if(txt)
+    {
+        txt->setPlainText(m_dict->getAlphaWordList(m_allowDoubleLetters->isChecked()));
+        txt->selectAll();
+        txt->setAlignment(Qt::AlignCenter);
+        QTextCursor tc = txt->textCursor();
+        tc.clearSelection();
+        tc.setPosition(0);
+        txt->setTextCursor(tc);
+    }
+
+    txt = m_helpPage->findChild<QTextEdit *>("Freq Words");
+    if(txt)
+    {
+        txt->setPlainText(m_dict->getFreqWordList(m_allowDoubleLetters->isChecked()));
+        txt->selectAll();
+        txt->setAlignment(Qt::AlignCenter);
+        QTextCursor tc = txt->textCursor();
+        tc.clearSelection();
+        tc.setPosition(0);
+        txt->setTextCursor(tc);
+    }
 }
 
 void MainStack::on_giveUpButton()
@@ -1403,7 +1471,7 @@ void MainStack::on_lineEdit_editingFinished()
 
 void MainStack::addKineticScrolling(QWidget * w)
 {
-#ifdef Q_OS_IOS
+#if defined(Q_OS_IOS) || defined(Q_OS_ANDROID)
         //qDebug() << "is iOS!!!";
         QScroller::grabGesture(w, QScroller::TouchGesture);
 #else

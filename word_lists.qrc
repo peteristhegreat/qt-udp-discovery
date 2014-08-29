@@ -1,0 +1,31 @@
+<RCC>
+    <qresource prefix="/">
+    <file>dictionary.txt</file>
+    <file>dictionary2.txt</file>
+    <file>frequency.txt</file>
+        <file>spoken/3alpha.txt</file>
+        <file>spoken/3alpha_NDL.txt</file>
+        <file>spoken/3freq.txt</file>
+        <file>spoken/3freq_NDL.txt</file>
+        <file>spoken/4alpha.txt</file>
+        <file>spoken/4alpha_NDL.txt</file>
+        <file>spoken/4freq.txt</file>
+        <file>spoken/4freq_NDL.txt</file>
+        <file>spoken/5alpha.txt</file>
+        <file>spoken/5alpha_NDL.txt</file>
+        <file>spoken/5freq.txt</file>
+        <file>spoken/5freq_NDL.txt</file>
+        <file>spoken/6alpha.txt</file>
+        <file>spoken/6alpha_NDL.txt</file>
+        <file>spoken/6freq.txt</file>
+        <file>spoken/6freq_NDL.txt</file>
+        <file>spoken/7alpha.txt</file>
+        <file>spoken/7alpha_NDL.txt</file>
+        <file>spoken/7freq.txt</file>
+        <file>spoken/7freq_NDL.txt</file>
+        <file>spoken/8alpha.txt</file>
+        <file>spoken/8alpha_NDL.txt</file>
+        <file>spoken/8freq.txt</file>
+        <file>spoken/8freq_NDL.txt</file>
+    </qresource>
+</RCC>

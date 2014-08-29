@@ -66,7 +66,9 @@ HEADERS += \
     mytime.h
 
 RESOURCES += \
-    qresources.qrc
+    qresources.qrc \
+    word_lists.qrc \
+    styles.qrc
 
 OTHER_FILES += \
     myapp.rc \
