@@ -1,4 +1,4 @@
-1998
+1983
 abhor
 abide
 abode
@@ -139,7 +139,6 @@ birch
 birds
 birth
 bison
-bitch
 biter
 bites
 bitsy
@@ -308,7 +307,6 @@ chime
 chimp
 china
 chine
-chink
 chins
 chips
 chirp
@@ -404,7 +402,6 @@ craft
 cramp
 crane
 crank
-craps
 crash
 crate
 crave
@@ -434,7 +431,6 @@ crush
 crust
 cubed
 cubes
-cunts
 curds
 cured
 cures
@@ -484,8 +480,6 @@ dials
 diary
 dices
 dicey
-dicks
-dicky
 diets
 dikes
 diner
@@ -899,7 +893,6 @@ jacks
 jacky
 jaunt
 jeans
-jerks
 jerky
 jocks
 johns
@@ -1242,7 +1235,6 @@ pears
 pecan
 pedal
 pedro
-penis
 peony
 perch
 peril
@@ -1323,7 +1315,6 @@ prang
 prats
 prawn
 price
-prick
 pride
 prima
 prime
@@ -1340,8 +1331,6 @@ prove
 prune
 psalm
 psych
-pubes
-pubic
 puked
 pulse
 punch
@@ -1602,7 +1591,6 @@ spend
 spent
 sperm
 spice
-spick
 spicy
 spike
 spiky
@@ -1619,7 +1607,6 @@ sport
 spout
 sprat
 spray
-spunk
 spurt
 squab
 squad
@@ -1812,7 +1799,6 @@ tuned
 tuner
 tunes
 turbo
-turds
 turfs
 turks
 turns
@@ -1930,7 +1916,6 @@ whisk
 whist
 white
 whole
-whore
 whose
 wicks
 widen

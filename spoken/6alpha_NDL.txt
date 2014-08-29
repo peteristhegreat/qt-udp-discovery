@@ -1,4 +1,4 @@
-1892
+1886
 abrupt
 absent
 absurd
@@ -128,7 +128,6 @@ biopsy
 births
 bishop
 bistro
-bitchy
 blacks
 blades
 blamed
@@ -292,7 +291,6 @@ cherub
 chesty
 chiefs
 chimes
-chinky
 chintz
 chirpy
 chisel
@@ -1257,7 +1255,6 @@ presto
 priced
 prices
 pricey
-pricks
 priest
 prince
 prints
@@ -1433,7 +1430,6 @@ septic
 serial
 sermon
 sewing
-sexual
 shadow
 shaken
 shalom
@@ -1850,9 +1846,7 @@ whirly
 whisky
 whiter
 whites
-whitey
 wholes
-whores
 wicked
 wicker
 wicket

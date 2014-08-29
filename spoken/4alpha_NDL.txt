@@ -1,4 +1,4 @@
-1547
+1535
 able
 abut
 aced
@@ -37,7 +37,6 @@ arch
 ares
 arms
 army
-arse
 arts
 arty
 atom
@@ -257,7 +256,6 @@ cows
 crab
 crag
 cram
-crap
 crew
 crib
 crop
@@ -267,7 +265,6 @@ cube
 cubs
 cues
 cult
-cunt
 cups
 curb
 curd
@@ -281,7 +278,6 @@ dags
 dahl
 dale
 dame
-damn
 damp
 dang
 dare
@@ -310,7 +306,6 @@ derm
 desk
 dial
 dice
-dick
 dies
 diet
 digs
@@ -373,7 +368,6 @@ dusk
 dust
 duty
 dyes
-dyke
 each
 earl
 earn
@@ -395,7 +389,6 @@ face
 fact
 fade
 fads
-fags
 fail
 fair
 fake
@@ -655,7 +648,6 @@ jane
 jars
 jaws
 jean
-jerk
 jest
 jets
 jews
@@ -1178,7 +1170,6 @@ send
 sent
 sept
 sewn
-sexy
 shag
 sham
 shat
@@ -1186,7 +1177,6 @@ shaw
 shed
 shin
 ship
-shit
 shod
 shoe
 shop
@@ -1226,7 +1216,6 @@ slow
 slug
 slum
 slur
-slut
 smog
 snag
 snap
@@ -1393,7 +1382,6 @@ tubs
 tuck
 tuna
 tune
-turd
 turf
 turn
 twig

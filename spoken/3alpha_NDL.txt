@@ -1,4 +1,4 @@
-601
+599
 abo
 abs
 ace
@@ -147,7 +147,6 @@ eon
 era
 ers
 fad
-fag
 fan
 far
 fas
@@ -476,7 +475,6 @@ sen
 ser
 set
 sew
-sex
 sha
 she
 shy

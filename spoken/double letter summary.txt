@@ -1,0 +1,10 @@
+Summary of Double Letter v. No Double Letter
+
+# Letters | total | w/o DL | DL/total%
+
+    "3"      678     599     11.7% DL
+    "4"     1902    1535     19.3% DL
+    "5"     2995    1983     33.8% DL
+    "6"     3865    1886     51.2% DL
+    "7"     4182    1374     67.1% DL
+    "8"     3530     720     79.6% DL

@@ -1,4 +1,4 @@
-682
+678
 aah
 aba
 abo
@@ -38,7 +38,6 @@ arm
 art
 ash
 ask
-ass
 ate
 att
 ava
@@ -182,7 +181,6 @@ ess
 eve
 eye
 fad
-fag
 fan
 far
 fas
@@ -542,7 +540,6 @@ sen
 ser
 set
 sew
-sex
 sha
 she
 shh
@@ -599,7 +596,6 @@ tie
 tin
 tip
 tis
-tit
 toe
 tog
 tom

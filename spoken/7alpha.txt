@@ -1,4 +1,4 @@
-4199
+4182
 abandon
 abiding
 abigail
@@ -164,7 +164,6 @@ asphalt
 aspires
 aspirin
 assault
-asshole
 assumed
 assumes
 assured
@@ -237,7 +236,6 @@ bashful
 bashing
 baskets
 bassett
-bastard
 batches
 bathing
 battery
@@ -313,7 +311,6 @@ biology
 birdies
 biscuit
 bishops
-bitches
 bitumen
 bizarre
 blabbed
@@ -505,7 +502,6 @@ butlers
 buttery
 butties
 butting
-buttock
 buttons
 buzzing
 cabanas
@@ -863,8 +859,6 @@ crackly
 crammed
 cramped
 cranked
-crapped
-crapper
 crashed
 crashes
 craters
@@ -1321,8 +1315,6 @@ faction
 factors
 factory
 factual
-fagging
-faggots
 failing
 failure
 fainted
@@ -1618,7 +1610,6 @@ goading
 gobbing
 gobbled
 goblins
-goddamn
 goddess
 godsend
 goggles
@@ -1775,7 +1766,6 @@ hedging
 heeling
 heights
 heiress
-hellish
 helmets
 helpers
 helpful
@@ -2399,7 +2389,6 @@ newsman
 newtons
 nibbles
 nicking
-niggers
 niggles
 nightie
 nightly
@@ -2597,7 +2586,6 @@ pencils
 pendant
 pending
 penguin
-penises
 pennies
 pennine
 pension
@@ -2653,7 +2641,6 @@ pioneer
 pipping
 pirated
 pirates
-pissing
 pistols
 pistons
 pitched
@@ -2839,7 +2826,6 @@ purpose
 pursued
 pursuit
 pushing
-pussies
 putting
 puzzled
 puzzles
@@ -3184,7 +3170,6 @@ screwed
 scripts
 scrolls
 scrooge
-scrotum
 scruffs
 scruffy
 scrunch
@@ -3270,7 +3255,6 @@ shining
 shinned
 shipped
 shipway
-shitted
 shocked
 shocker
 shodden
@@ -3792,7 +3776,6 @@ tiptoes
 tissues
 titanic
 titbits
-titties
 toasted
 toaster
 tobacco

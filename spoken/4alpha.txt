@@ -1,4 +1,4 @@
-1926
+1902
 abba
 able
 abut
@@ -36,7 +36,6 @@ amen
 amie
 ammo
 amps
-anal
 ands
 anew
 anna
@@ -53,7 +52,6 @@ area
 ares
 arms
 army
-arse
 arts
 arty
 asks
@@ -155,7 +153,6 @@ bone
 bong
 bonk
 bony
-boob
 book
 boom
 boon
@@ -212,7 +209,6 @@ busk
 bust
 busy
 buts
-butt
 buys
 buzz
 byes
@@ -283,7 +279,6 @@ coat
 coax
 cobb
 coca
-cock
 coco
 code
 coff
@@ -305,7 +300,6 @@ cons
 cook
 cool
 coop
-coot
 cope
 cops
 copy
@@ -326,7 +320,6 @@ cows
 crab
 crag
 cram
-crap
 crew
 crib
 crop
@@ -338,7 +331,6 @@ cues
 cuff
 cull
 cult
-cunt
 cups
 curb
 curd
@@ -357,7 +349,6 @@ dags
 dahl
 dale
 dame
-damn
 damp
 dang
 dare
@@ -392,7 +383,6 @@ derm
 desk
 dial
 dice
-dick
 died
 dies
 diet
@@ -466,7 +456,6 @@ dust
 duty
 dyed
 dyes
-dyke
 each
 earl
 earn
@@ -502,7 +491,6 @@ face
 fact
 fade
 fads
-fags
 fail
 fair
 fake
@@ -725,7 +713,6 @@ heed
 heel
 heir
 held
-hell
 helm
 help
 hems
@@ -757,7 +744,6 @@ hols
 holt
 holy
 home
-homo
 hone
 hong
 honk
@@ -824,7 +810,6 @@ jean
 jeep
 jees
 jeez
-jerk
 jess
 jest
 jets
@@ -1101,7 +1086,6 @@ move
 much
 muck
 muds
-muff
 mugs
 mule
 mums
@@ -1261,7 +1245,6 @@ pint
 piny
 pipe
 pips
-piss
 pits
 pity
 plan
@@ -1290,7 +1273,6 @@ pony
 poof
 pooh
 pool
-poop
 poor
 pope
 pops
@@ -1485,7 +1467,6 @@ sent
 sept
 sets
 sewn
-sexy
 shag
 sham
 shat
@@ -1493,7 +1474,6 @@ shaw
 shed
 shin
 ship
-shit
 shod
 shoe
 shoo
@@ -1540,7 +1520,6 @@ slow
 slug
 slum
 slur
-slut
 smog
 snag
 snap
@@ -1696,7 +1675,6 @@ tint
 tiny
 tips
 tire
-tits
 toad
 toby
 toes
@@ -1747,11 +1725,9 @@ tubs
 tuck
 tuna
 tune
-turd
 turf
 turn
 tutu
-twat
 twee
 twig
 twin

@@ -1,4 +1,4 @@
-601
+599
 you
 the
 and
@@ -165,7 +165,6 @@ veg
 gap
 pan
 jar
-fag
 lid
 fog
 lie
@@ -527,7 +526,6 @@ sot
 sol
 ska
 sic
-sex
 sag
 sac
 rue

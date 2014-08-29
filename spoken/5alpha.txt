@@ -1,4 +1,4 @@
-3022
+2995
 aargh
 aback
 abbey
@@ -94,7 +94,6 @@ aroma
 arose
 array
 arrow
-arses
 arson
 ascot
 ashes
@@ -218,7 +217,6 @@ birch
 birds
 birth
 bison
-bitch
 biter
 bites
 bitsy
@@ -279,7 +277,6 @@ bongo
 bonks
 bonny
 bonus
-boobs
 boogy
 books
 booms
@@ -366,7 +363,6 @@ buses
 bushy
 busty
 butch
-butts
 butty
 buyer
 bwana
@@ -458,7 +454,6 @@ chime
 chimp
 china
 chine
-chink
 chins
 chips
 chirp
@@ -522,7 +517,6 @@ coals
 coast
 coats
 cobra
-cocks
 cocky
 cocoa
 coder
@@ -580,7 +574,6 @@ craft
 cramp
 crane
 crank
-craps
 crash
 crass
 crate
@@ -622,7 +615,6 @@ cubby
 cubed
 cubes
 cuffs
-cunts
 cuppa
 curds
 cured
@@ -692,13 +684,10 @@ dials
 diary
 dices
 dicey
-dicks
-dicky
 didst
 diets
 digit
 dikes
-dildo
 dilly
 diner
 dingy
@@ -1200,7 +1189,6 @@ hedge
 heels
 hefty
 hello
-hells
 helps
 hence
 henry
@@ -1313,7 +1301,6 @@ jeeps
 jeers
 jelly
 jenny
-jerks
 jerky
 jerry
 jesse
@@ -1830,7 +1817,6 @@ pedro
 peels
 peeps
 pence
-penis
 penny
 peony
 perch
@@ -1943,7 +1929,6 @@ prawn
 preps
 press
 price
-prick
 pride
 prima
 prime
@@ -1964,8 +1949,6 @@ prove
 prune
 psalm
 psych
-pubes
-pubic
 puffs
 puffy
 puked
@@ -1981,7 +1964,6 @@ puppy
 puree
 purge
 purse
-pussy
 putts
 putty
 pygmy
@@ -1989,7 +1971,6 @@ quack
 qualm
 quart
 queen
-queer
 query
 quest
 queue
@@ -2222,7 +2203,6 @@ seven
 sever
 sewed
 sewer
-sexes
 shack
 shade
 shady
@@ -2257,7 +2237,6 @@ shiny
 ships
 shire
 shirt
-shits
 shock
 shoes
 shone
@@ -2429,7 +2408,6 @@ spend
 spent
 sperm
 spice
-spick
 spicy
 spies
 spike
@@ -2457,7 +2435,6 @@ sprat
 spray
 spree
 spuds
-spunk
 spurs
 spurt
 squab
@@ -2685,7 +2662,6 @@ tippy
 tired
 tires
 title
-titty
 toads
 toast
 today
@@ -2765,7 +2741,6 @@ tuned
 tuner
 tunes
 turbo
-turds
 turfs
 turks
 turns
@@ -2773,7 +2748,6 @@ turps
 tutor
 tutti
 twang
-twats
 tweak
 tweed
 tweet
@@ -2935,7 +2909,6 @@ whizz
 whole
 whoof
 whoop
-whore
 whose
 wicks
 widen

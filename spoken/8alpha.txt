@@ -1,4 +1,4 @@
-3540
+3530
 abhorred
 abnormal
 abortion
@@ -156,7 +156,6 @@ assemble
 assembly
 assessed
 assessor
-assholes
 assigned
 assisted
 assorted
@@ -227,7 +226,6 @@ bartered
 baseball
 basement
 bassetts
-bastards
 bastille
 bastions
 bathroom
@@ -268,7 +266,6 @@ binomial
 biopsies
 birthday
 biscuits
-bitching
 bitterly
 blabbing
 blanched
@@ -308,7 +305,6 @@ bodywork
 boggling
 bohemian
 bollards
-bollocks
 bolsters
 bombings
 boneless
@@ -376,7 +372,6 @@ building
 bulldogs
 bulldoze
 bullocks
-bullshit
 bullying
 bumbling
 bundling
@@ -392,7 +387,6 @@ busyness
 butchers
 butchery
 buttered
-buttocks
 buttoned
 bypasses
 cabbages
@@ -504,7 +498,6 @@ childish
 children
 chillies
 chimneys
-chinking
 chipmunk
 chipping
 chirping
@@ -568,7 +561,6 @@ clinical
 clinking
 clippers
 clipping
-clitoris
 clocking
 clonking
 clothing
@@ -2715,7 +2707,6 @@ settlers
 settling
 severely
 sewerage
-sexually
 shackled
 shagging
 shambles
@@ -2743,7 +2734,6 @@ shingles
 shipment
 shipping
 shipyard
-shitting
 shivered
 shockers
 shocking

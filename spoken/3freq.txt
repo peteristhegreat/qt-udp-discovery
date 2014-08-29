@@ -1,4 +1,4 @@
-682
+678
 you
 the
 and
@@ -193,7 +193,6 @@ veg
 gap
 pan
 jar
-fag
 lid
 fog
 lie
@@ -317,7 +316,6 @@ fry
 tat
 sub
 ant
-tit
 sew
 pro
 lit
@@ -414,7 +412,6 @@ col
 bud
 bot
 ban
-ass
 yap
 yak
 wen
@@ -600,7 +597,6 @@ sot
 sol
 ska
 sic
-sex
 sag
 sac
 rue

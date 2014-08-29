@@ -1007,15 +1007,20 @@ void MainStack::init_helpPage()
 
     QTabWidget * tabs = new QTabWidget;
     tabs->setTabPosition(QTabWidget::South);
+
+    QFile f("://spoken/double letter summary.txt");
+    f.open(QFile::ReadOnly | QFile::Text);
+
     QString helpText =
             "Welcome to Jotto!\n\n"
             "You play by trying to guess the secret word. "
             "If you are playing a five letter word game, "
             "the secret word is 5 letters long and "
             "only five letter words can be guessed.";
-    QLabel * label = new QLabel(helpText);
+    QLabel * label = new QLabel(helpText + "\n\n\n" + f.readAll());
+    f.close();
     label->setWordWrap(true);
-    label->setFixedWidth(300);
+//    label->setFixedWidth(300);
 //    grid->addWidget(label, grid->rowCount(), 0, Qt::AlignHCenter);
 
     tabs->addTab(label,"Instructions");

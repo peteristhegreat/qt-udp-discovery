@@ -1,8 +1,8 @@
 <RCC>
     <qresource prefix="/">
-    <file>dictionary.txt</file>
-    <file>dictionary2.txt</file>
-    <file>frequency.txt</file>
+        <file>dictionary.txt</file>
+        <file>dictionary2.txt</file>
+        <file>frequency.txt</file>
         <file>spoken/3alpha.txt</file>
         <file>spoken/3alpha_NDL.txt</file>
         <file>spoken/3freq.txt</file>
@@ -27,5 +27,6 @@
         <file>spoken/8alpha_NDL.txt</file>
         <file>spoken/8freq.txt</file>
         <file>spoken/8freq_NDL.txt</file>
+        <file>spoken/double letter summary.txt</file>
     </qresource>
 </RCC>
