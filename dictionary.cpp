@@ -290,3 +290,19 @@ void Dictionary::loadFrequencyList()
     freq.close();
     qDebug() << "time?" << time.elapsed();
 }
+
+
+bool Dictionary::isWordRecentlyGuessed(QString str)
+{
+    return m_guessesThisRound.contains(str);
+}
+
+void Dictionary::addWordToListOfRecentGuesses(QString str)
+{
+    m_guessesThisRound.insert(str);
+}
+
+void Dictionary::resetListOfRecentGuesses()
+{
+    m_guessesThisRound.clear();
+}

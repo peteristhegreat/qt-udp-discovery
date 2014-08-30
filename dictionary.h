@@ -7,6 +7,7 @@
 #include <QMap>
 #include <QFile>
 #include <QTextStream>
+#include <QSet>
 
 class Dictionary : public QObject
 {
@@ -71,10 +72,13 @@ public:
         QTextStream in(&file);
         return desc + in.readAll();
     }
+    bool isWordRecentlyGuessed(QString);
 
 signals:
     void ready();	
 public slots:
+    void addWordToListOfRecentGuesses(QString);
+    void resetListOfRecentGuesses();
     void loadFrequencyList();
     void loadFrequencyList(int numOfLetters, bool allowDoubleLetters);
     void addToOldSecretWords(QString word);
@@ -83,6 +87,7 @@ public slots:
     void setWordLength(QString str){ setWordLength(str.toInt());}
 
 private:
+    QSet <QString> m_guessesThisRound;
     QList <int> m_allowedWordLengths;
     int m_wordLength;
     QMap < int, QHash <QString, int> *> m_map;

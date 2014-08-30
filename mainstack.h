@@ -125,6 +125,7 @@ private:
     QComboBox * m_numLettersCombo;
     QCheckBox * m_autoMarkZeroLetterGuesses;
     QCheckBox * m_showStatsDuringGame;
+    QCheckBox * m_preventDuplicateGuesses;
 
     QStatusBar * m_bar;
     Dictionary * m_dict;

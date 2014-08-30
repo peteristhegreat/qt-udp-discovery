@@ -480,6 +480,7 @@ void MainStack::readSettings()
     m_allowDoubleLetters->setChecked(s.value("allow_double_letters",true).toBool());
     m_autoMarkZeroLetterGuesses->setChecked(s.value("auto_mark_zero_letter_guesses", true).toBool());
     m_showStatsDuringGame->setChecked(s.value("show_stats_during_game", false).toBool());
+    m_preventDuplicateGuesses->setChecked(s.value("prevent_duplicate_guesses", true).toBool());
 
     int fontSize = s.value("text_edit_font_size", 260).toInt();
     if(fontSize < 100) fontSize = 100;
@@ -526,6 +527,7 @@ void MainStack::writeSettings()
     s.setValue("auto_mark_zero_letter_guesses", m_autoMarkZeroLetterGuesses->isChecked());
 //    s.setValue("text_edit_font_size", this->findChild<QTextEdit*>()->fontPointSize()*10 * 96 / this->physicalDpiX());
     s.setValue("show_stats_during_game",m_showStatsDuringGame->isChecked());
+    s.setValue("prevent_duplicate_guesses", m_preventDuplicateGuesses->isChecked());
 //    qDebug() << this->findChild<QTextEdit*>()->fontPointSize()*10;
 
 }
@@ -578,7 +580,11 @@ void MainStack::sendData()
     else
     {
         // validation of input
-        if(m_correctLength->isChecked()
+        if(m_dict->isWordRecentlyGuessed(word) && m_preventDuplicateGuesses->isChecked())
+        {
+            bar->showMessage("\"" + word + "\" has already been guessed.", timeout);
+        }
+        else if(m_correctLength->isChecked()
                 && word.length() < m_theirSecretWord.length())
         {
             bar->showMessage("\"" + word + "\" is too short.", timeout);
@@ -605,6 +611,7 @@ void MainStack::sendData()
 
     if(send)
     {
+        m_dict->addWordToListOfRecentGuesses(word);
         QString tempGuessedWord = word;
         int count = 0;
         if(m_ephHouseRules->isChecked())
@@ -949,6 +956,9 @@ void MainStack::init_settings()
 //    form->addWidget(m_showStatsDuringGame);
     form->addRow(new QLabel(m_showStatsDuringGame->text()),m_showStatsDuringGame);
 
+    m_preventDuplicateGuesses = new QCheckBox("Prevent duplicate guesses");
+//    form->addWidget(m_showStatsDuringGame);
+    form->addRow(new QLabel(m_preventDuplicateGuesses->text()),m_preventDuplicateGuesses);
 
     grid->addLayout(form,1,0,1,2, Qt::AlignHCenter);
 
@@ -1161,6 +1171,8 @@ void MainStack::on_giveUpButton()
         bar->clearMessage();
 
         this->setCurrentWidget(m_mainMenu);
+
+        m_dict->resetListOfRecentGuesses();
     }
 
 }
@@ -1487,7 +1499,14 @@ void MainStack::addKineticScrolling(QWidget * w)
 void MainStack::on_randomGuess()
 {
     QLineEdit * lineEdit = this->currentWidget()->findChild<QLineEdit*>();
-    QString guess = m_dict->getNewSecretWord(0,75);
+    QString guess;
+
+    do
+    {
+        guess = m_dict->getNewSecretWord(0,75);
+
+    } while(m_dict->isWordRecentlyGuessed(guess));
+
     lineEdit->setText(guess);
     sendData();
 }
