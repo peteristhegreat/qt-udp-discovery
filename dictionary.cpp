@@ -13,7 +13,7 @@ Dictionary::Dictionary(QObject *parent) :
 {
     documentsPath = "";
 #ifdef Q_OS_IOS
-    documentsPath = "Documents/";
+    documentsPath = "../Documents/";
 #elif Q_OS_MAC
 //    documentsPath = "Contents/Resources/";
 #endif
@@ -102,7 +102,7 @@ void Dictionary::addToOldSecretWords(QString word, int numOfGuesses, int numOfRa
         out << word << ','
             << numOfGuesses << ','
             << '(' << numOfRandom << ')' << ','
-            << (won?"Won":"Gave Up") << ','
+            << (won?"Won":"Lost") << ','
             << time << ','
             << (twoPlayer?"Wifi":"Quick Game")
             << '\n';

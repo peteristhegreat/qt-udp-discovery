@@ -73,6 +73,7 @@ signals:
     void appendToTheirs(QString);
     void updateSize(qreal factor);
 public slots:
+    void on_endOfPageAnimation();
     void dumpCurrentWordLists();
     void on_updateSize(qreal);
     void updateStats();
