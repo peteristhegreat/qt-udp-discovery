@@ -72,8 +72,11 @@ public:
         int hours = (secs / 3600);
         secs = secs % 60;
 
+        QString f = format;
+        if(hours > 0 && !format.toLower().contains("h"))
+            f.prepend("h:");
         QTime timeString(hours, mins, secs);
-        return timeString.toString(format);
+        return timeString.toString(f);
     }
 
 private:

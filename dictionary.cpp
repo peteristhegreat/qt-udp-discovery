@@ -75,7 +75,7 @@ void Dictionary::loadFrequencyList(int numOfLetters, bool allowDoubleLetters)
         QTextStream in(&fileIn2);
         while (!in.atEnd())
         {
-            QString tmp = in.readLine();
+            QString tmp = in.readLine().split(',').first();
             if(list.removeOne(tmp))
                 count++;
         }
@@ -90,7 +90,8 @@ void Dictionary::loadFrequencyList(int numOfLetters, bool allowDoubleLetters)
     (*m_listmap[numOfLetters]) = list;
 }
 
-void Dictionary::addToOldSecretWords(QString word)
+void Dictionary::addToOldSecretWords(QString word, int numOfGuesses, int numOfRandom, bool won,
+                                     QString time, bool twoPlayer)
 {
     (*m_listmap[m_wordLength]).removeOne(word);
 
@@ -98,11 +99,32 @@ void Dictionary::addToOldSecretWords(QString word)
     QFile fileOut(documentsPath + QString::number(word.length()) + "oldSecretWords.txt");
     if (fileOut.open(QFile::WriteOnly | QFile::Text | QFile::Append)) {
         QTextStream out(&fileOut);
-        out << word << '\n';
+        out << word << ','
+            << numOfGuesses << ','
+            << '(' << numOfRandom << ')' << ','
+            << (won?"Won":"Gave Up") << ','
+            << time << ','
+            << (twoPlayer?"Wifi":"Quick Game")
+            << '\n';
     } else {
         qCritical() << "error opening output file\n";
     }
     fileOut.close();
+}
+
+QString Dictionary::getPreviousGameStats()
+{
+    QString fileName = documentsPath + QString::number(this->wordLength()) + "oldSecretWords.txt";
+    QString desc = QString("All stats of games with ") + QString::number(this->wordLength()) + " letters:\n\n"
+            "Word - Guesses - (Random Guesses) - Win? - Time - Game Type\n";
+    QFile file(fileName);
+    if (!file.open(QFile::ReadOnly | QFile::Text)) {
+        return QString("Cannot read file %1:\n%2.")
+                             .arg(fileName)
+                             .arg(file.errorString());
+    }
+    QTextStream in(&file);
+    return desc + in.readAll().replace(',', " - ");
 }
 
 QString Dictionary::getNewSecretWord(int lowPercent, int highPercent)

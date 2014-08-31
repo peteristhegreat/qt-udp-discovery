@@ -74,6 +74,8 @@ public:
     }
     bool isWordRecentlyGuessed(QString);
 
+    QString getPreviousGameStats();
+
 signals:
     void ready();	
 public slots:
@@ -81,7 +83,8 @@ public slots:
     void resetListOfRecentGuesses();
     void loadFrequencyList();
     void loadFrequencyList(int numOfLetters, bool allowDoubleLetters);
-    void addToOldSecretWords(QString word);
+    void addToOldSecretWords(QString word, int numOfGuesses, int numOfRandom, bool won,
+                             QString time, bool twoPlayer);
     void init();
     void setWordLength(int);
     void setWordLength(QString str){ setWordLength(str.toInt());}

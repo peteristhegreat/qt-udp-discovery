@@ -437,6 +437,13 @@ void MainStack::closeEvent(QCloseEvent *)
 }
 
 
+void MainStack::on_sliderChanged()
+{
+    QSlider * slider = this->currentWidget()->findChild<QSlider*>();
+    if(slider)
+        on_sliderChanged(slider->value());
+}
+
 void MainStack::on_sliderChanged(int size)
 {
     qDebug() << "Slider" << size;
@@ -482,7 +489,7 @@ void MainStack::readSettings()
     m_showStatsDuringGame->setChecked(s.value("show_stats_during_game", false).toBool());
     m_preventDuplicateGuesses->setChecked(s.value("prevent_duplicate_guesses", true).toBool());
 
-    int fontSize = s.value("text_edit_font_size", 260).toInt();
+    int fontSize = s.value("text_edit_font_size", 140).toInt();
     if(fontSize < 100) fontSize = 100;
     else if (fontSize > 360) fontSize = 100;
     qDebug() << "fontSize" << fontSize;
@@ -659,11 +666,17 @@ void MainStack::sendData()
 
         m_server->writeData(infoString); // send it to the other one
 
+        updateGuessCount();
+
         if(word == m_theirSecretWord)
         {
-            m_dict->addToOldSecretWords(m_theirSecretWord);
             m_stopWatch.pause();
             updateStats();
+            m_dict->addToOldSecretWords(m_theirSecretWord,
+                                        m_stat_numOfGuesses,
+                                        m_random_count,
+                                        true, m_stat_timeText,
+                                        this->currentWidget() == m_twoPlayerBoard);
             // Game Over, you win!
             emit appendToYours("Correct: " + word);
             m_server->writeData("\nThe other player guessed your word!");
@@ -697,7 +710,6 @@ void MainStack::sendData()
                 }
             }
         }
-        updateGuessCount();
     }
     lineEdit->clear();
 }
@@ -750,6 +762,8 @@ void MainStack::on_createGame()
 void MainStack::on_connected()
 {
     // Jump into two player mode!
+
+    m_random_count = 0;
 
     QString input;
     bool ok;
@@ -810,10 +824,13 @@ void MainStack::on_connected()
 
     this->currentWidget()->findChild<QLineEdit*>()->setEnabled(true);
     this->currentWidget()->findChild<QLineEdit*>()->setFocus();
+
+    on_sliderChanged();
 }
 
 void MainStack::on_onePlayer()
 {
+    m_random_count = 0;
     if(false)
     {
         QString input, errorText;
@@ -850,6 +867,7 @@ void MainStack::on_onePlayer()
     // Pick a random word from the dictionary based on difficulty
 //    m_theirSecretWord = m_dict->getNewSecretWord(16, m_allowDoubleLetters->isChecked());
     m_theirSecretWord = m_dict->getNewSecretWord(0,25);
+    qDebug() << m_theirSecretWord;
 
     this->setCurrentWidget(m_onePlayerBoard);// one player board
 
@@ -869,6 +887,7 @@ void MainStack::on_onePlayer()
     {
         label->hide();
     }
+    on_sliderChanged();
 }
 
 void MainStack::on_settingsButton()
@@ -1036,6 +1055,13 @@ void MainStack::init_helpPage()
     tabs->addTab(label,"Instructions");
 
     QTextEdit * txt;
+
+    txt = new QTextEdit;
+    txt->setReadOnly(true);
+    addKineticScrolling(txt);
+    txt->setObjectName("Stats");
+    tabs->addTab(txt, txt->objectName());
+
     txt = new QTextEdit;
     txt->setReadOnly(true);
     addKineticScrolling(txt);
@@ -1076,6 +1102,8 @@ void MainStack::on_helpButton()
 
 void MainStack::dumpCurrentWordLists()
 {
+//    static int cachedWordLength = m_dict->wordLength();
+//    bool firstRun = true;
     QLabel * label;
     label = m_helpPage->findChild<QLabel *>("help sub title");
     label->setText(m_numLettersCombo->currentText() + " letter words, " +
@@ -1083,6 +1111,27 @@ void MainStack::dumpCurrentWordLists()
                    + " double letters");
 
     QTextEdit * txt;
+    txt = m_helpPage->findChild<QTextEdit *>("Stats");
+    if(txt)
+    {
+        txt->setPlainText(m_dict->getPreviousGameStats());
+        txt->selectAll();
+        txt->setAlignment(Qt::AlignCenter);
+        QTextCursor tc = txt->textCursor();
+        tc.clearSelection();
+        tc.setPosition(0);
+        txt->setTextCursor(tc);
+    }
+
+//    if(firstRun || m_dict->wordLength() != cachedWordLength)
+//    {
+//        firstRun = false;
+//    }
+//    else
+//    {
+//        return;
+//    }
+
     txt = m_helpPage->findChild<QTextEdit *>("A-Z Words");
     if(txt)
     {
@@ -1139,7 +1188,12 @@ void MainStack::on_giveUpButton()
     {
         if(btn->text() == "Give Up")
         {
-            m_dict->addToOldSecretWords(m_theirSecretWord);
+            updateStats();
+            m_dict->addToOldSecretWords(m_theirSecretWord,
+                                        m_stat_numOfGuesses,
+                                        m_random_count,
+                                        false, m_stat_timeText,
+                                        this->currentWidget() == m_twoPlayerBoard);
             QMessageBox * msgBox = new QMessageBox();
             msgBox->setText("The secret word was:\n\n      "
                             + m_theirSecretWord
@@ -1444,22 +1498,23 @@ void MainStack::updateStats()
 
     // get time from m_stopwatch
     QLabel * label = this->currentWidget()->findChild<QLabel*>("Timer");
+    m_stat_timeText = m_stopWatch.toString("mm:ss");
     if(label)
-        label->setText(m_stopWatch.toString("mm:ss"));
+        label->setText(m_stat_timeText);
 
 //    qDebug() << m_stopWatch.elapsed();
     label = this->currentWidget()->findChild<QLabel*>("Guess Count");
-    int numOfGuesses = 0;
     if(label)
-        numOfGuesses = label->text().toInt();
+        m_stat_numOfGuesses = label->text().toInt() - 1;
 
     label = this->currentWidget()->findChild<QLabel*>("Total Guesses");
     if(label)
-        label->setText(QString::number(numOfGuesses-1));// works
+        label->setText(QString::number(m_stat_numOfGuesses));// works
 
+    m_stat_guessRate = (qreal)m_stopWatch.elapsed()/1000./qMax(1, m_stat_numOfGuesses);
     label = this->currentWidget()->findChild<QLabel*>("Guess Rate");
     if(label)
-        label->setText(QString::number((qreal)m_stopWatch.elapsed()/1000./qMax(1, numOfGuesses - 1),'f',1));
+        label->setText(QString::number(m_stat_guessRate,'f',1));
 }
 
 void MainStack::on_appendToTxtEdit(QString)
@@ -1507,6 +1562,7 @@ void MainStack::on_randomGuess()
 
     } while(m_dict->isWordRecentlyGuessed(guess));
 
+    m_random_count++;
     lineEdit->setText(guess);
     sendData();
 }

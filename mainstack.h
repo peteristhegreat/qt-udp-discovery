@@ -83,6 +83,7 @@ public slots:
     void on_lineEdit_returnPressed();
     void on_finishedLoading();
     void on_randomGuess();
+    void on_sliderChanged();
     void on_sliderChanged(int);
     void setCurrentWidget(QWidget * w);
     void on_refreshStyleSheet();
@@ -142,6 +143,11 @@ private:
     MyTime m_stopWatch;
 
     int m_dpiFactor;
+
+    qreal m_stat_guessRate;
+    int m_stat_numOfGuesses;
+    QString m_stat_timeText;
+    int m_random_count;
 };
 
 #endif // MAINSTACK_H
