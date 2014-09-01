@@ -4,6 +4,8 @@
 #include <QPalette>
 #include <QWidget>
 #include <QFrame>
+#include <QApplication>
+#include <QScreen>
 
 LetterButton::LetterButton(QChar c, QWidget *parent) :
     QLabel(parent)
@@ -81,6 +83,17 @@ void LetterButton::on_reset()
 
 void LetterButton::updateSize(qreal factor)
 {
+#ifdef Q_OS_ANDROID
+    qreal w = qMin(qApp->screens().first()->size().width(), qApp->screens().first()->size().height());
+
+    qDebug() << "Here!" << this->text() << factor << w;
+    if(w/10 > 30*factor)
+    {
+        factor = w/(10*30);
+    }
+    qDebug() << "newFactor" << factor;
+#endif
+
     this->setMinimumWidth(30*factor);
     this->setMinimumHeight(30*factor);
     QFont f = this->font();

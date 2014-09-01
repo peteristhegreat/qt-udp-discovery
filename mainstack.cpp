@@ -417,7 +417,7 @@ if(screen->size().width() <= 720 || screen->size().height() <= 720)
         qDebug() << "Smaller than 6\" on diagonal";
 #ifdef Q_OS_IOS
         m_dpiFactor = 2;
-#else
+#elif defined(Q_OS_ANDROID)
         m_dpiFactor = 1.5;
 #endif
     }
@@ -937,12 +937,12 @@ void MainStack::on_connected()
         getTextDialog->setInputMode(QInputDialog::TextInput);
         getTextDialog->setWindowTitle("Jotto - Set Secret Word");
         getTextDialog->setLabelText(
-                    "Please enter a "
+                    "Please enter a \n"
                     + QString::number(m_dict->wordLength())
                     + " letter word." + errorText);
 
 
-#if defined(Q_OS_MAC) || defined(Q_OS_IOS) || defined(Q_OS_ANDROID)
+#if defined(Q_OS_MAC) || defined(Q_OS_IOS) //|| defined(Q_OS_ANDROID)
         OverlayDialogBox dialog(this, getTextDialog);
         ret = dialog.exec();
         input = dialog.inputDialog()->textValue();
@@ -1317,7 +1317,7 @@ void MainStack::on_helpButton()
        QTimer * t = new QTimer;
        t->setSingleShot(true);
        QObject::connect(t, SIGNAL(timeout()), this, SLOT(dumpCurrentWordLists()));
-       t->start(200);
+       t->start(500);
    }
 }
 
@@ -1393,7 +1393,7 @@ void MainStack::on_giveUpButton()
                        "Do you really want to give up?");
         msgBox->setStandardButtons(QMessageBox::Yes | QMessageBox::No);
         msgBox->setDefaultButton(QMessageBox::No);
-#if defined(Q_OS_MAC) || defined(Q_OS_IOS) || defined(Q_OS_ANDROID)
+#if defined(Q_OS_MAC) || defined(Q_OS_IOS) //|| defined(Q_OS_ANDROID)
         OverlayDialogBox dialog(this, msgBox);
         ret = dialog.exec();
 #else
@@ -1422,7 +1422,7 @@ void MainStack::on_giveUpButton()
                             + "\n\nBetter luck next time.");
             msgBox->setStandardButtons(QMessageBox::Ok);
 
-#if defined(Q_OS_MAC) || defined(Q_OS_IOS) || defined(Q_OS_ANDROID)
+#if defined(Q_OS_MAC) || defined(Q_OS_IOS) //|| defined(Q_OS_ANDROID)
             OverlayDialogBox dialog(this, msgBox);
             ret = dialog.exec();
 #else
@@ -1487,6 +1487,10 @@ void MainStack::on_shuffle()
 
 void MainStack::init_board(bool is_two_player)
 {
+    int screenWidth = qMin(qApp->screens().first()->physicalSize().width(), qApp->screens().first()->physicalSize().height());
+    int marginStretch = 1;
+    if(screenWidth < 100) // mm
+        marginStretch = 0;
 //    QSvgWidget * svg;
     QWidget * w;
     QGridLayout * grid;
@@ -1587,20 +1591,20 @@ void MainStack::init_board(bool is_two_player)
     vboxSlider->addWidget(button);
 
     hbox->addLayout(vboxSlider);
-    hbox->addStretch();
+    hbox->addStretch(marginStretch);
 
     QObject::connect(slider, SIGNAL(valueChanged(int)), this, SLOT(on_sliderChanged(int)));
 
 //    txt->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
     if(is_two_player)
     {
-        txt->setMaximumWidth(120);
+//        txt->setMaximumWidth(120);
 //        grid->addWidget(txt,row,col++,Qt::AlignRight);
-        hbox->addWidget(txt);
+        hbox->addWidget(txt,4);
     }
     else
     {
-        hbox->addWidget(txt);
+        hbox->addWidget(txt,4);
 //        grid->addWidget(txt,row++,col++,1,2, Qt::AlignHCenter);
     }
     grid->setRowStretch(grid->rowCount() - 1, 4);
@@ -1616,15 +1620,15 @@ void MainStack::init_board(bool is_two_player)
         txt->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 #endif
 //        txt->setReadOnly(true);
-        txt->setMaximumWidth(120);
+//        txt->setMaximumWidth(120);
 //        grid->addWidget(txt,row++,col++, Qt::AlignLeft);
-        hbox->addWidget(txt);
+        hbox->addWidget(txt,4);
         QObject::connect(m_server, SIGNAL(data(QString)), this, SLOT(on_data(QString)));
         QObject::connect(this, SIGNAL(appendToTheirs(QString)), txt, SLOT(append(QString)));
         QObject::connect(this, SIGNAL(appendToTheirs(QString)), this, SLOT(on_appendToTxtEdit(QString)));
     }
 
-    hbox->addStretch();
+    hbox->addStretch(marginStretch);
     grid->addLayout(hbox,row++,0,1,grid->columnCount());
     grid->setRowStretch(row -1, 5);
 

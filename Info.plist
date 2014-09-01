@@ -97,5 +97,7 @@
 			<string>{1536, 2048}</string>
 		</dict>
 	</array-->
+        <key>UIRequiresPersistentWiFi</key>
+        <string>YES</string>
 </dict>
 </plist>

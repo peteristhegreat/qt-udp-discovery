@@ -73,6 +73,7 @@ RESOURCES += \
 OTHER_FILES += \
     myapp.rc \
     style.qss \
-    android/AndroidManifest.xml
+    android/AndroidManifest.xml \
+    custom.plist
 
 ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
