@@ -20,6 +20,13 @@
 #include <QTimer>
 #include <QTime>
 #include <QScreen>
+#include <QHideEvent>
+#include <QGestureEvent>
+#include <QPinchGesture>
+#include <QWindow>
+#include <QExposeEvent>
+#include <QScreen>
+#include <QApplication>
 
 class LineEdit : public QLineEdit
 {
@@ -106,7 +113,21 @@ public slots:
     void readSettings();
     void writeSettings();
     void closeEvent(QCloseEvent *);
+    void hideEvent(QHideEvent *);
+    bool event(QEvent *e);
+    bool gestureEvent(QGestureEvent *);
+    void pinchTriggered(QPinchGesture *gesture);
+//    void exposeEvent(QExposeEvent *);
+    void on_destroyed();
+
+    void on_visibilityChanged(QWindow::Visibility);
+    void on_activeChanged();
+    void on_windowStateChanged(Qt::WindowState);
+    void on_screenChanged(QScreen*);
+
+    void on_appStateChanged(Qt::ApplicationState);
 private:
+    QWindow * m_window;
     QWidget * m_prevPage;
     QString m_additionalStyleSheet;
 
@@ -149,6 +170,9 @@ private:
     int m_stat_numOfGuesses;
     QString m_stat_timeText;
     int m_random_count;
+    qreal scaleFactor;
+    qreal currentStepScaleFactor;
+    qreal rotationAngle;
 };
 
 #endif // MAINSTACK_H

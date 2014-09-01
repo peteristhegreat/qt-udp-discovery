@@ -14,7 +14,7 @@ Dictionary::Dictionary(QObject *parent) :
     documentsPath = "";
 #ifdef Q_OS_IOS
     documentsPath = "../Documents/";
-#elif Q_OS_MAC
+//#elif Q_OS_MAC
 //    documentsPath = "Contents/Resources/";
 #endif
 

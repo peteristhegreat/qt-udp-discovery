@@ -36,6 +36,7 @@
 #include <QScreen>
 #include <QDebug>
 #include <QScrollArea>
+#include <QGestureEvent>
 
 // Helper function to return display orientation as a string.
 QString Orientation(Qt::ScreenOrientation orientation)
@@ -216,20 +217,114 @@ MainStack::MainStack(QWidget *parent) :
 
 void MainStack::showEvent(QShowEvent *)
 {
+    qDebug() << Q_FUNC_INFO;
     static bool firstRun = true;
     if(!firstRun)
         return;
     myAdjustSize();
+
+    grabGesture(Qt::PinchGesture);
+
+    if(false)
+    {
+        QWindow * window = this->windowHandle();
+        if(window)	
+        {
+            m_window = window;
+            // These don't show Window states at all on iOS
+            QObject::connect(window, SIGNAL(visibilityChanged(QWindow::Visibility)), this, SLOT(on_visibilityChanged(QWindow::Visibility)));
+            QObject::connect(window, SIGNAL(activeChanged()), this, SLOT(on_activeChanged()));
+            QObject::connect(window, SIGNAL(windowStateChanged(Qt::WindowState)), this, SLOT(on_windowStateChanged(Qt::WindowState)));
+            QObject::connect(window, SIGNAL(destroyed()), this, SLOT(on_destroyed()));
+            QObject::connect(window, SIGNAL(screenChanged(QScreen*)), this, SLOT(on_screenChanged(QScreen*)));
+        }
+    }
+
+    // This works on iOS!!!
+    QObject::connect(qApp, SIGNAL(applicationStateChanged(Qt::ApplicationState)), this, SLOT(on_appStateChanged(Qt::ApplicationState)));
 }
+
+void MainStack::on_screenChanged(QScreen*)
+{
+    qDebug() << Q_FUNC_INFO;
+}
+
+void MainStack::on_appStateChanged(Qt::ApplicationState state)
+{
+    static bool wasInActive = false;
+    qDebug() << Q_FUNC_INFO;
+    switch(state)
+    {
+    case Qt::ApplicationSuspended:
+        qDebug() << "suspended";// this line doesn't print every time until after the app comes back.
+        // app could close at any time
+        break;
+    case Qt::ApplicationHidden:
+        // hidden and running in the background
+        // stop graphics
+        qDebug() << "hidden";
+        break;
+    case Qt::ApplicationInactive:
+        wasInActive = true;
+        // incoming call or sms message?
+        // reduce CPU intensive tasks
+//        writeSettings();
+
+        qDebug() << "inactive"; // usually followed by suspended on iOS
+
+        // store wifi settings
+        // notify other wifi player that we are suspended
+        if(m_server->isConnected())
+            m_server->writeSettings();
+
+        break;
+    case Qt::ApplicationActive:
+        // We are up and running!
+        qDebug() << "active";
+        if(wasInActive)
+            m_server->readSettings();
+        wasInActive = false;
+        break;
+    default:
+        qDebug() << "Unknown application state";
+        break;
+    }
+}
+
+
+void MainStack::on_destroyed()
+{
+    qDebug() << Q_FUNC_INFO;
+}
+
+void MainStack::on_visibilityChanged(QWindow::Visibility)
+{
+    qDebug() << Q_FUNC_INFO;
+}
+
+void MainStack::on_activeChanged()
+{
+    qDebug() << Q_FUNC_INFO;
+}
+
+void MainStack::on_windowStateChanged(Qt::WindowState)
+{
+    qDebug() << Q_FUNC_INFO;
+}
+
 
 void MainStack::myAdjustSize()
 {
 
+    
+    QScreen *screen = QGuiApplication::screens().first();
+    
+    
 #if defined(Q_OS_IOS) || defined(Q_OS_ANDROID)
 #ifdef Q_OS_IOS
-if(this->width() == 320 || this->height() == 320)
+if(screen->size().width() == 320 || screen->size().height() == 320)
 #else
-if(this->width() <= 720 || this->height() <= 720)
+if(screen->size().width() <= 720 || screen->size().height() <= 720)
 #endif
 #else
     if(false)
@@ -240,6 +335,7 @@ if(this->width() <= 720 || this->height() <= 720)
 //#endif
     {
         // we are an iphone!
+        qDebug() << Q_FUNC_INFO << "Appending to stylesheet!";
 
         this->setStyleSheet(this->styleSheet() +
                     "QFrame {padding: 5px;}"
@@ -290,8 +386,6 @@ if(this->width() <= 720 || this->height() <= 720)
 
 
 // if
-
-    QScreen *screen = QGuiApplication::screens().first();
         qDebug() << "Information for screen:" << screen->name();
         qDebug() << "  Available geometry:" << screen->availableGeometry().x() << screen->availableGeometry().y() << screen->availableGeometry().width() << "x" << screen->availableGeometry().height();
         qDebug() << "  Available size:" << screen->availableSize().width() << "x" << screen->availableSize().height();
@@ -373,6 +467,7 @@ void MainStack::on_refreshStyleSheet()
     if(styleFile.exists())
     {
         styleFile.open( QFile::ReadOnly );
+        qDebug() << "Using filesystem resource file";
 
         // Apply the loaded stylesheet
         QString style( styleFile.readAll() + m_additionalStyleSheet);
@@ -383,6 +478,7 @@ void MainStack::on_refreshStyleSheet()
     else
     {
         styleFile2.open( QFile::ReadOnly );
+        qDebug() << "Using compiled resource file" << m_additionalStyleSheet.size();
 
         // Apply the loaded stylesheet
         QString style( styleFile2.readAll() + m_additionalStyleSheet);
@@ -440,9 +536,64 @@ void MainStack::on_endOfVictoryDance()
 
 void MainStack::closeEvent(QCloseEvent *)
 {
+    // doesn't work on iOS
+    qDebug() << Q_FUNC_INFO;
     writeSettings();
 }
 
+void MainStack::hideEvent(QHideEvent *)
+{
+    // doesn't work on iOS
+    qDebug() << Q_FUNC_INFO;
+    writeSettings();
+}
+
+bool MainStack::event(QEvent *event)
+{
+    if (event->type() == QEvent::Gesture)
+        return gestureEvent(static_cast<QGestureEvent*>(event));
+    return QWidget::event(event);
+}
+
+bool MainStack::gestureEvent(QGestureEvent *event)
+{
+//    qDebug() << "gestureEvent():" << event->gestures().size();
+//    if (QGesture *swipe = event->gesture(Qt::SwipeGesture))
+//        swipeTriggered(static_cast<QSwipeGesture *>(swipe));
+//    else if (QGesture *pan = event->gesture(Qt::PanGesture))
+//        panTriggered(static_cast<QPanGesture *>(pan));
+    if (QGesture *pinch = event->gesture(Qt::PinchGesture))
+        pinchTriggered(static_cast<QPinchGesture *>(pinch));
+    else
+        return QWidget::event(event);
+    return true;
+}
+
+void MainStack::pinchTriggered(QPinchGesture *gesture)
+{
+    QPinchGesture::ChangeFlags changeFlags = gesture->changeFlags();
+    if (changeFlags & QPinchGesture::RotationAngleChanged) {
+        const qreal value = gesture->property("rotationAngle").toReal();
+        const qreal lastValue = gesture->property("lastRotationAngle").toReal();
+        const qreal rotationAngleDelta = value - lastValue;
+        rotationAngle += rotationAngleDelta;
+//        qDebug() << "pinchTriggered(): rotation by" << rotationAngleDelta << rotationAngle;
+    }
+    if (changeFlags & QPinchGesture::ScaleFactorChanged) {
+        qreal value = gesture->property("scaleFactor").toReal();
+        currentStepScaleFactor = value;
+//        qDebug() << "pinchTriggered(): " << currentStepScaleFactor;
+//        on_sliderChanged();
+        QSlider * slider = this->currentWidget()->findChild<QSlider*>();
+        if(slider)
+            slider->setValue(slider->value() * currentStepScaleFactor);
+    }
+    if (gesture->state() == Qt::GestureFinished) {
+        scaleFactor *= currentStepScaleFactor;
+        currentStepScaleFactor = 1;
+    }
+    update();
+}
 
 void MainStack::on_sliderChanged()
 {
@@ -453,7 +604,7 @@ void MainStack::on_sliderChanged()
 
 void MainStack::on_sliderChanged(int size)
 {
-    qDebug() << "Slider" << size;
+//    qDebug() << "Slider" << size;
     QSettings s;
     s.setValue("text_edit_font_size", size);
 
@@ -481,6 +632,7 @@ void MainStack::on_sliderChanged(int size)
         QFont f = statusBar->font();
         f.setPointSize(size/10);
         statusBar->setFont(f);
+//        this->currentWidget()->adjustSize();
     }
 }
 
@@ -496,7 +648,7 @@ void MainStack::readSettings()
     m_showStatsDuringGame->setChecked(s.value("show_stats_during_game", false).toBool());
     m_preventDuplicateGuesses->setChecked(s.value("prevent_duplicate_guesses", true).toBool());
 
-    int fontSize = s.value("text_edit_font_size", 140).toInt();
+    int fontSize = 140;//s.value("text_edit_font_size", 140).toInt();
     if(fontSize < 100) fontSize = 100;
     else if (fontSize > 360) fontSize = 100;
     qDebug() << "fontSize" << fontSize;
@@ -930,7 +1082,7 @@ void MainStack::init_settings()
     w = new QWidget;
 
 //    QScrollArea * scroll = new QScrollArea();
-    form = new QFormLayout;
+//    form = new QFormLayout;
     grid = new QGridLayout;
 
 //    QScroller::grabGesture(w);
@@ -1077,6 +1229,8 @@ void MainStack::on_backButton()
 
     if(reloadFreqList)
     {
+        writeSettings();
+
         m_dict->setWordLength(m_numLettersCombo->currentText().toInt());
         m_dict->loadFrequencyList(m_dict->wordLength(), m_allowDoubleLetters->isChecked());
         foreach(QTextEdit * txt, m_helpPage->findChildren<QTextEdit *>())
@@ -1683,7 +1837,8 @@ void MainStack::on_updateSize(qreal factor)
         {
             //        qDebug() << "factor" << factor << this->width();
             //        textEdit->setMinimumWidth(screen->availableSize().width()*2/3);
-            textEdit->setMaximumWidth(textEdit->maximumWidth()*1.5*m_dpiFactor);
+//            textEdit->setMaximumWidth(textEdit->maximumWidth()*1.5*m_dpiFactor);
+
         }
         firstRun = false;
     }

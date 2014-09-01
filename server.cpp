@@ -1,6 +1,7 @@
 #include "server.h"
 #include <QDebug>
 #include <QHostInfo>
+#include <QSettings>
 
 Server::Server(QObject *parent) :
     QObject(parent)
@@ -15,6 +16,24 @@ Server::Server(QObject *parent) :
 
     // If a connection is heard, it then starts up a TCPSocket to the broadcast address
     // otherwise it keeps an open socket to be connected to.
+    readSettings();
+}
+
+void Server::writeSettings()
+{
+    // save the last good host name to the ini file
+    QSettings s;
+    if(!m_hostAddress.isNull() || m_tcpSocket->isOpen())
+        s.setValue("Server/host", m_hostAddress.toString());
+}
+
+void Server::readSettings()
+{
+    // read the last good host name from the ini file
+    QSettings s;
+    m_hostAddress = QHostAddress(s.value("Server/host").toString());
+    if(!m_hostAddress.isNull() && !m_hostAddress.isLoopback())
+        startTcpServer();
 }
 
 void Server::connectToTcpServer()
@@ -80,6 +99,10 @@ void Server::on_tcpSocketError()
 {
     emit msg(m_tcpSocket->errorString());
     m_connected = false;
+
+    writeSettings();
+    // switch into a waiting for resume mode
+    startTcpServer();
 }
 
 void Server::broadcastUdp()
@@ -158,7 +181,22 @@ void Server::readPendingDatagrams()
 void Server::startTcpServer()
 {
     qDebug() << Q_FUNC_INFO;
-
+    if(m_tcpServer)
+    {
+        if(m_tcpServer->isListening())
+            m_tcpServer->close();
+        m_tcpServer->deleteLater();
+        m_tcpServer = 0;
+    }
+    if(m_tcpSocket)
+    {
+        if(m_tcpSocket->isOpen())
+        {
+            m_tcpSocket->close();
+        }
+        m_tcpSocket->deleteLater();
+        m_tcpSocket = 0;
+    }
     m_tcpServer = new QTcpServer;
     m_tcpServer->listen(QHostAddress::Any, MY_PORT + 1);
     QObject::connect(m_tcpServer, SIGNAL(newConnection()),

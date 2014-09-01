@@ -39,6 +39,8 @@ signals:
     void connected();
     void disconnected();
 public slots:
+    void readSettings();
+    void writeSettings();
     void on_tcpSocketError();
     void writeData(QString);
     void on_tcpReadyRead();

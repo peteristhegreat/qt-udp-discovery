@@ -23,7 +23,11 @@ int main(int argc, char *argv[])
     a.setFont(QFont("Arial", 14));
     a.setApplicationName("Jotto");
     a.setOrganizationName("Post Meridian");
+#if defined(Q_OS_IOS) || defined(Q_OS_ANDROID)
+    // don't set the default format to ini
+#else
     QSettings::setDefaultFormat(QSettings::IniFormat);
+#endif
     bool retVal = QResource::registerResource("qresources.qrc");
     if(!retVal)
         qDebug() << "resources?" << retVal;
