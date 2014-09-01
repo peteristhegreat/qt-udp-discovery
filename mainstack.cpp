@@ -265,7 +265,8 @@ void MainStack::on_appStateChanged(Qt::ApplicationState state)
         qDebug() << "hidden";
         break;
     case Qt::ApplicationInactive:
-        wasInActive = true;
+        if(m_server->isConnected())
+            wasInActive = true;
         // incoming call or sms message?
         // reduce CPU intensive tasks
 //        writeSettings();
@@ -274,8 +275,7 @@ void MainStack::on_appStateChanged(Qt::ApplicationState state)
 
         // store wifi settings
         // notify other wifi player that we are suspended
-        if(m_server->isConnected())
-            m_server->writeSettings();
+//            m_server->writeSettings();
 
         break;
     case Qt::ApplicationActive:
@@ -992,6 +992,10 @@ void MainStack::on_connected()
 
 void MainStack::on_onePlayer()
 {
+    QSettings s;
+    bool explain_zoom = s.value("help/explain_zoom", true);
+    s.setValue("help/explain_zoom", false);
+
     m_random_count = 0;
     if(false)
     {
@@ -1034,6 +1038,8 @@ void MainStack::on_onePlayer()
     this->setCurrentWidget(m_onePlayerBoard);// one player board
 
     emit appendToYours("Random secret word picked.");
+    if(explain_zoom)
+        emit appendToYours("Pinch/pull with 2 fingers to resize text!");
 
     this->currentWidget()->findChild<QLineEdit*>()->setEnabled(true);
     this->currentWidget()->findChild<QLineEdit*>()->setFocus();
@@ -1266,7 +1272,8 @@ void MainStack::init_helpPage()
             "You play by trying to guess the secret word. "
             "If you are playing a five letter word game, "
             "the secret word is 5 letters long and "
-            "only five letter words can be guessed.";
+            "only five letter words can be guessed.\n\n"
+            "See <a href=\"http://pmify.com/jotto\">http://pmify.com/jotto</a> for more info.";
     QLabel * label = new QLabel(helpText + "\n\n\n" + f.readAll());
     f.close();
     label->setWordWrap(true);
@@ -1436,7 +1443,7 @@ void MainStack::on_giveUpButton()
             btn2->setEnabled(true);
 
         foreach(QTextEdit * t,
-                this->currentWidget()->findChildren<QTextEdit *>())
+                this->findChildren<QTextEdit *>("Game Txt"))
         {
             t->clear();
         }
@@ -1557,6 +1564,7 @@ void MainStack::init_board(bool is_two_player)
     hbox = new QHBoxLayout;
 
     txt = new QTextEdit;
+    txt->setObjectName("Game Txt");
     addKineticScrolling(txt);
 #ifdef Q_OS_IOS
     txt->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -1615,6 +1623,7 @@ void MainStack::init_board(bool is_two_player)
     if(is_two_player)
     {
         txt = new QTextEdit;
+        txt->setObjectName("Game Txt");
         addKineticScrolling(txt);
 #ifdef Q_OS_IOS
         txt->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);

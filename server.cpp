@@ -21,19 +21,20 @@ Server::Server(QObject *parent) :
 
 void Server::writeSettings()
 {
-    // save the last good host name to the ini file
-    QSettings s;
-    if(!m_hostAddress.isNull() || m_tcpSocket->isOpen())
-        s.setValue("Server/host", m_hostAddress.toString());
+//    // save the last good host name to the ini file
+//    QSettings s;
+//    if(!m_hostAddress.isNull() || m_tcpSocket->isOpen())
+//        s.setValue("Server/host", m_hostAddress.toString());
 }
 
 void Server::readSettings()
 {
-    // read the last good host name from the ini file
-    QSettings s;
-    m_hostAddress = QHostAddress(s.value("Server/host").toString());
-    if(!m_hostAddress.isNull() && !m_hostAddress.isLoopback())
-        startTcpServer();
+//    // read the last good host name from the ini file
+//    QSettings s;
+//    m_hostAddress = QHostAddress(s.value("Server/host").toString());
+//    if(!m_hostAddress.isNull() && !m_hostAddress.isLoopback())
+//        //startTcpServer();
+//        connectToTcpServer();
 }
 
 void Server::connectToTcpServer()
@@ -52,6 +53,10 @@ void Server::connectToTcpServer()
     m_tcpSocket = new QTcpSocket;
     QObject::connect(m_tcpSocket, SIGNAL(readyRead()), this, SLOT(on_tcpReadyRead()));
     m_tcpSocket->connectToHost(m_hostAddress, MY_PORT + 1);
+
+    QSettings s;
+    if(s.value("Server/host").toString() != m_hostAddress.toString())
+        writeSettings();
 
     linkTcpSocket();
 }
@@ -102,7 +107,21 @@ void Server::on_tcpSocketError()
 
     writeSettings();
     // switch into a waiting for resume mode
-    startTcpServer();
+//    startTcpServer();
+
+
+    // get to a clean state
+    m_state = IDLE;
+    if(m_tcpSocket)
+        m_tcpSocket->deleteLater();
+    m_tcpSocket = 0;
+    if(m_udpSocket)
+        m_udpSocket->deleteLater();
+    m_udpSocket = 0;
+    if(m_tcpServer)
+        m_tcpServer->deleteLater();
+    m_tcpServer = 0;
+    m_connected = false;
 }
 
 void Server::broadcastUdp()
