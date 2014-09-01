@@ -993,7 +993,7 @@ void MainStack::on_connected()
 void MainStack::on_onePlayer()
 {
     QSettings s;
-    bool explain_zoom = s.value("help/explain_zoom", true);
+    bool explain_zoom = s.value("help/explain_zoom", true).toBool();
     s.setValue("help/explain_zoom", false);
 
     m_random_count = 0;
