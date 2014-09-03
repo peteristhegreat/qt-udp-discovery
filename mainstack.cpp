@@ -1274,7 +1274,12 @@ void MainStack::init_helpPage()
             "the secret word is 5 letters long and "
             "only five letter words can be guessed.\n\n"
             "See <a href=\"http://pmify.com/jotto\">http://pmify.com/jotto</a> for more info.";
-    QLabel * label = new QLabel(helpText + "\n\n\n" + f.readAll());
+    QLabel * label = new QLabel();
+    QString temp = helpText + "\n\n\n" + f.readAll();
+    temp = temp.replace('\n',"<br/>");
+    temp = temp.replace('\t', "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
+    label->setText(temp);
+    label->setTextFormat(Qt::RichText);
     f.close();
     label->setWordWrap(true);
 //    label->setFixedWidth(300);
