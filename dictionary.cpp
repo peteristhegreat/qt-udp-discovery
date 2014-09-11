@@ -119,9 +119,10 @@ QString Dictionary::getPreviousGameStats()
             "Word - Guesses - (Random Guesses) - Win? - Time - Game Type\n";
     QFile file(fileName);
     if (!file.open(QFile::ReadOnly | QFile::Text)) {
-        return QString("Cannot read file %1:\n%2.")
-                             .arg(fileName)
-                             .arg(file.errorString());
+//        return QString("Cannot read file %1:\n%2.")
+//                             .arg(fileName)
+//                             .arg(file.errorString());
+        return QString("Play a game with %1 letters, before you can see any game stats.").arg(this->wordLength());
     }
     QTextStream in(&file);
     return desc + in.readAll().replace(',', " - ");

@@ -27,32 +27,38 @@
 #include <QExposeEvent>
 #include <QScreen>
 #include <QApplication>
+#include <QInputMethod>
 
 class LineEdit : public QLineEdit
 {
     Q_OBJECT
 public:
-    LineEdit(QWidget * parent = 0): QLineEdit(parent){}
+    LineEdit(QWidget * parent = 0): QLineEdit(parent)
+    {
+    }
 public slots:
     void keyPressEvent(QKeyEvent * ke)
     {
-//        qDebug() << "Press:" << ke->key();
+//        qDebug() << "Press:" << QString::number(ke->key(),16);
         QLineEdit::keyPressEvent(ke);
     }
     void keyReleaseEvent(QKeyEvent * ke)
     {
-//        qDebug() << "     :" << ke->key();
+//        qDebug() << "     :" << QString::number(ke->key(),16);
         QLineEdit::keyReleaseEvent(ke);
     }
+    void on_returnPressed()
+    {
+        qDebug() << "Return pressed!";
+    }
+
     void focusInEvent(QFocusEvent* fe)
     {
-//        qDebug() << "in" << fe->reason();
         QLineEdit::focusInEvent(fe);
     }
 
     void focusOutEvent(QFocusEvent * fe)
     {
-//        qDebug() << "out" << fe->reason();
         QLineEdit::focusOutEvent(fe);
 #ifdef Q_OS_IOS
         if(fe->reason() == Qt::OtherFocusReason)
@@ -62,7 +68,9 @@ public slots:
         }
 #endif
     }
-//    void focusNextChild()
+
+private:
+    QTimer * m_enterPressedTimer;
 };
 
 class MainStack : public SlidingStackedWidget
@@ -80,6 +88,8 @@ signals:
     void appendToTheirs(QString);
     void updateSize(qreal factor);
 public slots:
+    void keyPressEvent(QKeyEvent* ke);
+    void keyReleaseEvent(QKeyEvent* ke);
     void on_endOfPageAnimation();
     void dumpCurrentWordLists();
     void on_updateSize(qreal);
@@ -173,6 +183,9 @@ private:
     qreal scaleFactor;
     qreal currentStepScaleFactor;
     qreal rotationAngle;
+
+    QTimer * m_hideInputMethodTimer;
+    QTimer * m_returnPressedTimer;
 };
 
 #endif // MAINSTACK_H

@@ -54,6 +54,17 @@ QString Orientation(Qt::ScreenOrientation orientation)
 MainStack::MainStack(QWidget *parent) :
     SlidingStackedWidget(parent)
 {
+    m_hideInputMethodTimer = new QTimer(0);
+    m_hideInputMethodTimer->setInterval(300);
+    m_hideInputMethodTimer->setSingleShot(true);
+    QObject::connect(m_hideInputMethodTimer, SIGNAL(timeout()), qApp->inputMethod(), SLOT(hide()));
+
+    m_returnPressedTimer = new QTimer(0);
+    m_returnPressedTimer->setInterval(100);
+    m_returnPressedTimer->setSingleShot(true);
+    QObject::connect(m_returnPressedTimer, SIGNAL(timeout()), this, SLOT(sendData()));
+//    QObject::connect(m_returnPressedTimer, SIGNAL(timeout()), this, SLOT(on_lineEdit_editingFinished()));
+
     m_dpiFactor = 1;
     qDebug() << "DPI - Logical:" << this->logicalDpiX() << this->logicalDpiY()
              << "Physical:" << this->physicalDpiX() << this->physicalDpiY()
@@ -113,6 +124,7 @@ MainStack::MainStack(QWidget *parent) :
     m_overlay = new Overlay(this);
     m_overlay->hide();
     QObject::connect(m_overlay, SIGNAL(finished()), this, SLOT(on_endOfVictoryDance()));
+
 
     m_additionalStyleSheet = "";
 #ifdef Q_OS_IOS
@@ -729,6 +741,12 @@ void MainStack::sendData()
     QStatusBar * bar = this->currentWidget()->findChild<QStatusBar *>();
 
     QString word = lineEdit->text().toLower().trimmed();
+#ifdef Q_OS_ANDROID
+//    QObject::connect(lineEdit, SIGNAL(returnPressed()), qApp->inputMethod(), SLOT(hide()));
+//    qApp->inputMethod()->hide();
+//    m_returnPressedTimer->start();
+#endif
+
     int timeout = 3000;
 
     bool send = false;
@@ -985,8 +1003,11 @@ void MainStack::on_connected()
     this->setCurrentWidget(m_twoPlayerBoard);// two player board
 
     this->currentWidget()->findChild<QLineEdit*>()->setEnabled(true);
+#if defined(Q_OS_IOS) || defined(Q_OS_ANDROID)
+    // don't auto select the tap here area
+#else
     this->currentWidget()->findChild<QLineEdit*>()->setFocus();
-
+#endif
     on_sliderChanged();
 }
 
@@ -1042,7 +1063,11 @@ void MainStack::on_onePlayer()
         emit appendToYours("Pinch/pull with 2 fingers to resize text!");
 
     this->currentWidget()->findChild<QLineEdit*>()->setEnabled(true);
+#if defined(Q_OS_IOS) || defined(Q_OS_ANDROID)
+    // don't auto select the tap here area
+#else
     this->currentWidget()->findChild<QLineEdit*>()->setFocus();
+#endif
 
     m_stopWatch.start();
     m_stopWatch.restart();
@@ -1720,7 +1745,15 @@ void MainStack::init_board(bool is_two_player)
 
     QLineEdit * lineEdit = new LineEdit;
     lineEdit->setPlaceholderText("tap here!");
+#ifdef Q_OS_ANDROID
+    QObject::connect(lineEdit, SIGNAL(returnPressed()), qApp->inputMethod(), SLOT(hide()));
+    QObject::connect(lineEdit, SIGNAL(returnPressed()), m_returnPressedTimer, SLOT(start()));
+//    QObject::connect(lineEdit, SIGNAL(returnPressed()), this, SLOT(on_lineEdit_returnPressed()));
+#else
     QObject::connect(lineEdit, SIGNAL(returnPressed()), this, SLOT(sendData()));
+
+#endif
+
     hbox->addWidget(lineEdit);
 //    QObject::connect(lineEdit, SIGNAL(editingFinished()), this, SLOT(on_lineEdit_editingFinished()));
 //    QObject::connect(lineEdit, SIGNAL(returnPressed()), this, SLOT(on_lineEdit_returnPressed()));
@@ -1788,7 +1821,7 @@ void MainStack::on_lineEdit_returnPressed()
 
 void MainStack::on_lineEdit_editingFinished()
 {
-    qDebug() << Q_FUNC_INFO;
+    qDebug() << "timer timeout?";
 }
 
 
@@ -1838,8 +1871,8 @@ void MainStack::on_endOfPageAnimation()
 {
     this->currentWidget()->adjustSize();
 }
-
 QWidget * MainStack::currentWidget()
+
 {
     return m_currWidget;
 }
@@ -1859,5 +1892,41 @@ void MainStack::on_updateSize(qreal factor)
 
         }
         firstRun = false;
+    }
+}
+
+void MainStack::keyPressEvent(QKeyEvent* ke)
+{
+    qDebug() << "ms" << ke->key() << "down";
+    SlidingStackedWidget::keyPressEvent(ke);
+}
+
+void MainStack::keyReleaseEvent(QKeyEvent* ke)
+{
+    if(ke->key() == Qt::Key_Back)// necessary for Q_OS_ANDROID
+    {
+        QPushButton * pb = this->currentWidget()->findChild<QPushButton *>("Back");
+        if(pb)
+        {
+            ke->accept();
+            this->on_backButton();
+            return;
+        }
+
+
+        pb = this->currentWidget()->findChild<QPushButton *>("Give Up");
+        if(pb)
+        {
+            ke->accept();
+            this->on_giveUpButton();
+            return;
+        }
+        ke->accept();
+    }
+    else
+    {
+        qDebug() << "ms" << ke->key() << "up";
+
+        SlidingStackedWidget::keyPressEvent(ke);
     }
 }
