@@ -442,10 +442,12 @@ if(screen->size().width() <= 720 || screen->size().height() <= 720)
         qDebug() << "Larger than 6\" on diagonal";
         m_dpiFactor = 3;
     }
+    QSettings s;
+    qreal letter_button_scale_factor = s.value("letter_button_scale_factor","1.0").toString().toDouble();
     m_dpiFactor *= (qreal)dpi/96;
-    qDebug() << "End dpi factor:" << m_dpiFactor;
-    emit updateSize(m_dpiFactor);
-    this->on_updateSize(m_dpiFactor);
+    qDebug() << "End dpi factor:" << m_dpiFactor << letter_button_scale_factor;
+    emit updateSize(m_dpiFactor, letter_button_scale_factor);
+    this->on_updateSize(m_dpiFactor*letter_button_scale_factor);
     this->readSettings();
 
     this->currentWidget()->adjustSize();
@@ -659,6 +661,7 @@ void MainStack::readSettings()
     m_autoMarkZeroLetterGuesses->setChecked(s.value("auto_mark_zero_letter_guesses", true).toBool());
     m_showStatsDuringGame->setChecked(s.value("show_stats_during_game", false).toBool());
     m_preventDuplicateGuesses->setChecked(s.value("prevent_duplicate_guesses", true).toBool());
+    m_letterButtonScaleFactorCombo->setCurrentIndex(m_letterButtonScaleFactorCombo->findText(s.value("letter_button_scale_factor","1.0").toString()));
 
     int fontSize = 140;//s.value("text_edit_font_size", 140).toInt();
     if(fontSize < 100) fontSize = 100;
@@ -706,8 +709,10 @@ void MainStack::writeSettings()
 //    s.setValue("text_edit_font_size", this->findChild<QTextEdit*>()->fontPointSize()*10 * 96 / this->physicalDpiX());
     s.setValue("show_stats_during_game",m_showStatsDuringGame->isChecked());
     s.setValue("prevent_duplicate_guesses", m_preventDuplicateGuesses->isChecked());
+    s.setValue("letter_button_scale_factor",m_letterButtonScaleFactorCombo->currentText());
 //    qDebug() << this->findChild<QTextEdit*>()->fontPointSize()*10;
 
+    emit updateSize(m_dpiFactor, m_letterButtonScaleFactorCombo->currentText().toDouble());
 }
 
 void MainStack::resizeEvent(QResizeEvent *event)
@@ -1089,7 +1094,16 @@ void MainStack::on_settingsButton()
 
     foreach(QWidget * w, m_settingsPage->findChildren<QWidget*>())
     {
-        if(w->objectName() != "Back")
+        if(w->objectName() != "Back"
+                && w->objectName() != "Letter Button Size"
+                && w->parent()->objectName() != "Letter Button Size"
+                && (qobject_cast<QLabel*>(w)
+                    || qobject_cast<QComboBox*>(w)
+                    || qobject_cast<QCheckBox*>(w)
+                    )
+//                    || qobject_cast<QLabel*>(w)
+//                    || qobject_cast<QLabel*>(w)
+                )
         {
             w->setEnabled(m_prevPage == m_mainMenu);
         }
@@ -1109,6 +1123,7 @@ void MainStack::init_settings()
 {
     QWidget * w;
     QFormLayout * form;
+    Q_UNUSED(form)
     QGridLayout * grid;
     w = new QWidget;
 
@@ -1158,6 +1173,7 @@ void MainStack::init_settings()
 
     m_numLettersCombo->setCurrentIndex(m_numLettersCombo->findText("5"));
     m_numLettersCombo->setMaximumWidth(120);
+
 //    m_numLettersCombo->set
 
 
@@ -1168,6 +1184,17 @@ void MainStack::init_settings()
 //    form->addRow("# Letters", m_numLettersCombo);
     grid->addWidget(new QLabel("# Letters"), grid->rowCount(), 0);
     grid->addWidget(m_numLettersCombo, grid->rowCount() -1, 1);
+
+    m_letterButtonScaleFactorCombo = new QComboBox;
+    m_letterButtonScaleFactorCombo->setObjectName("Letter Button Size");
+    m_letterButtonScaleFactorCombo->addItems(QStringList()
+                                             << "0.5" << "0.6" << "0.7" << "0.8"
+                                             << "0.9" << "1.0" << "1.1" << "1.2"
+                                             << "1.3" << "1.4" << "1.5");
+    QLabel * lb_label = new QLabel("Letter Box Scale");
+    lb_label->setObjectName("Letter Button Size");
+    grid->addWidget(lb_label, grid->rowCount(), 0);
+    grid->addWidget(m_letterButtonScaleFactorCombo, grid->rowCount() -1, 1);
 
     QObject::connect(m_numLettersCombo, SIGNAL(currentIndexChanged(QString)),
                      m_dict, SLOT(setWordLength(QString)));
@@ -1261,6 +1288,7 @@ void MainStack::on_backButton()
     if(reloadFreqList)
     {
         writeSettings();
+
 
         m_dict->setWordLength(m_numLettersCombo->currentText().toInt());
         m_dict->loadFrequencyList(m_dict->wordLength(), m_allowDoubleLetters->isChecked());
@@ -1679,7 +1707,7 @@ void MainStack::init_board(bool is_two_player)
         LetterButton * lb = new LetterButton('A' + i);
         QObject::connect(this, SIGNAL(setTheme(QColor, QColor, int)), lb, SLOT(setTheme(QColor, QColor, int)));
         QObject::connect(this, SIGNAL(resetLetters()), lb, SLOT(on_reset()));
-        QObject::connect(this, SIGNAL(updateSize(qreal)), lb, SLOT(updateSize(qreal)));
+        QObject::connect(this, SIGNAL(updateSize(qreal,qreal)), lb, SLOT(updateSize(qreal,qreal)));
         highlighter->connectToLetterButton(lb);
         flow->addWidget(lb);
     }
@@ -1886,6 +1914,7 @@ void MainStack::on_updateSize(qreal factor)
     {
         foreach(QTextEdit * textEdit, this->findChildren<QTextEdit *>())
         {
+            Q_UNUSED(textEdit)
             //        qDebug() << "factor" << factor << this->width();
             //        textEdit->setMinimumWidth(screen->availableSize().width()*2/3);
 //            textEdit->setMaximumWidth(textEdit->maximumWidth()*1.5*m_dpiFactor);

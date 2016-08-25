@@ -81,7 +81,7 @@ void LetterButton::on_reset()
     updateColors();
 }
 
-void LetterButton::updateSize(qreal factor)
+void LetterButton::updateSize(qreal factor, qreal factor_2)
 {
 #ifdef Q_OS_ANDROID
     qreal w = qMin(qApp->screens().first()->size().width(), qApp->screens().first()->size().height());
@@ -94,9 +94,10 @@ void LetterButton::updateSize(qreal factor)
     qDebug() << "newFactor" << factor;
 #endif
 
-    this->setMinimumWidth(30*factor);
-    this->setMinimumHeight(30*factor);
+    this->setMinimumWidth(30*factor*factor_2);
+    this->setMinimumHeight(30*factor*factor_2);
     QFont f = this->font();
-    f.setPointSize(12*factor);
+    f.setPointSizeF(12*factor*factor_2);
+    qDebug() << "Font Point size for letter buttons:" << f.pointSizeF();
     this->setFont(f);
 }

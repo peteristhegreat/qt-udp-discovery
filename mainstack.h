@@ -86,7 +86,7 @@ signals:
     void resetLetters();
     void appendToYours(QString);
     void appendToTheirs(QString);
-    void updateSize(qreal factor);
+    void updateSize(qreal factor, qreal factor_2);
 public slots:
     void keyPressEvent(QKeyEvent* ke);
     void keyReleaseEvent(QKeyEvent* ke);
@@ -159,6 +159,7 @@ private:
     QCheckBox * m_autoMarkZeroLetterGuesses;
     QCheckBox * m_showStatsDuringGame;
     QCheckBox * m_preventDuplicateGuesses;
+    QComboBox * m_letterButtonScaleFactorCombo;
 
     QStatusBar * m_bar;
     Dictionary * m_dict;
