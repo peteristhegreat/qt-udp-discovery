@@ -98,6 +98,6 @@ void LetterButton::updateSize(qreal factor, qreal factor_2)
     this->setMinimumHeight(30*factor*factor_2);
     QFont f = this->font();
     f.setPointSizeF(12*factor*factor_2);
-    qDebug() << "Font Point size for letter buttons:" << f.pointSizeF();
+    //qDebug() << "Font Point size for letter buttons:" << f.pointSizeF();
     this->setFont(f);
 }

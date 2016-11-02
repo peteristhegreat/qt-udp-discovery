@@ -4,10 +4,12 @@
 #include <QDebug>
 #include <QDir>
 #include <QFile>
+#include <QMediaPlayer>
 
-
+QMediaPlayer *player = new QMediaPlayer;
 Overlay::Overlay(QWidget *parent) :QWidget(parent)
 {
+
     setPalette(Qt::transparent);
     setAttribute(Qt::WA_TransparentForMouseEvents);
 
@@ -18,21 +20,24 @@ Overlay::Overlay(QWidget *parent) :QWidget(parent)
     QPropertyAnimation * a;
     a = new QPropertyAnimation(this, "star1Pos");
     a->setStartValue(QPoint(0,-100));
-    a->setEndValue(QPoint(100, 150));
+    //a->setEndValue(QPoint(100, 150));     //Ending coordinate of stars
+    a->setEndValue(QPoint(0, 0));
     a->setDuration(2000);
     a->setEasingCurve(QEasingCurve::InOutBack);
-
     m_paraAnimation->addAnimation(a);
+
     a = new QPropertyAnimation(this, "star2Pos");
     a->setStartValue(QPoint(0,-100));
-    a->setEndValue(QPoint(225, 150));
+    //a->setEndValue(QPoint(225, 150));
+    a->setEndValue(QPoint(125,0));
     a->setDuration(3000);
     a->setEasingCurve(QEasingCurve::InOutBack);
     m_paraAnimation->addAnimation(a);
 
     a = new QPropertyAnimation(this, "star3Pos");
     a->setStartValue(QPoint(0,-110));
-    a->setEndValue(QPoint(350, 150));
+    //a->setEndValue(QPoint(350, 150));
+    a->setEndValue(QPoint(250,0));
     a->setDuration(4000);
     a->setEasingCurve(QEasingCurve::InOutBack);
     m_paraAnimation->addAnimation(a);
@@ -44,7 +49,8 @@ Overlay::Overlay(QWidget *parent) :QWidget(parent)
 
     a = new QPropertyAnimation(this, "textPos");
     a->setStartValue(QPoint(0, 2000));
-    a->setEndValue(QPoint(200, 350));
+    //a->setEndValue(QPoint(200, 350));
+    a->setEndValue(QPoint(100, 200));
     a->setDuration(3000);
     a->setEasingCurve(QEasingCurve::InOutBack);
     m_seqAnimation->addAnimation(a);
@@ -63,9 +69,15 @@ Overlay::Overlay(QWidget *parent) :QWidget(parent)
     connect(m_probe, SIGNAL(audioBufferProbed(QAudioBuffer)),
             this, SLOT(processBuffer(QAudioBuffer)));
     m_player = new QMediaPlayer;
-//    m_player->setVolume(50);
+    m_player->setVolume(50);
+    m_player->setMedia(QUrl("qrc:/sounds/finished.wav"));
+    m_player->audioAvailableChanged(true);
 
-    m_probe->setSource(m_player);
+    if(m_probe->setSource(m_player))
+        qDebug() << "audio-probe source was set";
+    else
+        qDebug() << "audio-probe failed to set source";
+
 #else
     //finishedSoundEffect.setSource(QUrl::fromLocalFile("://sounds/finished.wav"));
     finishedSoundEffect.setSource(QUrl("://sounds/finished.wav"));
@@ -79,6 +91,7 @@ void Overlay::processBuffer(QAudioBuffer buffer)
 {
 //    qDebug() << a.sampleCount() << a.data()[0];
     // Assuming 'buffer' is an unsigned 16 bit stereo buffer..
+    qDebug() << "processBuffer intiated!";
     QAudioBuffer::S16U *frames = buffer.data<QAudioBuffer::S16U>();
     for (int i=0; i < buffer.frameCount(); i++) {
 //        qSwap(frames[i].left, frames[i].right);
@@ -99,16 +112,21 @@ void Overlay::paintEvent(QPaintEvent *)
 
     QPainter painter(this);
     if(this->width() < 500)
-        painter.scale(((qreal)this->width())/500, ((qreal)this->width())/500);
+        //painter.scale(((qreal)this->width())/500, ((qreal)this->width())/500);
+        painter.scale((qreal)(500/this->width()), (qreal)(500/this->width()));
     else
     {
-        painter.translate((this->width() - 500)/2, 0);
+        //painter.translate((this->width() - 500)/2, 0);
+        painter.translate(this->width()/2-175, this->height()/5);
     }
+
     painter.setRenderHint(QPainter::Antialiasing);
     painter.setPen(QPen(Qt::red));
     painter.setBrush(QBrush(Qt::red));
-//    painter.drawLine(width()/8, height()/8, 7*width()/8, 7*height()/8);
-//    painter.drawLine(width()/8, 7*height()/8, 7*width()/8, height()/8);
+
+    //painter.drawLine(width()/8, height()/8, 7*width()/8, 7*height()/8);
+    //painter.drawLine(width()/8, 7*height()/8, 7*width()/8, height()/8);
+
     painter.translate(star1Pos());
     painter.drawPolygon(star, 5, Qt::WindingFill);
     painter.translate(-star1Pos() + star2Pos());
@@ -119,12 +137,15 @@ void Overlay::paintEvent(QPaintEvent *)
 
     if(this->geometry().contains(textPos()))
     {
-        painter.drawText(textPos(),"WINNER!!!");
+       painter.drawText(textPos(),"WINNER!!!");
     }
 
 #ifdef USE_PLAYER
-    painter.drawRect(0, this->height()*4./5, 5,
+
+     painter.drawRect(0, this->height()*4./5, 5,
                      -this->height()*3./5*(100 - m_audioHeight)/100.);
+     //qDebug() << "audio height: " << m_audioHeight;
+
 #endif
 }
 
@@ -132,9 +153,10 @@ void Overlay::startAnimation()
 {
     this->resize(qobject_cast<QWidget*>(this->parent())->size());
 #ifdef USE_PLAYER
-    m_player->setMedia(QUrl::fromLocalFile("://sounds/finished.wav"));
-    qDebug() << QDir::current().absolutePath();
+
+    //qDebug() << QDir::current().absolutePath();
     m_player->play();
+
 //    qDebug() << m_player->errorString();
 #else
     finishedSoundEffect.play();

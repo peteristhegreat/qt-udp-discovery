@@ -746,6 +746,8 @@ void MainStack::sendData()
     QStatusBar * bar = this->currentWidget()->findChild<QStatusBar *>();
 
     QString word = lineEdit->text().toLower().trimmed();
+    QString word_def_url_source =  "view-source:www.dictionary.com/browse/"+word+"?s=t";
+
 #ifdef Q_OS_ANDROID
 //    QObject::connect(lineEdit, SIGNAL(returnPressed()), qApp->inputMethod(), SLOT(hide()));
 //    qApp->inputMethod()->hide();
@@ -1059,7 +1061,7 @@ void MainStack::on_onePlayer()
     // Pick a random word from the dictionary based on difficulty
 //    m_theirSecretWord = m_dict->getNewSecretWord(16, m_allowDoubleLetters->isChecked());
     m_theirSecretWord = m_dict->getNewSecretWord(0,25);
-    qDebug() << m_theirSecretWord;
+    qDebug() << "The secret word: " << m_theirSecretWord;
 
     this->setCurrentWidget(m_onePlayerBoard);// one player board
 
@@ -1320,6 +1322,7 @@ void MainStack::init_helpPage()
     QFile f("://spoken/double letter summary.txt");
     f.open(QFile::ReadOnly | QFile::Text);
 
+
     QString helpText =
             "Welcome to Jotto!\n\n"
             "You play by trying to guess the secret word. "
@@ -1327,7 +1330,10 @@ void MainStack::init_helpPage()
             "the secret word is 5 letters long and "
             "only five letter words can be guessed.\n\n"
             "See <a href=\"http://pmify.com/jotto\">http://pmify.com/jotto</a> for more info.";
+
     QLabel * label = new QLabel();
+    label->setOpenExternalLinks(true);
+
     QString temp = helpText + "\n\n\n" + f.readAll();
     temp = temp.replace('\n',"<br/>");
     temp = temp.replace('\t', "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
@@ -1337,6 +1343,7 @@ void MainStack::init_helpPage()
     label->setWordWrap(true);
 //    label->setFixedWidth(300);
 //    grid->addWidget(label, grid->rowCount(), 0, Qt::AlignHCenter);
+
 
     tabs->addTab(label,"Instructions");
 
