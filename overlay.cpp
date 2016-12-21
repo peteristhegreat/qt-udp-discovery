@@ -5,9 +5,10 @@
 #include <QDir>
 #include <QFile>
 #include <QMediaPlayer>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
 
-QMediaPlayer *player = new QMediaPlayer;
-Overlay::Overlay(QWidget *parent) :QWidget(parent)
+Overlay::Overlay(WinBox *winBox, QWidget *parent) : QWidget(parent), m_winBox(winBox)
 {
 
     setPalette(Qt::transparent);
@@ -15,7 +16,9 @@ Overlay::Overlay(QWidget *parent) :QWidget(parent)
 
     this->setFont(QFont("Times",40, QFont::Bold, true));
 
+
     m_paraAnimation = new QParallelAnimationGroup;
+    m_winBox_text = new QParallelAnimationGroup;
 
     QPropertyAnimation * a;
     a = new QPropertyAnimation(this, "star1Pos");
@@ -35,7 +38,7 @@ Overlay::Overlay(QWidget *parent) :QWidget(parent)
     m_paraAnimation->addAnimation(a);
 
     a = new QPropertyAnimation(this, "star3Pos");
-    a->setStartValue(QPoint(0,-110));
+    a->setStartValue(QPoint(0,-100));
     //a->setEndValue(QPoint(350, 150));
     a->setEndValue(QPoint(250,0));
     a->setDuration(4000);
@@ -53,7 +56,17 @@ Overlay::Overlay(QWidget *parent) :QWidget(parent)
     a->setEndValue(QPoint(100, 200));
     a->setDuration(3000);
     a->setEasingCurve(QEasingCurve::InOutBack);
-    m_seqAnimation->addAnimation(a);
+    m_winBox_text->addAnimation(a);
+
+    a = new QPropertyAnimation(winBox, "pos");
+    a->setStartValue(QPoint(0, -800));
+    a->setEndValue(QPoint(parent->width()/2-m_winBox->width()*3/4, parent->height()*3/4-winBox->height()/2));
+    a->setDuration(3000);
+    a->setEasingCurve(QEasingCurve::OutQuad);
+    m_winBox_text->addAnimation(a);
+
+    m_seqAnimation->addAnimation(m_winBox_text);
+
 
     QGraphicsDropShadowEffect * dse = new QGraphicsDropShadowEffect();
     dse->setBlurRadius(20);
@@ -63,6 +76,10 @@ Overlay::Overlay(QWidget *parent) :QWidget(parent)
 //    effect.setVolume(0.25f);
 
     QObject::connect(m_seqAnimation, SIGNAL(finished()), this, SIGNAL(finished()));
+
+
+
+
 
 #ifdef USE_PLAYER
     m_probe = new QAudioProbe;
@@ -140,10 +157,13 @@ void Overlay::paintEvent(QPaintEvent *)
        painter.drawText(textPos(),"WINNER!!!");
     }
 
+
+
+
 #ifdef USE_PLAYER
 
-     painter.drawRect(0, this->height()*4./5, 5,
-                     -this->height()*3./5*(100 - m_audioHeight)/100.);
+     //painter.drawRect(0, this->height()*4./5, 5,
+       //              -this->height()*3./5*(100 - m_audioHeight)/100.);
      //qDebug() << "audio height: " << m_audioHeight;
 
 #endif
@@ -166,5 +186,37 @@ void Overlay::startAnimation()
 //    f.write(qPrintable(QDir::current().absolutePath()));
 //    f.close();
     m_seqAnimation->start();
+    m_winBox->resize(this->size()/2);
+    m_winBox->update();
+    m_winBox->setVisible(true);
+    m_winBox->raise();
+
+
+
     setTextPos(QPoint(-200,-200));
+    m_winBox->setProperty("pos",QPoint(-1000,-1000));
+    //setWinBoxPos(QPoint(-200,-200));
+    //m_winBox->mapToParent(winBoxPos());
 }
+
+void Overlay::resizeEvent(QResizeEvent *event)
+{
+    qDebug() << Q_FUNC_INFO;
+    m_winBox->resize(this->size()/2);
+    m_winBox->update();
+    this->update();
+}
+
+void Overlay::setTime(QString time)
+{
+    m_winBox->setTime(time);
+
+}
+
+void Overlay::setNumberOfGuesses(int num)
+{
+
+    m_winBox->setNumberOfGuesses(num);
+}
+
+

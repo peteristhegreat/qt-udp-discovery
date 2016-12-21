@@ -28,6 +28,7 @@
 #include <QScreen>
 #include <QApplication>
 #include <QInputMethod>
+#include <QMediaPlayer>
 
 class LineEdit : public QLineEdit
 {
@@ -81,6 +82,8 @@ public:
     ~MainStack(){}
     void updateGuessCount(bool reset = false);
     QWidget * currentWidget();
+
+
 signals:
     void setTheme(QColor, QColor, int);
     void resetLetters();
@@ -113,8 +116,12 @@ public slots:
     void on_connectToGame();
     void on_connected();
     void on_onePlayer();
+    void on_newGame();
     void on_settingsButton();
     void on_giveUpButton();
+    void on_MainMenu();
+    void on_confirmedGiveUp();
+    void resetBoard();
     void on_shuffle();
     // line edit with enter pressed
     void sendData();
@@ -136,6 +143,7 @@ public slots:
     void on_screenChanged(QScreen*);
 
     void on_appStateChanged(Qt::ApplicationState);
+
 private:
     QWindow * m_window;
     QWidget * m_prevPage;
@@ -160,6 +168,7 @@ private:
     QCheckBox * m_showStatsDuringGame;
     QCheckBox * m_preventDuplicateGuesses;
     QComboBox * m_letterButtonScaleFactorCombo;
+    QCheckBox * m_soundEffects;
 
     QStatusBar * m_bar;
     Dictionary * m_dict;
@@ -187,6 +196,8 @@ private:
 
     QTimer * m_hideInputMethodTimer;
     QTimer * m_returnPressedTimer;
+
+    WinBox *m_winBox;
 };
 
 #endif // MAINSTACK_H

@@ -6,6 +6,7 @@
 #include <QMessageBox>
 #include <QIcon>
 
+
 OverlayDialogBox::OverlayDialogBox(QWidget *parent, QDialog * dialog) :
     QWidget(parent), m_dialog(dialog)
 {
@@ -54,6 +55,7 @@ OverlayDialogBox::OverlayDialogBox(QWidget *parent, QDialog * dialog) :
     dse->setBlurRadius(20);
     this->setGraphicsEffect(dse);
 
+
     QGridLayout * grid = new QGridLayout();
     this->setLayout(grid);
 //    m_dialog->setParent(this);
@@ -74,12 +76,20 @@ OverlayDialogBox::OverlayDialogBox(QWidget *parent, QDialog * dialog) :
 
     this->resize(parent->size());
 
+
+    m_appearAnimation = new QPropertyAnimation(this,"pos",this);
+    m_appearAnimation->setDuration(2000);
+     m_appearAnimation->setStartValue(QPoint(0,-3*this->height()/2));
+     m_appearAnimation->setEndValue(QPoint(0,0));
+     m_appearAnimation->setEasingCurve(QEasingCurve::OutCubic);
+
     this->hide();
 }
 
 int OverlayDialogBox::exec()
 {
     this->show();
+    m_appearAnimation->start();
     int retVal = m_dialog->exec();
     this->hide();
     return retVal;

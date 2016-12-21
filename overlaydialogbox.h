@@ -5,10 +5,16 @@
 #include <QDialog>
 #include <QMessageBox>
 #include <QInputDialog>
+#include <QPropertyAnimation>
 
 class OverlayDialogBox : public QWidget
 {
     Q_OBJECT
+
+    Q_PROPERTY(int blurRadius READ blurRadius WRITE setBlurRadius NOTIFY blurRadiusChanged)
+    int m_blurRadius;
+
+    QPropertyAnimation * m_appearAnimation;
 public:
     explicit OverlayDialogBox(QWidget *parent, QDialog * dialog);
     QMessageBox * msgBox()
@@ -28,10 +34,25 @@ signals:
     void accepted();
     void rejected();
     void finished(int);
+    void blurRadiusChanged(int blurRadius);
+
 public slots:
+void setBlurRadius(int blurRadius)
+{
+    if (m_blurRadius == blurRadius)
+    return;
+
+m_blurRadius = blurRadius;
+emit blurRadiusChanged(blurRadius);
+}
+
 public:
     int exec();
     QDialog * m_dialog;
+    int blurRadius() const
+    {
+        return m_blurRadius;
+    }
 };
 
 
