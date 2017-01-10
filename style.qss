@@ -1,3 +1,7 @@
+QWidget#win_box {
+   background: green;
+}
+
 QPushButton {
     padding: 20;
     margin: 10;

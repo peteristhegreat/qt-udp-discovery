@@ -29,16 +29,26 @@ WinBox::WinBox(QWidget *parent) : QWidget(parent)
     QObject::connect(m_exit,SIGNAL(clicked(bool)),this,SLOT(hide()));
 
 
-
+//    QPalette p = this->palette();
+//    p.setColor(QPalette::Background, Qt::black);
+//    this->setAutoFillBackground(true);
+//    this->setPalette(p);
+//    qDebug() << "geometry of winbox" << this->geometry();
 
     buttons->addWidget(m_exit);
     buttons->addWidget(m_newGame);
 
     layout->addLayout(labels);
     layout->addLayout(buttons);
-    setLayout(layout);
 
-    setStyleSheet("background-color:white;");
+    this->setAttribute(Qt::WA_TranslucentBackground, false);
+    QWidget * w = new QWidget(this);
+    QHBoxLayout * box = new QHBoxLayout(this);
+    w->setLayout(layout);
+    box->addWidget(w);
+    setLayout(box);
+
+    setStyleSheet("background-color:green;");
 
 
 

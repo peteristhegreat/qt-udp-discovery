@@ -13,8 +13,11 @@ RC_FILE = myapp.rc
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 #QT       -= gui
-
-ICON = jotto.icns
+macx {
+    QMAKE_MAC_SDK = macosx10.12
+    #!host_build:QMAKE_MAC_SDK = macosx10.11
+    ICON = jotto.icns
+}
 
 ios {
 # http://www.appiconsizes.com/
