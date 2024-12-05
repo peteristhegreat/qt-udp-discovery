@@ -4,5 +4,7 @@
         <file>dictionary.txt</file>
         <file>frequency.txt</file>
         <file>jotto.png</file>
+        <file>sounds/finished.wav</file>
+        <file>style.qss</file>
     </qresource>
 </RCC>

@@ -11,7 +11,7 @@ Overlay::Overlay(QWidget *parent) :QWidget(parent)
     setPalette(Qt::transparent);
     setAttribute(Qt::WA_TransparentForMouseEvents);
 
-    this->setFont(QFont("Times",30, QFont::Bold, true));
+    this->setFont(QFont("Times New Roman",30, QFont::Bold, true));
 
     m_paraAnimation = new QParallelAnimationGroup;
 
@@ -70,7 +70,7 @@ Overlay::Overlay(QWidget *parent) :QWidget(parent)
     finishedSoundEffect.setSource(QUrl::fromLocalFile("sounds/finished.wav"));
 #endif
 }
-
+#ifdef USE_PLAYER
 void Overlay::processBuffer(QAudioBuffer buffer)
 {
 //    qDebug() << a.sampleCount() << a.data()[0];
@@ -82,7 +82,7 @@ void Overlay::processBuffer(QAudioBuffer buffer)
         m_audioHeight = frames[i].average()*100./65535;
     }
 }
-
+#endif
 void Overlay::paintEvent(QPaintEvent *event)
 {
     static const QPointF star[5] = {

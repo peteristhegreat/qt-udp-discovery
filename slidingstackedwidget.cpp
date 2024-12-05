@@ -1,4 +1,4 @@
-#include "SlidingStackedWidget.h"
+#include "slidingstackedwidget.h"
 
 
 SlidingStackedWidget::SlidingStackedWidget(QWidget *parent)
@@ -110,9 +110,9 @@ void SlidingStackedWidget::slideInWgt(QWidget * newwidget, enum t_direction dire
         if(false)
         {
             if(this->width() > this->height())
-                direction = (SlidingStackedWidget::t_direction)(qrand()%2 + 2);
+                direction = (SlidingStackedWidget::t_direction)(QRandomGenerator::global()->bounded(2) + 2);
             else
-                direction = (SlidingStackedWidget::t_direction)(qrand()%2);
+                direction = (SlidingStackedWidget::t_direction)(QRandomGenerator::global()->bounded(2));
         }
         //NOW....
         //calculate the shifts

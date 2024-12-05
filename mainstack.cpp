@@ -56,7 +56,7 @@ void MainStack::on_refreshStyleSheet()
 //    QApplication app( argc, argv );
 
     // Load an application style
-    QFile styleFile( "style.qss" );
+    QFile styleFile( ":/style.qss" );
     if(styleFile.exists())
     {
         styleFile.open( QFile::ReadOnly );
@@ -353,19 +353,15 @@ void MainStack::on_onePlayer()
 
 void MainStack::init_gui()
 {
-    QSvgWidget * svg;
-    QWidget * w;
-    QGridLayout * grid;
-    QVBoxLayout * vbox;
-    QVBoxLayout * group_vbox;
-    QPushButton * btn;
-    QGroupBox * group;
-//    QTextEdit * txt;
-//    QLineEdit * lineEdit;
-//    QLabel * label;
-    QStatusBar * bar;
-//    Utils::FlowLayout * flow;
-    QHBoxLayout * hbox;
+    QWidget *w;
+    QGridLayout *grid;
+    QVBoxLayout *vbox;
+    QVBoxLayout *group_vbox;
+    QPushButton *btn;
+    QGroupBox *group;
+    QStatusBar *bar;
+    QHBoxLayout *hbox;
+    QSvgWidget *svg;
 
     w = new QWidget;
     vbox = new QVBoxLayout;
@@ -484,8 +480,10 @@ void MainStack::init_settings()
             hbox->addWidget(m_numLettersCombo);
     grid->addLayout(hbox, grid->rowCount(), 0);
 
-    QObject::connect(m_numLettersCombo, SIGNAL(currentIndexChanged(QString)),
+    QObject::connect(m_numLettersCombo, SIGNAL(currentTextChanged(QString)),
                      m_dict, SLOT(setWordLength(QString)));
+    // QObject::connect(m_numLettersCombo, &QComboBox::currentIndexChanged,
+    //                  m_dict, &Dictionary::setWordLength);
 
     m_ephHouseRules = new QCheckBox("EPH House Rules for double/triple letter reporting");
     grid->addWidget(m_ephHouseRules);
@@ -637,7 +635,7 @@ void MainStack::init_board(bool is_two_player)
 //    QLineEdit * lineEdit;
     QLabel * label;
     QStatusBar * bar;
-    Utils::FlowLayout * flow;
+    FlowLayout * flow;
 
     Highlighter * highlighter;
 
@@ -705,10 +703,10 @@ void MainStack::init_board(bool is_two_player)
     }
 
     // Draw the alphabet
-    flow = new Utils::FlowLayout;
+    flow = new FlowLayout;
     for(int i = 0; i< 26; i++)
     {
-        LetterButton * lb = new LetterButton('A' + i);
+        LetterButton * lb = new LetterButton(QChar('A' + i));
         QObject::connect(this, SIGNAL(setTheme(QColor, QColor, int)), lb, SLOT(setTheme(QColor, QColor, int)));
         QObject::connect(this, SIGNAL(resetLetters()), lb, SLOT(on_reset()));
         highlighter->connectToLetterButton(lb);

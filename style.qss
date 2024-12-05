@@ -1,5 +1,19 @@
+/* https://github.com/ColinDuquesnoy/QDarkStyleSheet/blob/master/qdarkstyle/light/lightstyle.qss */
+QLineEdit QTextEdit {
+  color: #19232D;
+  background: white;
+}
+
+/*
+QWidget:disabled {
+  color: #9DA9B5;
+  background: white;
+}
+*/
+
 QPushButton {
 
+color: #19232D;
 padding: 20;
 
 margin: 10;
@@ -9,6 +23,7 @@ border-radius: 20px;
 
 border-style: inset;
 border-width: 2px;
+
 /*  min-width: 10em; */
  
  background: white;

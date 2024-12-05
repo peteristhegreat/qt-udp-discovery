@@ -2,10 +2,11 @@
 #include <QFile>
 #include <QTextStream>
 #include <QTimer>
-#include <QTime>
+#include <QElapsedTimer>
 #include <QDebug>
 #include <QApplication>
 #include <QStringList>
+#include <QRandomGenerator>
 
 Dictionary::Dictionary(QObject *parent) :
     QObject(parent)
@@ -13,7 +14,7 @@ Dictionary::Dictionary(QObject *parent) :
     m_allowedWordLengths << 3 << 4 << 5 << 6 << 7 << 8;
 
     foreach(int i, m_allowedWordLengths)
-        m_map[i] = new QHash < QString, int>;
+        m_map[i] = new QMap < QString, int>;
 
     // start a delayed init
     QTimer * t = new QTimer;
@@ -45,7 +46,7 @@ void Dictionary::setWordLength(int l)
 
 void Dictionary::loadFrequencyList()
 {
-    QTime time;
+    QElapsedTimer time;
     time.start();
     QString word, line;
     QFile freq("://frequency.txt");
@@ -75,19 +76,19 @@ void Dictionary::loadFrequencyList()
 
 QString Dictionary::getNewSecretWord(int difficulty, bool allowDoubleLetters)
 {
-    // factor in difficulty
-    qsrand(QDateTime::currentMSecsSinceEpoch());
+    QRandomGenerator *randomGenerator = QRandomGenerator::global(); // Use the global QRandomGenerator instance
 
-    QHash<QString, int>::const_iterator iter;
+    QMap<QString, int>::const_iterator iter;
     do
     {
-        int i = qrand() % m_map[m_wordLength]->size();
+        int i = randomGenerator->bounded(m_map[m_wordLength]->size()); // Generate a random index
         iter = m_map[m_wordLength]->constBegin();
-        iter += i;
-        qDebug() << "SecretWord?" << iter.key() << iter.value() ;
+        std::advance(iter, i);
+
+        qDebug() << "SecretWord?" << iter.key() << iter.value();
         qApp->processEvents();
-    }while(iter.value() < difficulty
-           || (!allowDoubleLetters && Dictionary::hasDoubleLetters(iter.key())));
+    } while (iter.value() < difficulty
+             || (!allowDoubleLetters && Dictionary::hasDoubleLetters(iter.key())));
 
     return iter.key();
 }
@@ -96,7 +97,7 @@ void Dictionary::init()
 {
     // TODO: Cache the word lists for faster loading later
     // if files don't exist
-    QTime time;
+    QElapsedTimer time;
     time.start();
     QString word;
     QFile dict("://dictionary.txt");

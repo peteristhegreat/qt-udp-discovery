@@ -44,7 +44,7 @@ public slots:
 private:
     QList <int> m_allowedWordLengths;
     int m_wordLength;
-    QMap < int, QHash <QString, int> *> m_map;
+    QMap<int, QMap<QString, int> *> m_map;
 //    QHash <QString, int> six_letter_words;
 //    QHash <QString, int> five_letter_words;
 };

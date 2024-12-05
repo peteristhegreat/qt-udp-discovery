@@ -7,13 +7,15 @@
 #include <QPoint>
 #include <QGraphicsDropShadowEffect>
 #include <QSoundEffect>
-#include <QAudioProbe>
 #include <QMediaPlayer>
 
 #ifndef Q_OS_MAC
 #define USE_PLAYER
 #endif
 
+#ifdef USE_PLAYER
+// #include <QAudioProbe>
+#endif
 
 class Overlay : public QWidget
 {
@@ -52,7 +54,6 @@ public:
 signals:
     void finished();
 public slots:
-    void processBuffer(QAudioBuffer);
     void paintEvent(QPaintEvent *event);
     void startAnimation();
 private:
@@ -65,6 +66,7 @@ private:
     QPoint m_textPos;
 
 #ifdef USE_PLAYER
+    void processBuffer(QAudioBuffer);
     QAudioProbe *m_probe;
     QMediaPlayer * m_player;
 #else
