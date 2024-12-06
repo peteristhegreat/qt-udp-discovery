@@ -1,5 +1,5 @@
 /* https://github.com/ColinDuquesnoy/QDarkStyleSheet/blob/master/qdarkstyle/light/lightstyle.qss */
-QLineEdit QTextEdit {
+QLineEdit, QTextEdit, QStatusBar {
   color: #19232D;
   background: white;
 }

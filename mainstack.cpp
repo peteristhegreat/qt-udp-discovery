@@ -6,6 +6,7 @@
 #include <QLineEdit>
 #include <QLabel>
 #include <QSvgWidget>
+#include <QSvgRenderer>
 #include <QInputDialog>
 #include "flowlayout.h"
 #include "letterbutton.h"
@@ -20,6 +21,7 @@
 #include <QShortcut>
 #include <QKeySequence>
 #include <QGroupBox>
+#include <QSizePolicy>
 
 MainStack::MainStack(QWidget *parent) :
     SlidingStackedWidget(parent)
@@ -369,6 +371,8 @@ void MainStack::init_gui()
     grid = new QGridLayout;
 
     svg = new QSvgWidget("://jotto-logo.svg");
+    svg->renderer()->setAspectRatioMode(Qt::KeepAspectRatio);
+    svg->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     grid->addWidget(svg);
 
     vbox->addStretch();
@@ -717,7 +721,7 @@ void MainStack::init_board(bool is_two_player)
     emit setTheme(Qt::black, Qt::white, 0);
     emit setTheme(Qt::white, Qt::black, 2);
     emit setTheme(Qt::black, Qt::lightGray, 4);
-    emit setTheme(Qt::white, Qt::green, 6);
+    emit setTheme(Qt::black, Qt::green, 6);
     emit resetLetters();
 
     grid->addLayout(flow,row++,0,1,2, Qt::AlignCenter);

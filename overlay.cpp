@@ -65,6 +65,7 @@ Overlay::Overlay(QWidget *parent) : QWidget(parent)
 
 void Overlay::processBuffer()
 {
+    qDebug() << "In processBuffer";
     while (m_audioDecoder->bufferAvailable()) {
         QAudioBuffer buffer = m_audioDecoder->read();
         if (buffer.isValid()) {
