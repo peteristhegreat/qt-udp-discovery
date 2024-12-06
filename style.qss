@@ -18,7 +18,7 @@ padding: 20;
 
 margin: 10;
 
-font-family: "Times";
+font-family: "Times New Roman";
 border-radius: 20px;
 
 border-style: inset;

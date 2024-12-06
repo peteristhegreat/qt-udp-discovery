@@ -5,6 +5,7 @@
 #include <QDir>
 #include <QFile>
 #include <QAudioFormat>
+#include <QAudioBufferOutput>
 
 Overlay::Overlay(QWidget *parent) : QWidget(parent)
 {
@@ -38,12 +39,32 @@ Overlay::Overlay(QWidget *parent) : QWidget(parent)
     m_seqAnimation = new QSequentialAnimationGroup(this);
     m_seqAnimation->addAnimation(m_paraAnimation);
 
-    a = new QPropertyAnimation(this, "textPos");
-    a->setStartValue(QPoint(0, 2000));
-    a->setEndValue(QPoint(200, 300));
-    a->setDuration(3000);
-    a->setEasingCurve(QEasingCurve::InOutBack);
-    m_seqAnimation->addAnimation(a);
+    QList<QPoint> positions = {
+        QPoint(0, 2000),
+        QPoint(200, 300),
+        // QPoint(205, 300),
+        // QPoint(205, 305),
+        // QPoint(200, 305),
+        // QPoint(200, 300)
+    };
+
+    // Loop through the positions and create animations
+    for (int i = 0; i < positions.size() - 1; ++i) {
+        QPropertyAnimation *a = new QPropertyAnimation(this, "textPos");
+        a->setStartValue(positions[i]);
+        a->setEndValue(positions[i + 1]);
+        a->setDuration(3000);
+        a->setEasingCurve(QEasingCurve::InOutBack);
+        // connect(a, &QPropertyAnimation::finished, this, &Overlay::finished);
+
+        m_seqAnimation->addAnimation(a);
+    }
+    QPropertyAnimation *b = new QPropertyAnimation(this, "audioHeight");
+    b->setStartValue(0);
+    b->setEndValue(100);
+    b->setDuration(1500);
+    b->setEasingCurve(QEasingCurve::OutExpo);
+    m_seqAnimation->addAnimation(b);
 
     QGraphicsDropShadowEffect *dse = new QGraphicsDropShadowEffect();
     dse->setBlurRadius(20);
@@ -51,46 +72,46 @@ Overlay::Overlay(QWidget *parent) : QWidget(parent)
 
     connect(m_seqAnimation, &QSequentialAnimationGroup::finished, this, &Overlay::finished);
 
-    // Audio decoding setup
-    m_audioDecoder = new QAudioDecoder(this);
-    connect(m_audioDecoder, &QAudioDecoder::bufferReady, this, &Overlay::processBuffer);
-    connect(m_audioDecoder, &QAudioDecoder::finished, this, &Overlay::handleDecodingFinished);
 
     // Optional: MediaPlayer for playing sound effects
     m_player = new QMediaPlayer(this);
-    m_audioOutput = new QAudioOutput;
+    m_audioOutput = new QAudioOutput(this);
+    m_audioBufferOutput = new QAudioBufferOutput(this); // Create audio buffer output
+
+    // Set the audio outputs
     m_player->setAudioOutput(m_audioOutput);
+    m_player->setAudioBufferOutput(m_audioBufferOutput);
+
+    connect(m_audioBufferOutput, &QAudioBufferOutput::audioBufferReceived, this, &Overlay::processAudioBuffer);
+
     m_audioOutput->setVolume(50);
 }
 
-void Overlay::processBuffer()
+void Overlay::processAudioBuffer(const QAudioBuffer &buffer)
 {
-    qDebug() << "In processBuffer";
-    while (m_audioDecoder->bufferAvailable()) {
-        QAudioBuffer buffer = m_audioDecoder->read();
-        if (buffer.isValid()) {
-            // Get raw data from the buffer
-            const int16_t *samples = buffer.constData<int16_t>();
-            if (samples) {
-                int maxAmplitude = 0; // To calculate the peak amplitude
-
-                // Iterate over audio samples and process each
-                for (int i = 0; i < buffer.frameCount(); ++i) {
-                    int sampleValue = static_cast<int>(samples[i]); // Cast sample to int
-                    maxAmplitude = qMax(maxAmplitude, qAbs(sampleValue)); // Find max amplitude
-                }
-
-                // Normalize and set the audio height
-                m_audioHeight = (maxAmplitude * 100) / 32767; // Normalize based on Int16 max value
-            }
-        }
+    if (!buffer.isValid()) {
+        qDebug() << "Invalid audio buffer";
+        // m_audioHeight = 1;
+        return;
     }
-}
 
-void Overlay::handleDecodingFinished()
-{
-    qDebug() << "Audio decoding finished";
-    m_audioDecoder->stop();
+    // Get raw audio data from the buffer
+    const int16_t *samples = buffer.constData<int16_t>();
+    if (!samples) {
+        qDebug() << "Buffer data not in Int16 format";
+        return;
+    }
+
+    // Calculate the maximum amplitude
+    int maxAmplitude = 0;
+    for (int i = 0; i < buffer.frameCount(); ++i) {
+        maxAmplitude = qMax(maxAmplitude, qAbs(samples[i]));
+    }
+
+    // Normalize to a percentage
+    int normalizedAmplitude = (maxAmplitude * 100) / 32767; // 32767 is the max value for Int16
+    // qDebug() << "Current amplitude:" << normalizedAmplitude;
+    m_audioHeight = normalizedAmplitude;
 }
 
 void Overlay::paintEvent(QPaintEvent *event)
@@ -127,9 +148,6 @@ void Overlay::paintEvent(QPaintEvent *event)
 
 void Overlay::startAnimation()
 {
-    m_audioDecoder->setSource(QUrl("qrc:/sounds/finished.wav"));
-    m_audioDecoder->start();
-
     m_player->setSource(QUrl("qrc:/sounds/finished.wav"));
     m_player->play();
 

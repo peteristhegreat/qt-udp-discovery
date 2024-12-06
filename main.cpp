@@ -16,7 +16,7 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-#ifdef Q_OS_OSX
+#ifdef Q_OS_DARWIN
     a.setWindowIcon(QIcon("://jotto.png"));
     QDir::setCurrent(QApplication::applicationDirPath());
 #endif

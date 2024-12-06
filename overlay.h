@@ -8,7 +8,7 @@
 #include <QGraphicsDropShadowEffect>
 #include <QSoundEffect>
 #include <QAudioDecoder>
-#include <QAudioBuffer>
+// #include <QAudioBuffer>
 #include <QMediaPlayer>
 #include <QAudioOutput>
 
@@ -19,6 +19,7 @@ class Overlay : public QWidget
     Q_PROPERTY(QPoint star2Pos READ star2Pos WRITE setStar2Pos)
     Q_PROPERTY(QPoint star3Pos READ star3Pos WRITE setStar3Pos)
     Q_PROPERTY(QPoint textPos READ textPos WRITE setTextPos)
+    Q_PROPERTY(int audioHeight READ audioHeight WRITE setAudioHeight)
 
 public:
     Overlay(QWidget *parent);
@@ -27,11 +28,13 @@ public:
     QPoint star2Pos() const { return m_star2Pos; }
     QPoint star3Pos() const { return m_star3Pos; }
     QPoint textPos() const { return m_textPos; }
+    int audioHeight() const { return m_audioHeight; }
 
     void setStar1Pos(QPoint p) { m_star1Pos = p; update(); }
     void setStar2Pos(QPoint p) { m_star2Pos = p; update(); }
     void setStar3Pos(QPoint p) { m_star3Pos = p; update(); }
     void setTextPos(QPoint p) { m_textPos = p; update(); }
+    void setAudioHeight(int i) { m_audioHeight = i; update(); }
 
 signals:
     void finished();
@@ -41,8 +44,7 @@ public slots:
     void startAnimation();
 
 private slots:
-    void processBuffer();
-    void handleDecodingFinished();
+    void processAudioBuffer(const QAudioBuffer &buffer);
 
 private:
     int m_audioHeight = 0;
@@ -53,9 +55,11 @@ private:
     QPoint m_star3Pos;
     QPoint m_textPos;
 
-    QAudioDecoder *m_audioDecoder;
+    // QAudioDecoder *m_audioDecoder;
     QAudioOutput * m_audioOutput;
+    QAudioBufferOutput * m_audioBufferOutput;
     QMediaPlayer *m_player; // Only for playing sounds
+
 };
 
 #endif // OVERLAY_H
