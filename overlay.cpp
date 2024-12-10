@@ -51,21 +51,14 @@ Overlay::Overlay(WinBox *winBox, QWidget *parent) : QWidget(parent), m_winBox(wi
 
     m_seqAnimation->addAnimation(m_paraAnimation);
 
-    QPropertyAnimation *b = new QPropertyAnimation(this, "audioHeight");
-    b->setStartValue(0);
-    b->setEndValue(100);
-    b->setDuration(1500);
-    b->setEasingCurve(QEasingCurve::OutExpo);
-    m_seqAnimation->addAnimation(b);
-
-
     a = new QPropertyAnimation(this, "textPos");
     a->setStartValue(QPoint(0, 2000));
     //a->setEndValue(QPoint(200, 350));
     a->setEndValue(QPoint(100, 200));
     a->setDuration(3000);
     a->setEasingCurve(QEasingCurve::InOutBack);
-    m_winBox_text->addAnimation(a);
+    // m_winBox_text->addAnimation(a);
+    m_seqAnimation->addAnimation(a);
 
     a = new QPropertyAnimation(winBox, "pos");
     a->setStartValue(QPoint(0, -800));
@@ -74,7 +67,14 @@ Overlay::Overlay(WinBox *winBox, QWidget *parent) : QWidget(parent), m_winBox(wi
     a->setEasingCurve(QEasingCurve::OutQuad);
     m_winBox_text->addAnimation(a);
 
-    m_seqAnimation->addAnimation(m_winBox_text);
+    QPropertyAnimation *b = new QPropertyAnimation(this, "audioHeight");
+    b->setStartValue(0);
+    b->setEndValue(100);
+    b->setDuration(1500);
+    b->setEasingCurve(QEasingCurve::OutExpo);
+    m_seqAnimation->addAnimation(b);
+
+    // m_seqAnimation->addAnimation(m_winBox_text);
 
 
     QGraphicsDropShadowEffect * dse = new QGraphicsDropShadowEffect();
@@ -173,6 +173,8 @@ void Overlay::paintEvent(QPaintEvent *)
 void Overlay::startAnimation()
 {
     this->resize(qobject_cast<QWidget*>(this->parent())->size());
+    
+    m_player->setSource(QUrl("qrc:/sounds/finished.wav"));
     m_player->play();
 
 //    QFile f("temp.txt");

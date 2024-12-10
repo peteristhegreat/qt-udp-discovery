@@ -12,15 +12,24 @@ WinBox::WinBox(QWidget *parent) : QWidget(parent)
 
     QVBoxLayout *layout = new QVBoxLayout;
     QVBoxLayout *labels = new QVBoxLayout;
+    QHBoxLayout *hb;
     QHBoxLayout *buttons = new QHBoxLayout;
 
     labels->addWidget(new QLabel("You're a Winner!"));
 
     m_timeLabel = new QLabel("null");
-    labels->addWidget(m_timeLabel);  //add time to solve in QLabel here
+    hb = new QHBoxLayout();
+    hb->addWidget(new QLabel("Time to Finish"));
+    hb->addStretch();
+    hb->addWidget(m_timeLabel);
+    labels->addLayout(hb);  //add time to solve in QLabel here
 
     m_numberOfGuessesLabel = new QLabel("null");
-    labels->addWidget(m_numberOfGuessesLabel); //add number of guesses in QLabel here
+    hb = new QHBoxLayout();
+    hb->addWidget(new QLabel("Number of Guesses"));
+    hb->addStretch();
+    hb->addWidget(m_numberOfGuessesLabel);
+    labels->addLayout(hb);
 
     QObject::connect(m_newGame,SIGNAL(clicked(bool)),this,SIGNAL(newGame(void)));
     QObject::connect(m_newGame,SIGNAL(clicked(bool)),this,SLOT(hide()));
@@ -48,7 +57,7 @@ WinBox::WinBox(QWidget *parent) : QWidget(parent)
     box->addWidget(w);
     setLayout(box);
 
-    setStyleSheet("background-color:green;");
+    setStyleSheet("background-color:white;");
 
 
 
@@ -61,12 +70,12 @@ void WinBox::setTime(QString time)
 {
     m_time = time;
 
-    m_timeLabel->setText("Time to finish: " + time);
+    m_timeLabel->setText(time);
 }
 
 void WinBox::setNumberOfGuesses(int num)
 {
-    m_numberOfGuessesLabel->setText("Number of Guesses: " + QString::number(num));
+    m_numberOfGuessesLabel->setText(QString::number(num));
 }
 
 

@@ -13,14 +13,6 @@
 #include <QLabel>
 #include <winbox.h>
 
-#ifdef Q_OS_WIN
-#define USE_PLAYER
-#endif
-
-#ifdef Q_OS_IOS
-//#define USE_PLAYER
-#endif
-
 class Overlay : public QWidget
 {
     Q_OBJECT
@@ -84,7 +76,7 @@ protected:
     void resizeEvent(QResizeEvent *event);
 
 private:
-    int m_audioHeight;
+    int m_audioHeight = 0;
     QParallelAnimationGroup * m_paraAnimation;
     QParallelAnimationGroup * m_winBox_text;
     QSequentialAnimationGroup * m_seqAnimation;

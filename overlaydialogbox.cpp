@@ -47,6 +47,9 @@ OverlayDialogBox::OverlayDialogBox(QWidget *parent, QDialog * dialog) :
                         ""
                         "font-size: 24pt;"
                         "}"
+
+                        "background: #ffffff77;"
+                        "QLabel { color: black; }"
                         );
     // if you have buttons on this overlay you probably don't want this one
 //    setAttribute(Qt::WA_TransparentForMouseEvents);
