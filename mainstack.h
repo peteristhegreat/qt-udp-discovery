@@ -181,7 +181,7 @@ private:
 
     QString m_theirSecretWord;
 
-    QElapsedTimer * m_statsTimer;
+    QTimer * m_statsTimer;
     MyTime m_stopWatch;
 
     int m_dpiFactor;
@@ -194,8 +194,8 @@ private:
     qreal currentStepScaleFactor;
     qreal rotationAngle;
 
-    QElapsedTimer * m_hideInputMethodTimer;
-    QElapsedTimer * m_returnPressedTimer;
+    QTimer * m_hideInputMethodTimer;
+    QTimer * m_returnPressedTimer;
 
     WinBox *m_winBox;
 };

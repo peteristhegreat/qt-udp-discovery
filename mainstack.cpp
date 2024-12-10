@@ -58,12 +58,12 @@ MainStack::MainStack(QWidget *parent) :
 {
 
 
-    m_hideInputMethodTimer = new QElapsedTimer();
+    m_hideInputMethodTimer = new QTimer();
     m_hideInputMethodTimer->setInterval(300);
     m_hideInputMethodTimer->setSingleShot(true);
     QObject::connect(m_hideInputMethodTimer, SIGNAL(timeout()), qApp->inputMethod(), SLOT(hide()));
 
-    m_returnPressedTimer = new QElapsedTimer();
+    m_returnPressedTimer = new QTimer();
     m_returnPressedTimer->setInterval(100);
     m_returnPressedTimer->setSingleShot(true);
     QObject::connect(m_returnPressedTimer, SIGNAL(timeout()), this, SLOT(sendData()));
@@ -228,7 +228,7 @@ MainStack::MainStack(QWidget *parent) :
         statusBar->adjustSize();
     }
 
-    m_statsTimer = new QElapsedTimer;
+    m_statsTimer = new QTimer;
     m_statsTimer->setInterval(1000);
     QObject::connect(m_statsTimer, SIGNAL(timeout()), this, SLOT(updateStats()));
 
