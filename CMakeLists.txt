@@ -13,9 +13,9 @@ set(CMAKE_AUTORCC ON)   # Enables automatic processing of .qrc resource files
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Svg SvgWidgets Network Widgets Multimedia MultimediaWidgets)
 
 # Add plugins for macOS
-if(APPLE)
-    set(QT_PLUGINS qavfmediaplayer qtaudio_coreaudio qtmedia_audioengine qavfcamera)
-endif()
+# if(APPLE)
+#     set(QT_PLUGINS qavfmediaplayer qtaudio_coreaudio qtmedia_audioengine qavfcamera)
+# endif()
 
 # Define the executable
 add_executable(${PROJECT_NAME}
@@ -35,7 +35,17 @@ add_executable(${PROJECT_NAME}
     overlaydialogbox.cpp
     mytime.cpp
     winbox.cpp
+    qresources.qrc
+    word_lists.qrc
+    styles.qrc
 )
+
+if(APPLE)
+    set_source_files_properties(jotto.icns PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
+    target_sources(${PROJECT_NAME} PRIVATE jotto.icns)
+    set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE TRUE)
+    set(QMAKE_INFO_PLIST custom.plist)
+endif()
 
 # Include additional headers
 target_include_directories(${PROJECT_NAME} PRIVATE
@@ -43,16 +53,16 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 )
 
 # Add Qt resources
-qt6_add_resources(RESOURCES
-    qresources.qrc
-    word_lists.qrc
-    styles.qrc
-)
+# qt6_add_resources(RESOURCES
+#     qresources.qrc
+#     word_lists.qrc
+#     styles.qrc
+# )
 
 # Add Qt plugins
-if(QT_PLUGINS)
-    target_link_libraries(${PROJECT_NAME} PRIVATE ${QT_PLUGINS})
-endif()
+# if(QT_PLUGINS)
+#     target_link_libraries(${PROJECT_NAME} PRIVATE ${QT_PLUGINS})
+# endif()
 
 # Link Qt libraries
 target_link_libraries(${PROJECT_NAME} PRIVATE
@@ -65,6 +75,11 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt6::Multimedia
     Qt6::MultimediaWidgets
 )
+
+if(WIN32)
+    set(RC_FILE myapp.rc)
+    target_sources(${PROJECT_NAME} PRIVATE ${RC_FILE})
+endif()
 
 # macOS-specific settings
 if(APPLE)
