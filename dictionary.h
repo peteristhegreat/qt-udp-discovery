@@ -6,6 +6,7 @@
 #include <QMap>
 #include <QFile>
 #include <QTextStream>
+#include <QRandomGenerator>
 #include <QSet>
 
 class Dictionary : public QObject
@@ -95,6 +96,7 @@ private:
     QMap < int, QMap<QString, int> *> m_map;
     QMap < int, QStringList *> m_listmap;
     QString documentsPath;
+    QRandomGenerator * rand;
 //    QMap <QString, int> six_letter_words;
 //    QMap <QString, int> five_letter_words;
 };

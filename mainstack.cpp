@@ -23,6 +23,7 @@
 #include <QKeySequence>
 #include <QGroupBox>
 #include <QSlider>
+#include <QTimer>
 #include <QScroller>
 #include "globals.h"
 #include <QProgressDialog>
@@ -211,7 +212,7 @@ MainStack::MainStack(QWidget *parent) :
             btn->setDisabled(true);
     }
     // start a delayed init
-    QElapsedTimer * t = new QElapsedTimer;
+    QTimer * t = new QTimer;
     t->setSingleShot(true);
     QObject::connect(t, SIGNAL(timeout()), m_dict, SLOT(init()));
     t->start(500);
@@ -1401,7 +1402,7 @@ void MainStack::on_helpButton()
     QTextEdit * txt = m_helpPage->findChild<QTextEdit *>("Stats");
     if(txt && txt->document()->lineCount() < 2)
     {
-        QElapsedTimer * t = new QElapsedTimer;
+        QTimer * t = new QTimer;
         t->setSingleShot(true);
         QObject::connect(t, SIGNAL(timeout()), this, SLOT(dumpCurrentWordLists()));
         t->start(500);

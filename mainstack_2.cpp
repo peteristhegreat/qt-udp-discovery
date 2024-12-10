@@ -161,7 +161,7 @@ void MainStack::init_gui()
 
     // svg = new AspectRatioSvgWidget("://jotto-logo.svg");
     // svg->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
-
+    svg = new QSvgWidget("://jotto-logo.svg");
     svg->renderer()->setAspectRatioMode(Qt::KeepAspectRatio);
     svg->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     grid->addWidget(svg,0,0);

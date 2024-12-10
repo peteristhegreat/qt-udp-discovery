@@ -19,7 +19,7 @@ Dictionary::Dictionary(QObject *parent) :
 //    documentsPath = "Contents/Resources/";
 #endif
 
-    QRandomGenerator::global()->seed(static_cast<quint32>(QDateTime::currentMSecsSinceEpoch()));
+    rand = new QRandomGenerator(QDateTime::currentMSecsSinceEpoch());
 
     m_allowedWordLengths << 3 << 4 << 5 << 6 << 7 << 8;
 
@@ -158,9 +158,8 @@ QString Dictionary::getNewSecretWord(int lowPercent, int highPercent)
     // i += m_listmap[m_wordLength]->size()*((qreal) lowPercent)/100;
     // QString word = (*m_listmap[m_wordLength]).at(i);
     // return (*m_listmap[m_wordLength]).at(i);
-    QRandomGenerator *randomGenerator = QRandomGenerator::global(); // Use the global QRandomGenerator instance
 
-    int i = randomGenerator->bounded(
+    int i = rand->bounded(
         m_map[m_wordLength]->size()*(qreal)(highPercent - lowPercent)/100); // Generate a random index
     i += m_listmap[m_wordLength]->size()*((qreal) lowPercent)/100;
 
