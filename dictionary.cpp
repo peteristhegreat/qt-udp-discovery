@@ -58,6 +58,7 @@ void Dictionary::loadFrequencyList(int numOfLetters, bool allowDoubleLetters)
     QStringList list;
     int numOfWords = 0;
     QFile fileIn("://spoken/"+QString::number(numOfLetters) + "freq" + (allowDoubleLetters?"":"_NDL") + ".txt");
+    qDebug() << "filename" << fileIn.fileName();
     if (fileIn.open(QFile::ReadOnly | QFile::Text)) {
         QTextStream in(&fileIn);
         numOfWords = in.readLine().toInt();
@@ -160,13 +161,15 @@ QString Dictionary::getNewSecretWord(int lowPercent, int highPercent)
     // return (*m_listmap[m_wordLength]).at(i);
 
     int i = rand->bounded(
-        m_map[m_wordLength]->size()*(qreal)(highPercent - lowPercent)/100); // Generate a random index
+        m_listmap[m_wordLength]->size()*(qreal)(highPercent - lowPercent)/100); // Generate a random index
     i += m_listmap[m_wordLength]->size()*((qreal) lowPercent)/100;
+    qDebug() << "i" << i;
 
-    QMap<QString, int>::const_iterator iter;
-    iter = m_map[m_wordLength]->constBegin();
-    std::advance(iter, i);
-    return iter.key();
+    // QMap < int, QStringList *>::const_iterator iter;
+    // iter = m_listmap[m_wordLength]->constBegin();
+    // std::advance(iter, i);
+    // return iter.key();
+    return m_listmap[m_wordLength]->at(i);
 }
 
 void Dictionary::init()

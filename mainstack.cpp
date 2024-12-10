@@ -1067,7 +1067,7 @@ void MainStack::on_onePlayer()
 
     // Pick a random word from the dictionary based on difficulty
     //    m_theirSecretWord = m_dict->getNewSecretWord(16, m_allowDoubleLetters->isChecked());
-    m_theirSecretWord = m_dict->getNewSecretWord(0,25);
+    m_theirSecretWord = m_dict->getNewSecretWord(0, 25);
     qDebug() << "The secret word: " << m_theirSecretWord;
 
     this->setCurrentWidget(m_onePlayerBoard);// one player board
