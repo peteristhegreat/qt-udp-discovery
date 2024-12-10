@@ -1,10 +1,11 @@
 #ifndef MYTIME_H
 #define MYTIME_H
 
+#include <QElapsedTimer>
 #include <QTime>
 #include <QString>
 
-class MyTime : public QTime
+class MyTime : public QElapsedTimer
 {
 
 public:
@@ -18,7 +19,7 @@ public:
         if(m_paused)
             return m_offset;
         else
-            return QTime::elapsed() + m_offset;
+            return QElapsedTimer::elapsed() + m_offset;
     }
     int restart()
     {
@@ -26,7 +27,7 @@ public:
         if(m_paused)
             retVal = m_offset;
         else
-            retVal = QTime::restart() + m_offset;
+            retVal = QElapsedTimer::restart() + m_offset;
         m_paused = false;
         m_offset = 0;
         return retVal;
@@ -34,7 +35,7 @@ public:
     void start()
     {
         m_paused = false;
-        QTime::start();
+        QElapsedTimer::start();
     }
 
     bool isPaused()

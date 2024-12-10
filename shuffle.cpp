@@ -1,6 +1,7 @@
 #include "shuffle.h"
 #include <QDateTime>
 #include <QChar>
+#include <QRandomGenerator>
 
 //QString shuffle(QString str)
 //{
@@ -27,16 +28,11 @@
 
 QString shuffle(QString str)
 {
-//    QStringList strList;
-//    strList << "first" << "second" << "third" << "fourth" << "fifth" << "sixth";
-//    qDebug() << strList;
+    QRandomGenerator *randomGenerator = QRandomGenerator::global(); // Use the global QRandomGenerator instance
 
-//    qsrand( QDateTime::currentMSecsSinceEpoch());//QTime(0,0,0).secsTo(QTime::currentTime()) );
-
-    for( int i = str.count() - 1 ; i > 0 ; --i )
+    for (int i = str.count() - 1; i > 0; --i)
     {
-        int random = qrand() % str.count();
-//        qSwap(str[i],str[random]);
+        int random = randomGenerator->bounded(str.count()); // Generate a random index within bounds
         QChar c = str.at(i);
         str[i] = str.at(random);
         str[random] = c;
@@ -46,9 +42,10 @@ QString shuffle(QString str)
 
 QStringList shuffle(QStringList str)
 {
+    QRandomGenerator *randomGenerator = QRandomGenerator::global();
     for( int i = str.count() - 1 ; i > 0 ; --i )
     {
-        int random = qrand() % str.count();
+        int random = randomGenerator->bounded(str.count());
         qSwap(str[i],str[random]);
     }
     return str;

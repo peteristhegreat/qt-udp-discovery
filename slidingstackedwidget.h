@@ -5,7 +5,7 @@
 
 //#include <QtGui>
 #include <QWidget>
-#include <QTimer>
+#include <QElapsedTimer>
 #include <QPropertyAnimation>
 #include <QParallelAnimationGroup>
 #include <QDebug>

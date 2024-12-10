@@ -3,6 +3,7 @@
 #include <QHBoxLayout>
 #include <QPushButton>
 #include <QStatusBar>
+#include <QSvgRenderer>
 #include <QTextEdit>
 #include <QLineEdit>
 #include <QLabel>
@@ -138,7 +139,8 @@
 
 void MainStack::init_gui()
 {
-    AspectRatioSvgWidget * svg;
+    // AspectRatioSvgWidget * svg;
+    QSvgWidget *svg;
     QWidget * w;
     QGridLayout * grid;
     QVBoxLayout * vbox;
@@ -157,8 +159,11 @@ void MainStack::init_gui()
 
     grid = new QGridLayout;
 
-    svg = new AspectRatioSvgWidget("://jotto-logo.svg");
-    svg->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
+    // svg = new AspectRatioSvgWidget("://jotto-logo.svg");
+    // svg->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
+
+    svg->renderer()->setAspectRatioMode(Qt::KeepAspectRatio);
+    svg->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     grid->addWidget(svg,0,0);
     grid->setRowStretch(0, 1);
 //    grid->setRowStretch(grid->rowCount(),6);

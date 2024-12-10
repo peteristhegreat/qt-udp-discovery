@@ -1,38 +1,9 @@
-/****************************************************************************
-**
-** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
-** Contact: http://www.qt-project.org/legal
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and Digia.  For licensing terms and
-** conditions see http://qt.digia.com/licensing.  For further information
-** use the contact form at http://qt.digia.com/contact-us.
-**
-** GNU Lesser General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU Lesser
-** General Public License version 2.1 as published by the Free Software
-** Foundation and appearing in the file LICENSE.LGPL included in the
-** packaging of this file.  Please review the following information to
-** ensure the GNU Lesser General Public License version 2.1 requirements
-** will be met: http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
-**
-** In addition, as a special exception, Digia gives you certain additional
-** rights.  These rights are described in the Digia Qt LGPL Exception
-** version 1.1, included in the file LGPL_EXCEPTION.txt in this package.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
+
+#include <QtWidgets>
 
 #include "flowlayout.h"
-
-#include <QWidget>
-
-using namespace Utils;
-
 FlowLayout::FlowLayout(QWidget *parent, int margin, int hSpacing, int vSpacing)
     : QLayout(parent), m_hSpace(hSpacing), m_vSpace(vSpacing)
 {
@@ -44,35 +15,33 @@ FlowLayout::FlowLayout(int margin, int hSpacing, int vSpacing)
 {
     setContentsMargins(margin, margin, margin, margin);
 }
-
 FlowLayout::~FlowLayout()
 {
     QLayoutItem *item;
     while ((item = takeAt(0)))
         delete item;
 }
-
 void FlowLayout::addItem(QLayoutItem *item)
 {
     itemList.append(item);
 }
-
 int FlowLayout::horizontalSpacing() const
 {
-    if (m_hSpace >= 0)
+    if (m_hSpace >= 0) {
         return m_hSpace;
-    else
+    } else {
         return smartSpacing(QStyle::PM_LayoutHorizontalSpacing);
+    }
 }
 
 int FlowLayout::verticalSpacing() const
 {
-    if (m_vSpace >= 0)
+    if (m_vSpace >= 0) {
         return m_vSpace;
-    else
+    } else {
         return smartSpacing(QStyle::PM_LayoutVerticalSpacing);
+    }
 }
-
 int FlowLayout::count() const
 {
     return itemList.size();
@@ -87,15 +56,12 @@ QLayoutItem *FlowLayout::takeAt(int index)
 {
     if (index >= 0 && index < itemList.size())
         return itemList.takeAt(index);
-    else
-        return 0;
+    return nullptr;
 }
-
 Qt::Orientations FlowLayout::expandingDirections() const
 {
-    return 0;
+    return { };
 }
-
 bool FlowLayout::hasHeightForWidth() const
 {
     return true;
@@ -106,7 +72,6 @@ int FlowLayout::heightForWidth(int width) const
     int height = doLayout(QRect(0, 0, width, 0), true);
     return height;
 }
-
 void FlowLayout::setGeometry(const QRect &rect)
 {
     QLayout::setGeometry(rect);
@@ -121,14 +86,13 @@ QSize FlowLayout::sizeHint() const
 QSize FlowLayout::minimumSize() const
 {
     QSize size;
-    QLayoutItem *item;
-    foreach (item, itemList)
+    for (const QLayoutItem *item : std::as_const(itemList))
         size = size.expandedTo(item->minimumSize());
 
-    size += QSize(2*margin(), 2*margin());
+    const QMargins margins = contentsMargins();
+    size += QSize(margins.left() + margins.right(), margins.top() + margins.bottom());
     return size;
 }
-
 int FlowLayout::doLayout(const QRect &rect, bool testOnly) const
 {
     int left, top, right, bottom;
@@ -137,10 +101,8 @@ int FlowLayout::doLayout(const QRect &rect, bool testOnly) const
     int x = effectiveRect.x();
     int y = effectiveRect.y();
     int lineHeight = 0;
-
-    QLayoutItem *item;
-    foreach (item, itemList) {
-        QWidget *wid = item->widget();
+    for (QLayoutItem *item : std::as_const(itemList)) {
+        const QWidget *wid = item->widget();
         int spaceX = horizontalSpacing();
         if (spaceX == -1)
             spaceX = wid->style()->layoutSpacing(
@@ -172,7 +134,7 @@ int FlowLayout::smartSpacing(QStyle::PixelMetric pm) const
         return -1;
     } else if (parent->isWidgetType()) {
         QWidget *pw = static_cast<QWidget *>(parent);
-        return pw->style()->pixelMetric(pm, 0, pw);
+        return pw->style()->pixelMetric(pm, nullptr, pw);
     } else {
         return static_cast<QLayout *>(parent)->spacing();
     }

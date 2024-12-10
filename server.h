@@ -6,7 +6,7 @@
 #include <QTcpServer>
 #include <QTcpSocket>
 #include <QString>
-//#include <QTimerEvent>
+//#include <QElapsedTimerEvent>
 
 #define MY_PORT 45234
 

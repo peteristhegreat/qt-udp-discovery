@@ -5,8 +5,10 @@
 #include <QDir>
 #include <QFile>
 #include <QMediaPlayer>
+#include <QAudioOutput>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
+#include <QAudioBufferOutput>
 
 Overlay::Overlay(WinBox *winBox, QWidget *parent) : QWidget(parent), m_winBox(winBox)
 {
@@ -14,7 +16,7 @@ Overlay::Overlay(WinBox *winBox, QWidget *parent) : QWidget(parent), m_winBox(wi
     setPalette(Qt::transparent);
     setAttribute(Qt::WA_TransparentForMouseEvents);
 
-    this->setFont(QFont("Times",40, QFont::Bold, true));
+    this->setFont(QFont("Times New Roman",40, QFont::Bold, true));
 
 
     m_paraAnimation = new QParallelAnimationGroup;
@@ -49,6 +51,13 @@ Overlay::Overlay(WinBox *winBox, QWidget *parent) : QWidget(parent), m_winBox(wi
 
     m_seqAnimation->addAnimation(m_paraAnimation);
 
+    QPropertyAnimation *b = new QPropertyAnimation(this, "audioHeight");
+    b->setStartValue(0);
+    b->setEndValue(100);
+    b->setDuration(1500);
+    b->setEasingCurve(QEasingCurve::OutExpo);
+    m_seqAnimation->addAnimation(b);
+
 
     a = new QPropertyAnimation(this, "textPos");
     a->setStartValue(QPoint(0, 2000));
@@ -77,44 +86,43 @@ Overlay::Overlay(WinBox *winBox, QWidget *parent) : QWidget(parent), m_winBox(wi
 
     QObject::connect(m_seqAnimation, SIGNAL(finished()), this, SIGNAL(finished()));
 
+    m_player = new QMediaPlayer(this);
+    m_audioOutput = new QAudioOutput(this);
+    m_audioBufferOutput = new QAudioBufferOutput(this); // Create audio buffer output
 
+    // Set the audio outputs
+    m_player->setAudioOutput(m_audioOutput);
+    m_player->setAudioBufferOutput(m_audioBufferOutput);
 
+    connect(m_audioBufferOutput, &QAudioBufferOutput::audioBufferReceived, this, &Overlay::processAudioBuffer);
 
-
-#ifdef USE_PLAYER
-    m_probe = new QAudioProbe;
-    connect(m_probe, SIGNAL(audioBufferProbed(QAudioBuffer)),
-            this, SLOT(processBuffer(QAudioBuffer)));
-    m_player = new QMediaPlayer;
-    m_player->setVolume(50);
-    m_player->setMedia(QUrl("qrc:/sounds/finished.wav"));
-    m_player->audioAvailableChanged(true);
-
-    if(m_probe->setSource(m_player))
-        qDebug() << "audio-probe source was set";
-    else
-        qDebug() << "audio-probe failed to set source";
-
-#else
-    //finishedSoundEffect.setSource(QUrl::fromLocalFile("://sounds/finished.wav"));
-    finishedSoundEffect.setSource(QUrl("://sounds/finished.wav"));
-
-    QFile f("://sounds/finished.wav");
-    qDebug() << "sound file exists?" << f.exists();
-#endif
+    m_audioOutput->setVolume(50);
 }
 
-void Overlay::processBuffer(QAudioBuffer buffer)
+void Overlay::processAudioBuffer(const QAudioBuffer &buffer)
 {
-//    qDebug() << a.sampleCount() << a.data()[0];
-    // Assuming 'buffer' is an unsigned 16 bit stereo buffer..
-    qDebug() << "processBuffer intiated!";
-    QAudioBuffer::S16U *frames = buffer.data<QAudioBuffer::S16U>();
-    for (int i=0; i < buffer.frameCount(); i++) {
-//        qSwap(frames[i].left, frames[i].right);
-//        qDebug() << frames[i].average()*100./65535;
-        m_audioHeight = frames[i].average()*100./65535;
+        if (!buffer.isValid()) {
+        qDebug() << "Invalid audio buffer";
+        // m_audioHeight = 1;
+        return;
+     }
+    // Get raw audio data from the buffer
+    const int16_t *samples = buffer.constData<int16_t>();
+    if (!samples) {
+        qDebug() << "Buffer data not in Int16 format";
+        return;
     }
+
+    // Calculate the maximum amplitude
+    int maxAmplitude = 0;
+    for (int i = 0; i < buffer.frameCount(); ++i) {
+        maxAmplitude = qMax(maxAmplitude, qAbs(samples[i]));
+    }
+
+    // Normalize to a percentage
+    int normalizedAmplitude = (maxAmplitude * 100) / 32767; // 32767 is the max value for Int16
+    // qDebug() << "Current amplitude:" << normalizedAmplitude;
+    m_audioHeight = normalizedAmplitude;
 }
 
 void Overlay::paintEvent(QPaintEvent *)
@@ -157,30 +165,16 @@ void Overlay::paintEvent(QPaintEvent *)
        painter.drawText(textPos(),"WINNER!!!");
     }
 
-
-
-
-#ifdef USE_PLAYER
-
-     //painter.drawRect(0, this->height()*4./5, 5,
-       //              -this->height()*3./5*(100 - m_audioHeight)/100.);
+     painter.drawRect(0, this->height()*4./5, 5,
+                     -this->height()*3./5*(100 - m_audioHeight)/100.);
      //qDebug() << "audio height: " << m_audioHeight;
-
-#endif
 }
 
 void Overlay::startAnimation()
 {
     this->resize(qobject_cast<QWidget*>(this->parent())->size());
-#ifdef USE_PLAYER
-
-    //qDebug() << QDir::current().absolutePath();
     m_player->play();
 
-//    qDebug() << m_player->errorString();
-#else
-    finishedSoundEffect.play();
-#endif
 //    QFile f("temp.txt");
 //    f.open(QFile::WriteOnly);
 //    f.write(qPrintable(QDir::current().absolutePath()));
@@ -190,8 +184,6 @@ void Overlay::startAnimation()
     m_winBox->update();
     m_winBox->setVisible(true);
     m_winBox->raise();
-
-
 
     setTextPos(QPoint(-200,-200));
     m_winBox->setProperty("pos",QPoint(-1000,-1000));

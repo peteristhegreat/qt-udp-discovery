@@ -5,7 +5,9 @@
 #include <QTextEdit>
 #include <QLineEdit>
 #include <QLabel>
-#include "aspectratiosvgwidget.h"
+// #include "aspectratiosvgwidget.h"
+#include <QSvgWidget>
+#include <QSvgRenderer>
 #include <QInputDialog>
 #include "flowlayout.h"
 #include "letterbutton.h"
@@ -56,12 +58,12 @@ MainStack::MainStack(QWidget *parent) :
 {
 
 
-    m_hideInputMethodTimer = new QTimer(0);
+    m_hideInputMethodTimer = new QElapsedTimer();
     m_hideInputMethodTimer->setInterval(300);
     m_hideInputMethodTimer->setSingleShot(true);
     QObject::connect(m_hideInputMethodTimer, SIGNAL(timeout()), qApp->inputMethod(), SLOT(hide()));
 
-    m_returnPressedTimer = new QTimer(0);
+    m_returnPressedTimer = new QElapsedTimer();
     m_returnPressedTimer->setInterval(100);
     m_returnPressedTimer->setSingleShot(true);
     QObject::connect(m_returnPressedTimer, SIGNAL(timeout()), this, SLOT(sendData()));
@@ -184,7 +186,7 @@ MainStack::MainStack(QWidget *parent) :
     on_refreshStyleSheet();
     
 
-    //    QTimer * t2 = new QTimer;
+    //    QElapsedTimer * t2 = new QElapsedTimer;
     //    t2->setSingleShot(true);
     //    QObject::connect(t2, SIGNAL(timeout()), this, SLOT(myAdjustSize()));
     //    t2->start(400);
@@ -209,7 +211,7 @@ MainStack::MainStack(QWidget *parent) :
             btn->setDisabled(true);
     }
     // start a delayed init
-    QTimer * t = new QTimer;
+    QElapsedTimer * t = new QElapsedTimer;
     t->setSingleShot(true);
     QObject::connect(t, SIGNAL(timeout()), m_dict, SLOT(init()));
     t->start(500);
@@ -226,7 +228,7 @@ MainStack::MainStack(QWidget *parent) :
         statusBar->adjustSize();
     }
 
-    m_statsTimer = new QTimer;
+    m_statsTimer = new QElapsedTimer;
     m_statsTimer->setInterval(1000);
     QObject::connect(m_statsTimer, SIGNAL(timeout()), this, SLOT(updateStats()));
 
@@ -1208,7 +1210,7 @@ void MainStack::init_settings()
     grid->addWidget(lb_label, grid->rowCount(), 0);
     grid->addWidget(m_letterButtonScaleFactorCombo, grid->rowCount() -1, 1);
 
-    QObject::connect(m_numLettersCombo, SIGNAL(currentIndexChanged(QString)),
+    QObject::connect(m_numLettersCombo, SIGNAL(currentTextChanged(QString)),
                      m_dict, SLOT(setWordLength(QString)));
 
     m_ephHouseRules = new QCheckBox("Alternate Dbl Letter Rules");
@@ -1399,7 +1401,7 @@ void MainStack::on_helpButton()
     QTextEdit * txt = m_helpPage->findChild<QTextEdit *>("Stats");
     if(txt && txt->document()->lineCount() < 2)
     {
-        QTimer * t = new QTimer;
+        QElapsedTimer * t = new QElapsedTimer;
         t->setSingleShot(true);
         QObject::connect(t, SIGNAL(timeout()), this, SLOT(dumpCurrentWordLists()));
         t->start(500);
@@ -1619,7 +1621,7 @@ void MainStack::init_board(bool is_two_player)
     //    QLineEdit * lineEdit;
     QLabel * label;
     QStatusBar * bar;
-    Utils::FlowLayout * flow;
+    FlowLayout * flow;
 
     Highlighter * highlighter;
 
@@ -1755,11 +1757,11 @@ void MainStack::init_board(bool is_two_player)
     grid->setRowStretch(row -1, 5);
 
     // Draw the alphabet
-    flow = new Utils::FlowLayout(0,0,0);
+    flow = new FlowLayout(0,0,0);
     //    flow->setContentsMargins(0,0,0,0);
     for(int i = 0; i< 26; i++)
     {
-        LetterButton * lb = new LetterButton('A' + i);
+        LetterButton * lb = new LetterButton(QChar('A' + i));
         QObject::connect(this, SIGNAL(setTheme(QColor, QColor, int)), lb, SLOT(setTheme(QColor, QColor, int)));
         QObject::connect(this, SIGNAL(resetLetters()), lb, SLOT(on_reset()));
         QObject::connect(this, SIGNAL(updateSize(qreal,qreal)), lb, SLOT(updateSize(qreal,qreal)));

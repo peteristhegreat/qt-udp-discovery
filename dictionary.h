@@ -2,7 +2,6 @@
 #define DICTIONARY_H
 
 #include <QObject>
-#include <QHash>
 #include <QString>
 #include <QMap>
 #include <QFile>
@@ -93,11 +92,11 @@ private:
     QSet <QString> m_guessesThisRound;
     QList <int> m_allowedWordLengths;
     int m_wordLength;
-    QMap < int, QHash <QString, int> *> m_map;
+    QMap < int, QMap<QString, int> *> m_map;
     QMap < int, QStringList *> m_listmap;
     QString documentsPath;
-//    QHash <QString, int> six_letter_words;
-//    QHash <QString, int> five_letter_words;
+//    QMap <QString, int> six_letter_words;
+//    QMap <QString, int> five_letter_words;
 };
 
 #endif // DICTIONARY_H

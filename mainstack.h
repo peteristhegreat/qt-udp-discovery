@@ -17,7 +17,7 @@
 #include "slidingstackedwidget.h"
 #include <QKeyEvent>
 #include <QFocusEvent>
-#include <QTimer>
+#include <QElapsedTimer>
 #include <QTime>
 #include <QScreen>
 #include <QHideEvent>
@@ -71,7 +71,7 @@ public slots:
     }
 
 private:
-    QTimer * m_enterPressedTimer;
+    QElapsedTimer * m_enterPressedTimer;
 };
 
 class MainStack : public SlidingStackedWidget
@@ -181,7 +181,7 @@ private:
 
     QString m_theirSecretWord;
 
-    QTimer * m_statsTimer;
+    QElapsedTimer * m_statsTimer;
     MyTime m_stopWatch;
 
     int m_dpiFactor;
@@ -194,8 +194,8 @@ private:
     qreal currentStepScaleFactor;
     qreal rotationAngle;
 
-    QTimer * m_hideInputMethodTimer;
-    QTimer * m_returnPressedTimer;
+    QElapsedTimer * m_hideInputMethodTimer;
+    QElapsedTimer * m_returnPressedTimer;
 
     WinBox *m_winBox;
 };

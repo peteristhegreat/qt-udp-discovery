@@ -1,12 +1,13 @@
 #include "dictionary.h"
 #include <QFile>
 #include <QTextStream>
-#include <QTimer>
+#include <QElapsedTimer>
 #include <QTime>
 #include <QDebug>
 #include <QApplication>
 #include <QStringList>
 #include "shuffle.h"
+#include <QRandomGenerator>
 
 Dictionary::Dictionary(QObject *parent) :
     QObject(parent)
@@ -18,13 +19,13 @@ Dictionary::Dictionary(QObject *parent) :
 //    documentsPath = "Contents/Resources/";
 #endif
 
-    qsrand(QDateTime::currentMSecsSinceEpoch());
+    QRandomGenerator::global()->seed(static_cast<quint32>(QDateTime::currentMSecsSinceEpoch()));
 
     m_allowedWordLengths << 3 << 4 << 5 << 6 << 7 << 8;
 
     foreach(int i, m_allowedWordLengths)
     {
-        m_map[i] = new QHash < QString, int>;
+        m_map[i] = new QMap < QString, int>;
         m_listmap[i] = new QStringList;
     }
 
@@ -150,20 +151,30 @@ QString Dictionary::getNewSecretWord(int lowPercent, int highPercent)
 //    }
 //    else
 //    {
-        // difficulty selects 0-25%, 25-50%, 50-75%,
-    int i = qrand() %
-            ((int)(m_listmap[m_wordLength]->size()
-                   *(qreal)(highPercent - lowPercent)/100));
+    // // difficulty selects 0-25%, 25-50%, 50-75%,
+    // int i = qrand() %
+    //         ((int)(m_listmap[m_wordLength]->size()
+    //                *(qreal)(highPercent - lowPercent)/100));
+    // i += m_listmap[m_wordLength]->size()*((qreal) lowPercent)/100;
+    // QString word = (*m_listmap[m_wordLength]).at(i);
+    // return (*m_listmap[m_wordLength]).at(i);
+    QRandomGenerator *randomGenerator = QRandomGenerator::global(); // Use the global QRandomGenerator instance
+
+    int i = randomGenerator->bounded(
+        m_map[m_wordLength]->size()*(qreal)(highPercent - lowPercent)/100); // Generate a random index
     i += m_listmap[m_wordLength]->size()*((qreal) lowPercent)/100;
-    QString word = (*m_listmap[m_wordLength]).at(i);
-    return (*m_listmap[m_wordLength]).at(i);
+
+    QMap<QString, int>::const_iterator iter;
+    iter = m_map[m_wordLength]->constBegin();
+    std::advance(iter, i);
+    return iter.key();
 }
 
 void Dictionary::init()
 {
     // TODO: Cache the word lists for faster loading later
     // if files don't exist
-    QTime time;
+    QElapsedTimer time;
     time.start();
     QString word;
     QFile dict("://dictionary.txt");
@@ -218,7 +229,7 @@ void Dictionary::createShuffledListOfAvailableWords(int wordLength, bool allowDo
 
     qDebug() << Q_FUNC_INFO << wordLength << allowDoubleLetters << low_frequency << high_frequency;
 
-    QHash<QString, int>::const_iterator iter = m_map[wordLength]->constBegin();
+    QMap<QString, int>::const_iterator iter = m_map[wordLength]->constBegin();
     while (iter != m_map[wordLength]->constEnd())
     {
         if(iter.value() >= low_frequency && iter.value() <= high_frequency)
@@ -283,7 +294,7 @@ void saveCurrentIndexForList()
 
 void Dictionary::loadFrequencyList()
 {
-    QTime time;
+    QElapsedTimer time;
     time.start();
     QString word, line;
     QFile freq("://frequency.txt");

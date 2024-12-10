@@ -2,12 +2,12 @@
 #define OVERLAY_H
 
 #include <QWidget>
+#include <QAudioBuffer>
 #include <QParallelAnimationGroup>
 #include <QSequentialAnimationGroup>
 #include <QPoint>
 #include <QGraphicsDropShadowEffect>
 #include <QSoundEffect>
-#include <QAudioProbe>
 #include <QMediaPlayer>
 #include <QPushButton>
 #include <QLabel>
@@ -28,6 +28,7 @@ class Overlay : public QWidget
     Q_PROPERTY(QPoint star2Pos READ star2Pos WRITE setStar2Pos)
     Q_PROPERTY(QPoint star3Pos READ star3Pos WRITE setStar3Pos)
     Q_PROPERTY(QPoint textPos READ textPos WRITE setTextPos)
+    Q_PROPERTY(int audioHeight READ audioHeight WRITE setAudioHeight)
 
 public:
     Overlay(WinBox *winBox, QWidget *parent);
@@ -51,11 +52,13 @@ public:
         this->update();
     }
     QPoint textPos() const { return m_textPos; }
+    int audioHeight() const { return m_audioHeight; }
     void setTextPos(QPoint p)
     {
         m_textPos = p;
         this->update();
     }
+    void setAudioHeight(int i) { m_audioHeight = i; update(); }
 
     WinBox* getWinBox()
     {
@@ -72,7 +75,7 @@ signals:
 
 
 public slots:
-    void processBuffer(QAudioBuffer);
+    void processAudioBuffer(const QAudioBuffer &buffer);
     void paintEvent(QPaintEvent *event);
     void startAnimation();
 
@@ -94,13 +97,9 @@ private:
 
     QTime *m_time;
 
-
-#ifdef USE_PLAYER
-    QAudioProbe *m_probe;
+    QAudioOutput * m_audioOutput;
+    QAudioBufferOutput * m_audioBufferOutput;
     QMediaPlayer * m_player;
-#else
-    QSoundEffect finishedSoundEffect;
-#endif
 };
 
 #endif // OVERLAY_H
