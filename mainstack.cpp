@@ -1692,7 +1692,7 @@ void MainStack::init_board(bool is_two_player)
     QSlider * slider;
     slider = new QSlider(Qt::Vertical);
     slider->setObjectName("font_size_slider");
-    slider->setRange(100, 360);
+    slider->setRange(50, 360);
     slider->setValue(260);
     slider->setFixedWidth(30);
     //    grid->addWidget(slider,row,col++,Qt::AlignLeft);
