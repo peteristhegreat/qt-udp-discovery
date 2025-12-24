@@ -16,7 +16,7 @@ find_package(Qt6 REQUIRED COMPONENTS
 )
 
 # Executable
-add_executable(${PROJECT_NAME}
+qt_add_executable(${PROJECT_NAME}
     main.cpp
     server.cpp
     mainstack.cpp
@@ -35,6 +35,7 @@ add_executable(${PROJECT_NAME}
     qresources.qrc
     word_lists.qrc
     styles.qrc
+
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE
@@ -115,15 +116,31 @@ if(IOS)
 endif()
 
 # ---- Android ----
+qt_finalize_executable(${PROJECT_NAME})
 if(ANDROID)
     set(ANDROID_PACKAGE_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/android)
 endif()
 
-# IDE grouping (optional)
-set(OTHER_FILES
-    myapp.rc
-    style.qss
-    android/AndroidManifest.xml
-    custom.plist
-)
-source_group("Resources" FILES ${OTHER_FILES})
+if(WIN32)
+  target_sources(${PROJECT_NAME} PRIVATE myapp.rc)
+endif()
+
+if(ANDROID)
+  target_sources(${PROJECT_NAME} PRIVATE android/AndroidManifest.xml)
+endif()
+
+if(APPLE)
+  target_sources(${PROJECT_NAME} PRIVATE custom.plist)
+endif()
+
+target_sources(${PROJECT_NAME} PRIVATE style.qss)
+
+
+# # IDE grouping (optional)
+# set(OTHER_FILES
+#     myapp.rc
+#     style.qss
+#     android/AndroidManifest.xml
+#     custom.plist
+# )
+# source_group("Resources" FILES ${OTHER_FILES})

@@ -33,7 +33,7 @@ public slots:
 protected:
     void mousePressEvent(QMouseEvent *event)
     {
-        qDebug() << "Mouse Pressed at " << event->x() << ", " << event->y();
+        qDebug() << "Mouse Pressed at " << event->position().x() << ", " << event->position().y();
         qDebug() << "Widget size: "<<this->width() << " x " << this->height();
     }
 

@@ -29,6 +29,7 @@
 #include <QApplication>
 #include <QInputMethod>
 #include <QMediaPlayer>
+#include <QTimer>
 
 class LineEdit : public QLineEdit
 {
@@ -143,8 +144,11 @@ public slots:
     void on_screenChanged(QScreen*);
 
     void on_appStateChanged(Qt::ApplicationState);
+    void applyDebouncedSlider();
 
 private:
+    QTimer m_sliderDebounce;
+    int m_pendingSliderValue = 0;
     QWindow * m_window;
     QWidget * m_prevPage;
     QString m_additionalStyleSheet;
@@ -184,7 +188,7 @@ private:
     QTimer * m_statsTimer;
     MyTime m_stopWatch;
 
-    int m_dpiFactor;
+    double m_dpiFactor;
 
     qreal m_stat_guessRate;
     int m_stat_numOfGuesses;

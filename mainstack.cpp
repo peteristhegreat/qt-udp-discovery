@@ -40,6 +40,9 @@
 #include <QScrollArea>
 #include <QGestureEvent>
 #include <QMediaPlayer>
+#include <QScroller>
+#include <QScrollerProperties>
+#include <QVariant>
 
 // Helper function to return display orientation as a string.
 QString Orientation(Qt::ScreenOrientation orientation)
@@ -217,9 +220,42 @@ MainStack::MainStack(QWidget *parent) :
     QObject::connect(t, SIGNAL(timeout()), m_dict, SLOT(init()));
     t->start(500);
 
-    foreach(QTextEdit * txt, this->findChildren<QTextEdit*>())
+    foreach (QTextEdit* txt, this->findChildren<QTextEdit*>())
     {
         txt->setTextInteractionFlags(Qt::NoTextInteraction);
+        txt->setMinimumWidth(0);
+        txt->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Expanding);
+        // #ifdef Q_OS_ANDROID
+
+        // auto v = txt->viewport();
+        // auto sb = txt->verticalScrollBar();
+
+        // v->setAttribute(Qt::WA_StaticContents, false);
+        // v->setUpdatesEnabled(true);
+
+        // QObject::connect(sb, &QScrollBar::valueChanged,
+        //                  v,
+        //                  [v] { v->update(); },
+        //                  Qt::QueuedConnection);
+        // txt->setViewportUpdateMode(QAbstractScrollArea::FullViewportUpdate);
+        // #endif
+        if(false)
+        if (auto* vp = txt->viewport())
+        {
+            // If you want to fully disable kinetic/touch scrolling too:
+            QScroller::ungrabGesture(vp);
+            vp->setAttribute(Qt::WA_AcceptTouchEvents, false);
+
+            // Disable "bounce" (overshoot) explicitly
+            auto* scroller = QScroller::scroller(vp);
+            auto props = scroller->scrollerProperties();
+
+            const QVariant off = QVariant::fromValue(QScrollerProperties::OvershootAlwaysOff);
+            props.setScrollMetric(QScrollerProperties::HorizontalOvershootPolicy, off);
+            props.setScrollMetric(QScrollerProperties::VerticalOvershootPolicy, off);
+
+            scroller->setScrollerProperties(props);
+        }
     }
 
     foreach(QStatusBar * statusBar, this->findChildren<QStatusBar*>())
@@ -232,6 +268,11 @@ MainStack::MainStack(QWidget *parent) :
     m_statsTimer = new QTimer;
     m_statsTimer->setInterval(1000);
     QObject::connect(m_statsTimer, SIGNAL(timeout()), this, SLOT(updateStats()));
+
+    m_sliderDebounce.setSingleShot(true);
+    m_sliderDebounce.setInterval(200);
+    connect(&m_sliderDebounce, &QTimer::timeout,
+            this, &MainStack::applyDebouncedSlider);
 
     m_prevPage = m_mainMenu;
 }
@@ -550,7 +591,10 @@ void MainStack::on_endOfVictoryDance()
     QStatusBar * bar = this->currentWidget()->findChild<QStatusBar *>();
     if(bar)
     {
-        bar->showMessage(victoryMessages.at(victory_count % victoryMessages.size()));
+        auto nextMessage = victoryMessages.at(victory_count % victoryMessages.size());
+        bar->showMessage(nextMessage);
+        //on_appendToTxtEdit(nextMessage);
+        emit appendToYours(nextMessage);
         victory_count++;
         s.setValue("victory_count", victory_count);
     }
@@ -621,9 +665,25 @@ void MainStack::pinchTriggered(QPinchGesture *gesture)
 
 void MainStack::on_sliderChanged()
 {
-    QSlider * slider = this->currentWidget()->findChild<QSlider*>();
-    if(slider)
-        on_sliderChanged(slider->value());
+    QSlider* slider = currentWidget()->findChild<QSlider*>();
+    if (!slider) return;
+
+    m_pendingSliderValue = slider->value();
+    m_sliderDebounce.start(); // restarts countdown each change
+}
+
+void MainStack::applyDebouncedSlider()
+{
+    on_sliderChanged(m_pendingSliderValue);
+
+    QWidget* w = currentWidget();
+    if (!w) return;
+
+    QTimer::singleShot(0, w, [w] {
+        if (auto* l = w->layout())
+            l->invalidate();
+        w->updateGeometry();
+    });
 }
 
 void MainStack::on_sliderChanged(int size)
@@ -885,7 +945,7 @@ void MainStack::sendData()
 
 
             QPushButton * btn = this->currentWidget()->findChild<QPushButton *>("Give Up");
-            //btn->setText("Done");
+            btn->setText("Done");
             btn->setDisabled(true);
             lineEdit->setDisabled(true);
             QPushButton * btn2 = this->currentWidget()->findChild<QPushButton *>("Random");
@@ -1471,7 +1531,7 @@ void MainStack::dumpCurrentWordLists()
 void MainStack::on_giveUpButton()
 {
     qDebug() << Q_FUNC_INFO;
-    /*qDebug() << QObject::sender()->objectName();
+    qDebug() << QObject::sender()->objectName();
 
     QPushButton * btn = 0;
     //if(QObject::sender()->objectName() == "win_box")
@@ -1481,29 +1541,31 @@ void MainStack::on_giveUpButton()
     {
         qDebug() << "No Done button found";
         return;
-
     }
+
+
+    qDebug() << "Btn Text:" << btn->text();
     int ret = QMessageBox::Yes;
     if(btn->text() == "Give Up")
-    {*/
-    int ret = QMessageBox::Yes;
-    QMessageBox * msgBox = new QMessageBox;
-    msgBox->setText("You are so close."
-                    "\n\n"
-                    "Do you really want to give up?");
-    msgBox->setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-    msgBox->setDefaultButton(QMessageBox::No);
+    {
+        QMessageBox * msgBox = new QMessageBox;
+        msgBox->setText("You are so close."
+                        "\n\n"
+                        "Do you really want to give up?");
+        msgBox->setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        msgBox->setDefaultButton(QMessageBox::No);
 
-    ret = msgBox->exec();
-    delete msgBox;
-    /*
-}
-else
-{
-// they answered with a correct word
-}
+        ret = msgBox->exec();
+        delete msgBox;
 
-*/
+    }
+    else
+    {
+        // they answered with a correct word
+        this->on_MainMenu();
+        return;
+    }
+
     if(ret == QMessageBox::Yes)
     {
         this->on_confirmedGiveUp();
