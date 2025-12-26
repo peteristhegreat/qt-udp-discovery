@@ -30,7 +30,7 @@ qt_add_executable(${PROJECT_NAME}
     globals.cpp
     mainstack_2.cpp
     overlaydialogbox.cpp
-    mytime.cpp
+
     winbox.cpp
     qresources.qrc
     word_lists.qrc

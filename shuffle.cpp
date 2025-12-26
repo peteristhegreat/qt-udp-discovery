@@ -30,9 +30,9 @@ QString shuffle(QString str)
 {
     QRandomGenerator *randomGenerator = QRandomGenerator::global(); // Use the global QRandomGenerator instance
 
-    for (int i = str.count() - 1; i > 0; --i)
+    for (int i = str.length() - 1; i > 0; --i)
     {
-        int random = randomGenerator->bounded(str.count()); // Generate a random index within bounds
+        int random = randomGenerator->bounded(str.length()); // Generate a random index within bounds
         QChar c = str.at(i);
         str[i] = str.at(random);
         str[random] = c;

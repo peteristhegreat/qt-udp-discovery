@@ -11,7 +11,7 @@ Highlighter::Highlighter(QTextDocument *parent) :
     QSyntaxHighlighter(parent)
 {
     // the default format
-    m_default.setFontFamily("Arial");
+    m_default.setFontFamilies(QStringList("Arial"));
 }
 
 void Highlighter::connectToLetterButton(LetterButton *lb)
