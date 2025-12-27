@@ -132,44 +132,66 @@ QString Dictionary::getPreviousGameStats()
 
 QString Dictionary::getNewSecretWord(int lowPercent, int highPercent)
 {
-//    if(false)
-//    {
-//        // factor in difficulty
-////        qsrand(QDateTime::currentMSecsSinceEpoch());
+// //    if(false)
+// //    {
+// //        // factor in difficulty
+// ////        qsrand(QDateTime::currentMSecsSinceEpoch());
 
-//        QHash<QString, int>::const_iterator iter;
-//        do
-//        {
-//            int i = qrand() % m_map[m_wordLength]->size();
-//            iter = m_map[m_wordLength]->constBegin();
-//            iter += i;
-//            qDebug() << "SecretWord?" << iter.key() << iter.value() ;
-//            qApp->processEvents();
-//        }while(iter.value() < difficulty
-//               || (!allowDoubleLetters && Dictionary::hasDoubleLetters(iter.key())));
+// //        QHash<QString, int>::const_iterator iter;
+// //        do
+// //        {
+// //            int i = qrand() % m_map[m_wordLength]->size();
+// //            iter = m_map[m_wordLength]->constBegin();
+// //            iter += i;
+// //            qDebug() << "SecretWord?" << iter.key() << iter.value() ;
+// //            qApp->processEvents();
+// //        }while(iter.value() < difficulty
+// //               || (!allowDoubleLetters && Dictionary::hasDoubleLetters(iter.key())));
 
-//        return iter.key();
-//    }
-//    else
-//    {
-    // // difficulty selects 0-25%, 25-50%, 50-75%,
-    // int i = qrand() %
-    //         ((int)(m_listmap[m_wordLength]->size()
-    //                *(qreal)(highPercent - lowPercent)/100));
-    // i += m_listmap[m_wordLength]->size()*((qreal) lowPercent)/100;
-    // QString word = (*m_listmap[m_wordLength]).at(i);
-    // return (*m_listmap[m_wordLength]).at(i);
+// //        return iter.key();
+// //    }
+// //    else
+// //    {
+//     // // difficulty selects 0-25%, 25-50%, 50-75%,
+//     // int i = qrand() %
+//     //         ((int)(m_listmap[m_wordLength]->size()
+//     //                *(qreal)(highPercent - lowPercent)/100));
+//     // i += m_listmap[m_wordLength]->size()*((qreal) lowPercent)/100;
+//     // QString word = (*m_listmap[m_wordLength]).at(i);
+//     // return (*m_listmap[m_wordLength]).at(i);
 
-    int i = rand->bounded(
-        m_listmap[m_wordLength]->size()*(qreal)(highPercent - lowPercent)/100); // Generate a random index
-    i += m_listmap[m_wordLength]->size()*((qreal) lowPercent)/100;
-    qDebug() << "i" << i;
+//     int i = rand->bounded(
+//         m_listmap[m_wordLength]->size()*(qreal)(highPercent - lowPercent)/100); // Generate a random index
+//     i += m_listmap[m_wordLength]->size()*((qreal) lowPercent)/100;
+//     qDebug() << "i" << i;
 
-    // QMap < int, QStringList *>::const_iterator iter;
-    // iter = m_listmap[m_wordLength]->constBegin();
-    // std::advance(iter, i);
-    // return iter.key();
-    return m_listmap[m_wordLength]->at(i);
+//     // QMap < int, QStringList *>::const_iterator iter;
+//     // iter = m_listmap[m_wordLength]->constBegin();
+//     // std::advance(iter, i);
+//     // return iter.key();
+//     return m_listmap[m_wordLength]->at(i);
+
+    auto *list = m_listmap.value(m_wordLength, nullptr);
+    if (!list || list->isEmpty())
+        return QString();  // exhausted or missing
+
+    const int size = list->size();
+
+    // clamp percents defensively
+    const qreal lo = qBound<qreal>(0.0, lowPercent, 100.0);
+    const qreal hi = qBound<qreal>(lo, highPercent, 100.0);
+
+    // compute range
+    const int start = qFloor(size * lo / 100.0);
+    const int count = qMax(0, qFloor(size * (hi - lo) / 100.0));
+
+    if (count <= 0 || start >= size)
+        return QString();
+
+    const int i = start + rand->bounded(qMin(count, size - start));
+    Q_ASSERT(i >= 0 && i < size);
+
+    return list->at(i);
 }
 
 void Dictionary::init()
