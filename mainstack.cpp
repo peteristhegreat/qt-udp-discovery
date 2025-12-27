@@ -823,6 +823,7 @@ void MainStack::sendData()
     //    QObject::connect(lineEdit, SIGNAL(returnPressed()), qApp->inputMethod(), SLOT(hide()));
     //    qApp->inputMethod()->hide();
     //    m_returnPressedTimer->start();
+    fixAndroidKeyboardHide();
 #endif
 
     int timeout = 3000;
@@ -1896,7 +1897,7 @@ void MainStack::init_board(bool is_two_player)
 #ifdef Q_OS_ANDROID
     QObject::connect(lineEdit, SIGNAL(returnPressed()), qApp->inputMethod(), SLOT(hide()));
     QObject::connect(lineEdit, SIGNAL(returnPressed()), m_returnPressedTimer, SLOT(start()));
-    //    QObject::connect(lineEdit, SIGNAL(returnPressed()), this, SLOT(on_lineEdit_returnPressed()));
+    QObject::connect(lineEdit, SIGNAL(returnPressed()), this, SLOT(fixAndroidKeyboardHide()));
 #else
     QObject::connect(lineEdit, SIGNAL(returnPressed()), this, SLOT(sendData()));
 
@@ -2082,4 +2083,27 @@ void MainStack::keyReleaseEvent(QKeyEvent* ke)
         SlidingStackedWidget::keyPressEvent(ke);
 
     }
+}
+
+
+void MainStack::fixAndroidKeyboardHide()
+{
+    int waitMs = 500;
+
+    QTimer::singleShot(waitMs, this, [this]() {
+        qDebug() << "[Alt sequence] fix Android keyboard hide";
+
+        if (auto *c = m_currWidget) c->updateGeometry();
+        adjustSize();
+
+        //qApp->processEvents(QEventLoop::AllEvents, 50);
+
+        if (auto *w = windowHandle()) {
+            const QRect g = QGuiApplication::primaryScreen()->availableGeometry();
+            w->setGeometry(g);
+        }
+
+        //qApp->processEvents(QEventLoop::AllEvents, 50);
+        qDebug() << "[Alt sequence] done";
+    });
 }

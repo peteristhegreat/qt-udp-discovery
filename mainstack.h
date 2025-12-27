@@ -92,6 +92,7 @@ signals:
     void appendToTheirs(QString);
     void updateSize(qreal factor, qreal factor_2);
 public slots:
+    void fixAndroidKeyboardHide();
     void keyPressEvent(QKeyEvent* ke);
     void keyReleaseEvent(QKeyEvent* ke);
     void on_endOfPageAnimation();
